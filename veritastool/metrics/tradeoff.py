@@ -151,8 +151,8 @@ class TradeoffRate(object):
         if self.metric_group == "uplift":
 
             # define meshgrid
-            self.th_x = np.linspace(min(self.e_lift)*0.7, max(self.e_lift)*0.7, Constants().tradeoff_threshold_bins)
-            self.th_y = np.linspace(min(self.e_lift)*0.7, max(self.e_lift)*0.7, Constants().tradeoff_threshold_bins)
+            self.th_x = np.linspace(min(self.e_lift)*Constants().uplift_threshold_proportion, max(self.e_lift)*Constants().uplift_threshold_proportion, Constants().tradeoff_threshold_bins)
+            self.th_y = np.linspace(min(self.e_lift)*Constants().uplift_threshold_proportion, max(self.e_lift)*Constants().uplift_threshold_proportion, Constants().tradeoff_threshold_bins)
             self.th_a, self.th_b = np.meshgrid(self.th_x, self.th_y, sparse=True)
 
             #access from the special params
