@@ -21,15 +21,7 @@ jobs:
       run: |
         pip install pytest
         pip install coverage
-        pip install scikit-learn
-        pip install numpy
-        pip install pandas
-        pip install imbalanced-learn
-        pip install scipy
-        pip install ipywidgets
-        pip install IPython
-        pip install matplotlib
-        pip install tqdm
-        coverage run -m pytest
+        pip install -r requirements.txt
+        coverage run --omit="*\examples\*" -m pytest
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
