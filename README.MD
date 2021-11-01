@@ -1,9 +1,11 @@
 
 
 # Veritas Toolkit
-[![CodeCov](https://github.com/mas-veritas2/veritastool/actions/workflows/code_cov.yml/badge.svg)](https://github.com/mas-veritas2/veritastool/actions/workflows/code_cov.yml)
+[![codecov](https://codecov.io/gh/mas-veritas2/veritastool/branch/main/graph/badge.svg?token=0J3QEBHBDU)](https://codecov.io/gh/mas-veritas2/veritastool)
 [![PyPI version](https://badge.fury.io/py/veritastool.svg)](https://badge.fury.io/py/veritastool) 
-[![Python 3.9](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/downloads/release/python-390/) 
+[![Python 3.9](https://img.shields.io/badge/python-3.9-green)](https://www.python.org/downloads/release/python-395/) 
+[![Python 3.8](https://img.shields.io/badge/python-3.8-green)](https://www.python.org/downloads/release/python-385/) 
+[![Python 3.7](https://img.shields.io/badge/python-3.7-green)](https://www.python.org/downloads/release/python-375/) 
 [![GitHub license](https://img.shields.io/github/license/mas-veritas2/veritastool.svg)](https://github.com/mas-veritas2/veritastool/blob/master/license.txt)
 [![Python package](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml/badge.svg)](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml)
 
