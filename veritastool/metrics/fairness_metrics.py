@@ -837,9 +837,10 @@ class FairnessMetrics:
         e_y_pred_curr_p_var = self._get_entropy(df,['y_pred', 'curr_p_var'])
         e_y_true_y_pred_curr_p_var = self._get_entropy(df,['y_true', 'y_pred', 'curr_p_var'])
         e_y_true = self._get_entropy(df,['y_true'])
-        mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_y_true_curr_p_var
+        e_curr_p_var_y_true_conditional = e_y_true_curr_p_var - e_y_true
+        mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
             
-        return (mi_separation, None)
+        return (mi_separation, None)            
     
     def _compute_mi_sufficiency(self, **kwargs) :
         """
@@ -867,7 +868,8 @@ class FairnessMetrics:
         e_y_true_y_pred = self._get_entropy(df,['y_true', 'y_pred'])
         e_y_true_y_pred_curr_p_var = self._get_entropy(df,['y_true', 'y_pred', 'curr_p_var'])
         e_y_pred = self._get_entropy(df,['y_pred'])
-        mi_sufficiency = (e_y_pred_curr_p_var + e_y_true_y_pred - e_y_true_y_pred_curr_p_var - e_y_pred)/e_y_pred_curr_p_var
+        e_curr_p_var_y_pred_conditional = e_y_pred_curr_p_var - e_y_pred
+        mi_sufficiency = (e_y_pred_curr_p_var + e_y_true_y_pred - e_y_true_y_pred_curr_p_var - e_y_pred)/e_curr_p_var_y_pred_conditional
             
         return (mi_sufficiency, None)
     
