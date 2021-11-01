@@ -1,0 +1,15 @@
+#Directories
+logs/
+.idea/
+venv/
+#Files
+*.pyc
+*.bak
+*.data
+*.dat
+*.model
+*.json
+*.out
+.ipynb_checkpoints/*
+*checkpoint.ipynb
+__pycache__/

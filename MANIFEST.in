@@ -1,0 +1,8 @@
+include license.txt
+include README.MD
+include requirements.txt
+include veritastool/config/*.ini
+include veritastool/config/*
+include veritastool/resources/data/credit_score_dict.pickle
+include veritastool/resources/data/credit_score_sample.pickle
+include veritastool/resources/widget/*
