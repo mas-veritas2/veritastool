@@ -35,11 +35,14 @@ class Constants:
         tradeoff_threshold_bins : float
                 Tradeoff threshold bins
 
+        uplift_threshold_proportion: float
+                Tradeoff uplift threshold proportion for e_lift
+                
         uplift_min_threshold: float
-                Tradeoff uplift minimum threshold
+                performance dynamics uplift minimum threshold
 
         uplift_max_threshold : float
-                Tradeoff uplift maximum threshold
+                performance dynamics uplift maximum threshold
 
         classify_min_threshold: float
                 Tradeoff minimum threshold
@@ -69,6 +72,7 @@ class Constants:
         self.proportion_of_interpolation_fitting_high = config.getfloat('threshold', 'proportion_of_interpolation_fitting_high')
         self.selection_threshold = config.getfloat('threshold', 'selection_threshold')
         self.tradeoff_threshold_bins = config.getint('threshold', 'tradeoff_threshold_bins')
+        self.uplift_threshold_proportion = config.getfloat('threshold', 'uplift_threshold_proportion')
         self.uplift_min_threshold = config.getfloat('threshold', 'uplift_min_threshold')
         self.uplift_max_threshold = config.getfloat('threshold', 'uplift_max_threshold')
         self.classify_min_threshold = config.getfloat('threshold', 'classify_min_threshold')
