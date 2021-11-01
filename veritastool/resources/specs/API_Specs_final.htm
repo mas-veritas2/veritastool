@@ -3076,46 +3076,230 @@ ul
 			<p class=MsoNormal>Inside the config.ini folder (../<b><i>veritastool/config/config.ini</i></b>),
 			following parameter values have been set up. User can update these parameter
 			values inside this file. Default values are as follows:&nbsp;</p>
-
-			<p class=MsoNormal>&nbsp;</p>
-
-			<p class=MsoNormal>[threshold]</p>
-
-			<p class=MsoNormal>fair_threshold_low : 0</p>
-
-			<p class=MsoNormal>fair_threshold_high : 100</p>
-
-			<p class=MsoNormal>fair_neutral_tolerance_low : 0</p>
-
-			<p class=MsoNormal>fair_neutral_tolerance_high : 0.01</p>
-
-			<p class=MsoNormal>fair_neutral_tolerance : 0.001</p>
-
-			<p class=MsoNormal>selection_threshold : 0</p>
-
-			<p class=MsoNormal>proportion_of_interpolation_fitting_low : 0.8</p>
-
-			<p class=MsoNormal>proportion_of_interpolation_fitting_high : 1.0</p>
-
-			<p class=MsoNormal>tradeoff_threshold_bins : 500</p>
-
-			<p class=MsoNormal>uplift_min_threshold : -0.3</p>
-
-			<p class=MsoNormal>uplift_max_threshold : 0.3</p>
-
-			<p class=MsoNormal>classify_min_threshold : 0.3</p>
-
-			<p class=MsoNormal>classify_max_threshold : 0.7</p>
-
-			<p class=MsoNormal>[default]</p>
-
-			<p class=MsoNormal>k : 50</p>
-
-			<p class=MsoNormal>perf_dynamics_array_size : 100</p>
-
-			<p class=MsoNormal>decimals : 3</p>
-
-
+			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
+			 style='width:770.7pt;border-collapse:collapse'>
+			 <tr>
+			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><b>Parameters/Default values</b></p>
+			  </td>
+			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 0.5pt;
+			  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><b>Description</b></p>
+			  </td>
+			 </tr>
+			 <tr>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>fair_threshold_low : 0</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Fairness threshold minimum value</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>fair_threshold_high : 100</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Fairness threshold maximum value</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>fair_neutral_tolerance_low : 0</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Fairness neutral threshold minimum value</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>fair_neutral_tolerance_high : 0.01</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Fairness neutral threshold maximum value</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>fair_neutral_tolerance : 0.001</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Fairness neutral tolerance</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>proportion_of_interpolation_fitting_low : 0.8</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Proportion of interpolation fitting minimum value for
+			  Tradeoff</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>proportion_of_interpolation_fitting_high : 1.0</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Proportion of interpolation fitting maximum value for
+			  Tradeoff</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>selection_threshold : float</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Selection threshold for uplift models</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>tradeoff_threshold_bins : 500</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Tradeoff threshold bins</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>uplift_min_threshold : -0.3</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Tradeoff uplift minimum threshold</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>uplift_max_threshold : 0.3</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Tradeoff uplift maximum threshold</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>classify_min_threshold : 0.3</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Tradeoff minimum threshold for classification models</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>classify_max_threshold : 0.7</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Tradeoff maximum threshold for classification models</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>k : 50</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Number of samples to calculate confidence interval</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>perf_dynamics_array_size : 100</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>To be used in _performance_dynamics() to determine size
+			  of samples</span></p>
+			  </td>
+			 </tr>
+			 <tr style='height:15.75pt'>
+			  <td width=300 style='width:225.05pt;border:solid windowtext 0.5pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+			  style='color:black'>decimals : 3</span></b></p>
+			  </td>
+			  <td width=756 style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+			  style='color:black'>Number of decimal places for values to be rounded off</span></p>
+			  </td>
+			 </tr>
+			</table>
 		</div>
 	</div>
 </body>
