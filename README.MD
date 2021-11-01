@@ -2,7 +2,8 @@
 
 # Veritas Toolkit
 
-[![codecov](https://codecov.io/gh/mas-veritas/veritastool/branch/master/graph/badge.svg?token=N7PXYH7HHX)](https://codecov.io/gh/mas-veritas/veritastool) [![PyPI version](https://badge.fury.io/py/veritastool.svg)](https://badge.fury.io/py/veritastool) [![Python 3.9](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/downloads/release/python-390/) [![GitHub license](https://img.shields.io/github/license/mas-veritas/veritastool.svg)](https://github.com/mas-veritas/veritastool/blob/master/license.txt)[![Python package](https://github.com/mas-veritas/veritastool/actions/workflows/python-package.yml/badge.svg)](https://github.com/mas-veritas/veritastool/actions/workflows/python-package.yml)
+[![codecov](https://codecov.io/gh/mas-veritas/veritastool/branch/master/graph/badge.svg?token=N7PXYH7HHX)](https://codecov.io/gh/mas-veritas/veritastool) [![PyPI version](https://badge.fury.io/py/veritastool.svg)](https://badge.fury.io/py/veritastool) [![Python 3.9](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/downloads/release/python-390/) [![GitHub license](https://img.shields.io/github/license/mas-veritas2/veritastool.svg)](https://github.com/mas-veritas2/veritastool/blob/master/license.txt)
+
 
 
 
