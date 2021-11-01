@@ -6,7 +6,7 @@
 
 
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/mas-veritas-logo.png" width="200" height="240"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/mas-veritas-logo.png" width="200" height="240"></p>
 
 
 The purpose of this toolkit is to facilitate the adoption of Veritas Methodology on Fairness Assessment and spur industry development. It will also
@@ -29,7 +29,7 @@ test_function_cs()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/test_evaluate_cs.png" width="800" height="100"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/test_evaluate_cs.png" width="800" height="100"></p>
 
 ### Initialization ##
 
@@ -92,7 +92,7 @@ cre_sco_obj.evaluate()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/evaluate-default.png" width="800" height="800"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate-default.png" width="800" height="800"></p>
 
 You can also toggle the widget to view your results in a interactive visualization format.
 
@@ -101,7 +101,7 @@ cre_sco_obj.evaluate(visualize = True)
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/evaluate_widget.JPG" width="900" height="500"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_widget.JPG" width="900" height="500"></p>
 
 **Tradeoff**
 
@@ -112,7 +112,7 @@ cre_sco_obj.tradeoff()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/tradeoff.png" width="700" height="600"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/tradeoff.png" width="700" height="600"></p>
 
 ** Note: Replace {Balanced Accuracy} with the respective given metrics. 
 
@@ -125,7 +125,7 @@ cre_sco_obj.feature_importance()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/feature-imp.png" width="1000" height="500"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/feature-imp.png" width="1000" height="500"></p>
 
 ** Note: Replace {Balanced Accuracy} & {Equal Opportunity} with the respective given metrics. 
 
@@ -138,7 +138,7 @@ cre_sco_obj.compile()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/compile.png" width="600" height="200"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/compile.png" width="600" height="200"></p>
 
 **Model Artifact**
 
@@ -146,7 +146,7 @@ A JSON file that stores all the results from evaluate(), tradeoff() and feature_
 
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas/veritastool/master/icon/json-output.png" width="700" height="800"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/json-output.png" width="700" height="800"></p>
 
 ## Examples
 
@@ -154,12 +154,12 @@ You may refer to our example notebooks below to see how the toolkit can be appli
 
 | Filename               | Description      | 
 | -----------------------| -------------    | 
-| [`CS_Demo.ipynb`](https://github.com/mas-veritas/veritastool/blob/master/veritastool/examples/CS_demo.ipynb)| Tutorial notebook to diagnose a credit scoring model for predicting customers' loan repayment.            | 
-| [`CM_Demo.ipynb`](https://github.com/mas-veritas/veritastool/blob/master/veritastool/examples/customer_marketing_example/CM_demo.ipynb)          | Tutorial notebook to diagnose a customer marketing uplift model for selecting existing customers for a marketing call to increase the sales of loan product.            | 
-| [`nonPythonModel_customMetric_demo.ipynb`](https://github.com/mas-veritas/veritastool/blob/master/veritastool/examples/nonPythonModel_customMetric_demo.ipynb)          | Tutorial notebook to diagnose a credit scoring model by LibSVM (non-Python) with custom metric.            | 
+| [`CS_Demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/CS_demo.ipynb)| Tutorial notebook to diagnose a credit scoring model for predicting customers' loan repayment.            | 
+| [`CM_Demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/customer_marketing_example/CM_demo.ipynb)          | Tutorial notebook to diagnose a customer marketing uplift model for selecting existing customers for a marketing call to increase the sales of loan product.            | 
+| [`nonPythonModel_customMetric_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/nonPythonModel_customMetric_demo.ipynb)          | Tutorial notebook to diagnose a credit scoring model by LibSVM (non-Python) with custom metric.            | 
 
 ## License
 
-Veritas Toolkit is licensed under the Apache License, Version 2.0 - see [`LICENSE`](https://raw.githubusercontent.com/mas-veritas/veritastool/master/license.txt) for more details. 
+Veritas Toolkit is licensed under the Apache License, Version 2.0 - see [`LICENSE`](https://raw.githubusercontent.com/mas-veritas2/veritastool/master/license.txt) for more details. 
 
 
