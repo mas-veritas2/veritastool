@@ -7,7 +7,7 @@
 
 
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/mas-veritas-logo.png" ></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/main/icon/veritas_logo_new.png" ></p>
 
 
 The purpose of this toolkit is to facilitate the adoption of Veritas Methodology on Fairness Assessment and spur industry development. It will also
