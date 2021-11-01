@@ -35,16 +35,16 @@ class Constants:
         tradeoff_threshold_bins : float
                 Tradeoff threshold bins
 
-        tradeoff_uplift_min_threshold: float
+        uplift_min_threshold: float
                 Tradeoff uplift minimum threshold
 
-        tradeoff_uplift_max_threshold : float
+        uplift_max_threshold : float
                 Tradeoff uplift maximum threshold
 
-        tradeoff_min_threshold: float
+        classify_min_threshold: float
                 Tradeoff minimum threshold
 
-        tradeoff_max_threshold: float
+        classify_max_threshold: float
                 Tradeoff maximum threshold
 
         k : int
