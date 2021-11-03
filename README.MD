@@ -7,7 +7,7 @@
 [![Python 3.8](https://img.shields.io/badge/python-3.8-green)](https://www.python.org/downloads/release/python-385/) 
 [![Python 3.7](https://img.shields.io/badge/python-3.7-green)](https://www.python.org/downloads/release/python-375/) 
 [![GitHub license](https://img.shields.io/github/license/mas-veritas2/veritastool.svg)](https://github.com/mas-veritas2/veritastool/blob/master/license.txt)
-[![Python package](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml/badge.svg)](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml)
+[![Python package](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml/badge.svg)](https://github.com/mas-veritas2/veritastool/actions/workflows/python-package.yml) 
 
 
 
