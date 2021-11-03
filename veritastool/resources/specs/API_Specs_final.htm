@@ -310,7 +310,11 @@ ul
 			style='color:windowtext;display:none;text-decoration:none'> </span><span
 			style='color:windowtext;display:none;text-decoration:none'>1</span></a></p>
 
-			<p class=MsoToc1><a href="#_Toc85640080">Parameter Configuration<span
+			<p class=MsoToc1><a href="#_Toc85640080">Supported Metrics<span
+			style='color:windowtext;display:none;text-decoration:none'>. </span><span
+			style='color:windowtext;display:none;text-decoration:none'>1</span></a></p>
+
+			<p class=MsoToc1><a href="#_Toc85640081">Parameter Configuration<span
 			style='color:windowtext;display:none;text-decoration:none'>. </span><span
 			style='color:windowtext;display:none;text-decoration:none'>1</span></a></p>
 
@@ -320,7 +324,7 @@ ul
 			
 		</div>
 		<div style="margin-left: 25%; class=WordSection1">
-			<p class=MsoNormal><i>Last updated: 25/10/2021</i></p>
+			<p class=MsoNormal><i>Last updated: 3/11/2021</i></p>
 
 			<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><i><span
 			style='font-size:60.0pt;font-family:"Calibri Light",sans-serif;color:#262626;
@@ -346,109 +350,114 @@ ul
 
 			<p class=MsoNormal><i>&nbsp;</i></p>
 
-			<p class=MsoNormal><b><i>veritastool.model.model_container.ModelContainer(y_true,
-			p_var, p_grp, model_type, y_pred=None, y_prob=None, x_train=None,
-			protected_features_cols=None, y_train=None, x_test=None, model_object=None,
-			train_op_name=&quot;fit&quot;, predict_op_name=&quot;predict&quot;,
-			feature_imp=None, sample_weight=None, model_name=&quot;auto&quot;,
-			pos_label=[[1]], neg_label=None)</i></b></p>
+			<p class=MsoNormal><span class=SpellE><b><i>veritastool.model.model_container.ModelContainer</i></b></span><b><i>(<span
+			class=SpellE>y_true</span>, <span class=SpellE>p_var</span>, <span
+			class=SpellE>p_grp</span>, <span class=SpellE>model_type</span>, <span
+			class=SpellE>y_pred</span>=None, <span class=SpellE>y_prob</span>=None, <span
+			class=SpellE>y_train</span>=None, <span class=SpellE>protected_features_cols</span>=None,
+			<span class=SpellE>train_op_name</span>=&quot;fit&quot;, <span class=SpellE>predict_op_name</span>=&quot;predict&quot;,
+			<span class=SpellE>feature_imp</span>=None, <span class=SpellE>sample_weight</span>=None,
+			<span class=SpellE>model_name</span>=&quot;auto&quot;, <span class=SpellE>pos_label</span>=[[1]],
+			<span class=SpellE>neg_label</span>=None, <span class=SpellE>x_train</span>=None,
+			<span class=SpellE>x_test</span>=None, <span class=SpellE>model_object</span>=None)</i></b></p>			
 
 			<p class=MsoNormal>&nbsp;</p>
 
 			<p class=MsoNormal>Helper class that holds the model parameters required for
 			computations in all use cases.</p>
 
-			<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=1056
-			 style='width:791.95pt;border-collapse:collapse;border:none'>
+			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
+			 style='width:791.95pt;border-collapse:collapse'>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Attributes</b></p>
 			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 0.5pt;
+			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 1.0pt;
 			  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Description</b></p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_true: array of shape (n_samples,)</b></p>
+			  <p class=MsoNormal><b>y_true: list, numpy.ndarray or pandas.Series</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Ground truth target values.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>p_var: list of size=k</b></p>
+			  <p class=MsoNormal><b>p_var: list</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>List of protected variables used for fairness analysis.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>p_grp: dictionary of lists</b></p>
+			  <p class=MsoNormal><b>p_grp: dict of lists</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>List of privileged groups within the protected variables.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>model_type: string</b></p>
+			  <p class=MsoNormal><b>model_type: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>The type of model to be evaluated, model_type is unique.</p>
 			  <p class=MsoNormal>Customer Marketing: &quot;uplift&quot; or
 			  &quot;propensity&quot; or &quot;reject&quot;</p>
 			  <p class=MsoNormal>Credit Scoring: &quot;credit&quot;</p>
-			  <p class=MsoNormal>Base Class: &quot;default&quot;</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>model_name: </span></b><b>string</b></p>
+			  <p class=MsoNormal><b><span style='color:black'>model_name: </span>str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Used to name the model artifact json file in compile
 			  function.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_pred: array of shape (n_samples,), default=None</b></p>
+			  <p class=MsoNormal><b>y_pred: list, numpy.ndarray, pandas.Series or None,
+			  default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Predicted targets as returned by classifier.</p>
 			  <p class=MsoNormal>&nbsp;</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_prob: array of shape (n_samples, L), default=None</b></p>
+			  <p class=MsoNormal><b>y_prob: list, numpy.ndarray, pandas.Series,
+			  pandas.DataFrame or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Predicted probabilities as returned by classifier. For
 			  uplift models, L = 4. Else, L = 1.</p>
@@ -457,25 +466,26 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_train: array of shape (m_samples,)</b></p>
+			  <p class=MsoNormal><b>y_train: list, numpy.ndarray, pandas.Series or None,
+			  default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Ground truth for training data. If&nbsp;it is not given in
 			  correct format, Feature Importance LOO&nbsp;Analysis is to be skipped.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>protected_features_cols: pandas Dataframe of shape
-			  (n_samples, k), default=None</b></p>
+			  <p class=MsoNormal><b>protected_features_cols: pandas.DataFrame or None,
+			  default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>This variable will be used for masking. If not provided,
 			  x_test will be used and x_test must be a pandas dataframe. K = number of
@@ -483,24 +493,24 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>train_op_name: string, default=&quot;fit&quot;</b></p>
+			  <p class=MsoNormal><b>train_op_name: str, default = &quot;fit&quot;</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>The method used by the model_object to train the model. By
 			  default a sklearn model is assumed.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>predict_op_name: string, default=&quot;predict&quot;</b></p>
+			  <p class=MsoNormal><b>predict_op_name: str, default = &quot;predict&quot;</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>The method used by the model_object to predict the labels
 			  or probabilities. By default a sklearn model is assumed. </p>
@@ -509,38 +519,37 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>feature_imp: pandas Dataframe of shape (n_features,2),
-			  default=None</b></p>
+			  <p class=MsoNormal><b>feature_imp: pandas.DataFrame or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>The feature importance for the top 20 variables computed
-			  on the model object fitted to x_train. Order of features must be the same as
-			  x_test &amp; x_train. n_features should not be less than or equal to 20.</p>
+			  <p class=MsoNormal>The feature importance computed on the model object fitted
+			  to x_train. </p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>sample_weight: </span></b><b>array
-			  of shape (n_samples,), default=None</b></p>
+			  <p class=MsoNormal><b><span style='color:black'>sample_weight: </span>list,
+			  numpy.ndarray or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Used to normalize y_true &amp; y_pred.</p>
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>pos_label: array, default=[[1]]</span></b></p>
+			  <p class=MsoNormal><b><span style='color:black'>pos_label: list of lists,
+			  default = [[1]]</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Label values which are considered favorable in
 			  classification models.</p>
@@ -552,15 +561,16 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>neg_label: array, default=None</span></b></p>
+			  <p class=MsoNormal><b><span style='color:black'>neg_label: list of lists or
+			  None, default = None</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Label values which are considered unfavorable in
-			  classification models.</p>
+			  <p class=MsoNormal>Label values which are considered unfavorable in classification
+			  models.</p>
 			  <p class=MsoNormal>unfav_label will only be used in uplift models.</p>
 			  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g.
 			  [[&quot;c&quot;], [&quot;d&quot;]] in unfav label. The first will be mapped
@@ -568,13 +578,12 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>x_train: pandas Dataframe of shape (m_samples,
-			  n_features) or string </b></p>
+			  <p class=MsoNormal><b>x_train: pandas.DataFrame, str or None, default = None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Training dataset. m_samples refers to number of rows in
 			  the training dataset. The string refers to the dataset path acceptable by the
@@ -583,13 +592,12 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>x_test: pandas Dataframe or array of shape (n_samples,
-			  n_features) or string</b></p>
+			  <p class=MsoNormal><b>x_test: pandas.DataFrame, str or None, default = None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Testing dataset. The string refers to the dataset path
 			  acceptable by the model (e.g. HDFS URI). If it is not given in correct
@@ -598,50 +606,15 @@ ul
 			  </td>
 			 </tr>
 			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
+			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>model_object: Object </b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>A blank model object used in the feature importance
-			  section for training and prediction or a ModelWrapper() instance.</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>_input_validation_lookup:
-			  dictionary</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Contains the attribute and its correct data type and allowed
-			  values (if applicable) for every argument passed by user.</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>err: object</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>VeritasError object to save errors</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.3pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>pos_label2: default=[[1]]</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Encoded pos_label value</p>
+			  <p class=MsoNormal>A blank model object used in the feature importance section
+			  for training and prediction or a ModelWrapper() instance.</p>
 			  </td>
 			 </tr>
 			</table>
@@ -704,7 +677,7 @@ ul
 			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>clone(y_true, model_object, y_pred=None, y_prob=None,
-			  y_train=None, train_op_name=&quot;fit&quot;, Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â predict_op_name
+			  y_train=None, train_op_name=&quot;fit&quot;, predict_op_name
 			  =&quot;predict&quot;, feature_imp=None, sample_weight=None, pos_label=[[1]],
 			  neg_label=None)</p>
 			  </td>
@@ -740,13 +713,13 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>successMsg: string</b></p>
+			  <p class=MsoNormal><b>successMsg: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>If there are no errors, a success message will be
-			  returnedÂ Â  </p>
+			  returned  </p>
 			  </td>
 			 </tr>
 			</table>
@@ -775,13 +748,13 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>successMsg: string</b></p>
+			  <p class=MsoNormal><b>successMsg: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>If there are no errors, a success message will be
-			  returnedÂ Â  </p>
+			  returned.  </p>
 			  </td>
 			 </tr>
 			</table>
@@ -810,13 +783,13 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>successMsg: string</b></p>
+			  <p class=MsoNormal><b>successMsg: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>If there are no errors, a success message will be
-			  returnedÂ Â  </p>
+			  returned</p>
 			  </td>
 			 </tr>
 			</table>
@@ -845,13 +818,13 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>successMsg: string</b></p>
+			  <p class=MsoNormal><b>successMsg: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>If there are no errors, a success message will be
-			  returnedÂ Â  </p>
+			  returned </p>
 			  </td>
 			 </tr>
 			</table>
@@ -862,166 +835,193 @@ ul
 			style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			</span></span>clone(y_true, model_object, y_pred=None, y_prob=None,
 			y_train=None, train_op_name=&quot;fit&quot;, predict_op_name
-			=&quot;predict&quot;, feature_imp=None, sample_weight=None,Â  pos_label=[[1]], neg_label=None)</p>
+			=&quot;predict&quot;, feature_imp=None, sample_weight=None, pos_label=[[1]], neg_label=None)</p>
 
 			<p class=MsoNormal>&nbsp;</p>
 
-			<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=1056
-			 style='width:791.9pt;border-collapse:collapse;border:none'>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
+			 style='width:791.9pt;border-collapse:collapse;mso-yfti-tbllook:1184;
+			 mso-padding-alt:0in 0in 0in 0in'>
+			 <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Parameters</b></p>
 			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 0.5pt;
+			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 1.0pt;
 			  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Description</b></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:1'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_true : array of shape (n_samples,)</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>y_true</b></span><b>: list, <span
+			  class=SpellE><span class=GramE>numpy.ndarray</span></span> or <span
+			  class=SpellE>pandas.Series</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Ground truth target values.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:2'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>model_object</b> <b>: Object</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>model_<span class=GramE>object</span></b></span><span
+			  class=GramE> <b>:</b></span><b> Object</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>A blank model object used in the feature importance
 			  section for training and prediction.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:3'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_pred : array of shape (n_samples,), default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>y_pred</b></span><b>: list, <span
+			  class=SpellE><span class=GramE>numpy.ndarray</span></span>, <span
+			  class=SpellE>pandas.Series</span> or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Predicted targets as returned by classifier.</p>
+			  <p class=MsoNormal>Predicted targets as returned by classifier.<o:p></o:p></p>
+			  <p class=MsoNormal>&nbsp;</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:4'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_prob: array of shape (n_samples, L), default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>y_prob</b></span><b>: list, <span
+			  class=SpellE><span class=GramE>numpy.ndarray</span></span>, <span
+			  class=SpellE>pandas.Series</span>, <span class=SpellE>pandas.DataFrame</span>
+			  or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'>Predicted
-			  probabilities as returned by classifier. For uplift models, L = 4. Else, L =
-			  1.</p>
-			  <p class=MsoNormal>y_prob column orders should be [&quot;TR&quot;,
-			  &quot;TN&quot;, &quot;CR&quot;, &quot;CN&quot;] for uplift models.</p>
+			  <p class=MsoNormal>Predicted probabilities as returned by classifier. <o:p></o:p></p>
+			  <p class=MsoNormal>For uplift models, L = 4. Else, L = 1 where dimensions are
+			  (<span class=SpellE>n_samples</span>, L)<o:p></o:p></p>
+			  <p class=MsoNormal><span class=SpellE>y_prob</span> column orders should be
+			  [&quot;TR&quot;, &quot;TN&quot;, &quot;CR&quot;, &quot;CN&quot;] for uplift
+			  models.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:5'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_train : array of shape (m_samples,), default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>y_train</b></span><b>: list, <span
+			  class=SpellE><span class=GramE>numpy.ndarray</span></span>, <span
+			  class=SpellE>pandas.Series</span> or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Ground truth for training data.</p>
+			  <p class=MsoNormal>Ground truth for training data. If&nbsp;it is not given in
+			  correct format, Feature Importance LOO&nbsp;Analysis is to be skipped.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:6'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>train_op_name : string, default=&quot;fit&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>train_op_name</b></span><b>: str,
+			  default = &quot;fit&quot;</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>The method used by the model_object to train the model. By
-			  default a sklearn model is assumed.</p>
+			  <p class=MsoNormal>The method used by the <span class=SpellE>model_object</span>
+			  to train the model. By <span class=GramE>default</span> a <span class=SpellE>sklearn</span>
+			  model is assumed.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:7'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>predict_op_name : string, default=&quot;predict&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>predict_op_name</b></span><b>: str,
+			  default = &quot;predict&quot;</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>The method used by the model_object to predict the labels
-			  or probabilities. By default a sklearn model is assumed.</p>
-			  <p class=MsoNormal>For uplift models, this method should predict the probabilities
-			  and for non-uplift models it should predict the labels.</p>
+			  <p class=MsoNormal>The method used by the <span class=SpellE>model_object</span>
+			  to predict the labels or probabilities. By <span class=GramE>default</span> a
+			  <span class=SpellE>sklearn</span> model is assumed. <o:p></o:p></p>
+			  <p class=MsoNormal>For uplift models, this method should predict the
+			  probabilities and for non-uplift models it should predict the labels/values.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:8'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>feature_imp : pandas Dataframe of shape (n_features,2),
-			  default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b>feature_<span class=GramE>imp</span></b></span><span
+			  class=GramE><b> :</b></span><b> pandas <span class=SpellE>Dataframe</span> of
+			  shape (n_features,2), default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>The feature importance computed on the model object fitted
-			  to x_train. Order of features must be the same as x_test &amp; x_train.</p>
+			  to <span class=SpellE>x_train</span>. Order of features must be the same as <span
+			  class=SpellE>x_test</span> &amp; <span class=SpellE>x_train</span>.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:9'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>sample_weight : array of shape (n_samples,),
-			  default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span style='color:black'>sample_weight</span></b></span><b><span
+			  style='color:black'>: </span>list, <span class=SpellE><span class=GramE>numpy.ndarray</span></span>
+			  or None, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Used to normalize y_true &amp; y_pred.</p>
+			  <p class=MsoNormal>Used to normalize <span class=SpellE>y_true</span> &amp; <span
+			  class=SpellE>y_pred</span>.</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:10'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>pos_label : array, default=[[1]]</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span style='color:black'>pos_label</span></b></span><b><span
+			  style='color:black'>: list of lists, default = [[1]]</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Label values which are considered favorable.</p>
-			  <p class=MsoNormal>For all model types except uplift, converts the favourable
-			  labels to 1 and others to 0.</p>
+			  <p class=MsoNormal>Label values which are considered favorable in
+			  classification models.<o:p></o:p></p>
+			  <p class=MsoNormal>For all classification model types except uplift, converts
+			  the favorable labels to 1 and others to 0.<o:p></o:p></p>
 			  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g.
 			  [[&quot;a&quot;], [&quot;b&quot;]] in fav label. The first will be mapped to
 			  treatment responded (TR) &amp; second to control responded (CR).</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:11;mso-yfti-lastrow:yes'>
+			  <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>neg_label : array, default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span style='color:black'>neg_label</span></b></span><b><span
+			  style='color:black'>: list of lists or None, default = None</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Label values which are considered unfavorable.</p>
-			  <p class=MsoNormal>neg_label will only be used in uplift models.</p>
+			  <p class=MsoNormal>Label values which are considered unfavorable in
+			  classification models.<o:p></o:p></p>
+			  <p class=MsoNormal><span class=SpellE>unfav_label</span> will only be used in
+			  uplift models.<o:p></o:p></p>
 			  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g.
-			  [[&quot;c&quot;], [&quot;d&quot;]] in unfav label. The first will be mapped
-			  to treatment rejected (TR) &amp; second to control rejected (CR).</p>
+			  [[&quot;c&quot;], [&quot;d&quot;]] in <span class=SpellE>unfav</span> label.
+			  The first will be mapped to treatment others (TN) &amp; second to control
+			  others (CN).</p>
 			  </td>
 			 </tr>
 			</table>
-
 			<p class=MsoNormal>&nbsp;</p>
 
 			<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=1056
@@ -1060,364 +1060,181 @@ ul
 			<p class=MsoNormal>&nbsp;</p>
 
 			<p class=MsoNormal><a name="_Toc77321328"></a><a name="_Toc77321277"></a><b><i>veritastool.fairness.credit_scoring.CreditScoring(model_params,
-			fair_threshold, fair_metric_name=&quot;auto&quot;,
-			perf_metric_name=&quot;balanced_acc&quot;,Â  fair_concern=&quot;eligible&quot;,
-			fair_priority=&quot;benefit&quot;, fair_impact=&quot;normal&quot;, num
-			_applicants=None,</i></b> <b><i>base_default_rate = None,
-			fairness_metric_value_input={})</i></b></p>
+			perf_metric_name=&quot;balanced_acc&quot;,&nbsp; fair_threshold,
+			fair_metric_name=&quot;auto&quot;, fair_concern=&quot;eligible&quot;,
+			fair_priority=&quot;benefit&quot;, fair_impact=&quot;normal&quot;, num_applicants=None,</i></b>
+			<b><i>base_default_rate = None, fairness_metric_value_input={})</i></b></p>
 
 			<p class=MsoNormal>Class to evaluate and analyse fairness in credit scoring
 			related applications.</p>
 
-			<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=1056
-			 style='width:11.0in;border-collapse:collapse;border:none'>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
+			 style='width:11.0in;border-collapse:collapse;mso-yfti-tbllook:1184;mso-padding-alt:
+			 0in 0in 0in 0in'>
+			 <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>Attributes</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>Attributes</span></b></p>
 			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 0.5pt;
+			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 1.0pt;
 			  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>Description</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>Description</span></b></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:1'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>model_params: list containing 1
-			  ModelContainer object</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>model_params:
+			  list</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Data holder that contains all the
-			  attributes of the model to be assessed. Compulsory input for initialization.
-			  Single object corresponding to model type of &quot;default&quot;.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Data
+			  holder that contains all the attributes of the model to be assessed.
+			  Compulsory input for initialization. <o:p></o:p></span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>It holds
+			  one ModelContainer object. Single object corresponding to model type of
+			  &quot;default&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:2'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fair_threshold: float or int</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>perf_metric_name:
+			  str, default = &quot;balanced_acc&quot;<o:p></o:p></span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Value between 0 and 100. If a float
-			  between 0 and 1 (not inclusive) is provided, it is used to benchmark against
-			  the primary fairness metric value to determine the fairness_conclusion. If an
-			  integer between 1 and 100 is provided, it is converted to a percentage and
-			  the p % rule is used to calculate the fairness threshold value.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Name of
+			  the primary performance metric to be used for computations in the evaluate()
+			  and/or compile() functions.<o:p></o:p></span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:3'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>perf_metric_name: string, default = &quot;balanced_acc&quot;</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fair_threshold:
+			  float or int</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Name of the primary performance metric to
-			  be used for computations in the evaluate() and/or compile() functions.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Value
+			  between 0 and 100. If a float between 0 and 1 (inclusive) is provided, it is
+			  used to benchmark against the primary fairness metric value to determine the
+			  fairness_conclusion. If an integer between 1 and 100 is provided, it is
+			  converted to a percentage and the p % rule is used to calculate the fairness
+			  threshold value.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border-top:none;border-left:
-			  solid windowtext 0.5pt;border-bottom:none;border-right:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:4'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
+			  border-top:none;mso-border-top-alt:solid windowtext 1.0pt;mso-border-alt:
+			  solid windowtext 1.0pt;mso-border-bottom-alt:solid windowtext .5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fair_metric_name: string,
-			  default&nbsp;= &quot;auto&quot;</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fair_metric_name:
+			  str, default&nbsp;= &quot;auto&quot;</span></b></p>
 			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:none;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Name of the primary fairness metric to be
-			  used for computations in the evaluate() and/or compile() functions&nbsp; </span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'></td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'></td>
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  mso-border-top-alt:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext 1.0pt;
+			  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Name of
+			  the primary fairness metric to be used for computations in the evaluate()
+			  and/or compile() functions&nbsp; </span></p>
+			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border-top:none;border-left:
-			  solid windowtext 0.5pt;border-bottom:none;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'></td>
-			  <td width=756 valign=top style='width:566.65pt;border:none;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'></td>
+			 <tr style='mso-yfti-irow:5'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
+			  border-top:none;mso-border-top-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fair_concern:
+			  str, default = &quot;eligible&quot;</span></b></p>
+			  </td>
+			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  mso-border-top-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Used to
+			  specify a single fairness concern applied to all protected variables. Could
+			  be &quot;eligible&quot; or &quot;inclusive&quot; or &quot;both&quot;.</span></p>
+			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:6'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fair_concern: string, default = &quot;eligible&quot;</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fair_priority:
+			  str, default = &quot;benefit&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Used to specify a single fairness concern
-			  applied to all protected variables. Could be &quot;eligible&quot; or
-			  &quot;inclusive&quot; or &quot;both&quot;.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Used to
+			  pick the fairness metric according to the Fairness Tree methodology. Could be
+			  &quot;benefit&quot; or &quot;harm&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:7'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fair_priority: string, default =
-			  &quot;benefit&quot;</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fair_impact:
+			  str, default = &quot;normal&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Used to pick the fairness metric
-			  according to the Fairness Tree methodology. Could be &quot;benefit&quot; or
-			  &quot;harm&quot;.</span></p>
+			  <p class=MsoNormal style='line-height:105%'><span lang=EN-GB
+			  style='mso-ansi-language:EN-GB'>Used to pick the fairness metric according to
+			  the Fairness Tree methodology. Could be &quot;normal&quot; or
+			  &quot;significant&quot; or &quot;selective&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:8'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fair_impact: string, default =
-			  &quot;normal&quot;</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>num_applicants:
+			  dict of lists, default = None</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal style='line-height:107%'><span lang=EN-GB>Used to pick the
-			  fairness metric according to the Fairness Tree methodology. Could be
-			  &quot;normal&quot; or &quot;significant&quot; or &quot;selective&quot;.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Contains
+			  the number of rejected applicants for the privileged and unprivileged groups
+			  for each protected feature. e.g.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>{&quot;gender&quot;:
+			  [10, 20], &quot;race&quot;: [12, 18]}</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:9'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>num_applicants: dictionary of lists,
-			  default = None</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>base_default_rate:
+			  dict of lists, default = None</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains the number of rejected
-			  applicants for the privileged and unprivileged groups for each protected
-			  feature. e.g.</span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;gender&quot;: [10, 20], &quot;race&quot;:
-			  [12, 18]}</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Contains
+			  the base default rates for the privileged and unprivileged groups for each
+			  protected feature. e.g.</span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>{&quot;gender&quot;:
+			  [10, 20], &quot;race&quot;: [12, 18]}</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:10;mso-yfti-lastrow:yes'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>base_default_rate: dictionary of
-			  lists, default = None</span></b></p>
+			  <p class=MsoNormal><b><span lang=EN-GB style='mso-ansi-language:EN-GB'>fairness_metric_value_input
+			  : dict</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains the base default rates for the
-			  privileged and unprivileged groups for each protected feature. e.g.</span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;gender&quot;: [10, 20], &quot;race&quot;:
-			  [12, 18]}</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>fairness_metric_value_input :
-			  dictionary</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains the p_var and respective
-			  fairness_metric and value e.g. </span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;gender&quot;:
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Contains
+			  the p_var and respective fairness_metric and value e.g. </span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>{&quot;gender&quot;:
 			  {&quot;fnr_parity&quot;: 0.2}}</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>_rejection_inference_flag: dictionary</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Flag to ascertain whether rejection
-			  inference technique should be used for each protected feature to impute the
-			  target value for rejected cases, allowing reject cohort to be used in model
-			  building. If both the base_default_rate &amp; num_rejected_applicants are not
-			  None, the flag will be set to True. e.g.</span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;gender&quot;: True, &quot;race&quot;:
-			  False, &quot;age&quot;: True}</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB style='color:black'>_model_type_to_metric_lookup:
-			  dictionary</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Used to associate the model type (key)
-			  with the metric type, expected size of positive and negative labels (value)
-			  &amp; length of model_params respectively. e.g. </span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;rejection&quot;:
-			  (&quot;classification&quot;, 2, 1), &quot;uplift&quot;: (&quot;uplift&quot;,
-			  4, 1), &quot;a_new_type&quot;: (&quot;regression&quot;, -1, 1)}</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB style='color:black'>_use_case_metrics:
-			  dictionary of lists</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains all the performance &amp;
-			  fairness metrics for credit scoring. e.g.</span></p>
-			  <p class=MsoNormal><span lang=EN-GB>{&quot;fair &quot;:
-			  [&quot;fnr_parity&quot;, ...], &quot;perf&quot;: [&quot;balanced_accuracy,
-			  ...&quot;]}</span></p>
-			  <p class=MsoNormal><span lang=EN-GB>Dynamically assigned during
-			  initialisation by using the _metric_group_map in Fairness/Performance Metrics
-			  class and the _model_type_to_metric above.</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border-top:none;border-left:
-			  solid windowtext 0.5pt;border-bottom:none;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB style='color:black'>_input_validation_</span></b><span
-			  lang=EN-GB>lookup<b><span style='color:black'>: dictionary</span></b></span></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:none;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains the attribute and its correct data
-			  type for every argument passed by user. Used to perform the Utility checks.
-			  e.g.</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>_input_validation_lookup
-			  = </span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>{</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_threshold&quot;:
-			  [(float, int), (Constants().fair_threshold_low),
-			  Constants().fair_threshold_high],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_neutral_tolerance&quot;:
-			  [(float,),(Constants().fair_neutral_threshold_low),
-			  Constants().fair_neutral_threshold_high],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_concern&quot;:
-			  [(str,), [&quot;eligible&quot;, &quot;inclusive&quot;, &quot;both&quot;]],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_priority&quot;:
-			  [(str,), [&quot;benefit&quot;, &quot;harm&quot;]],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_impact&quot;:
-			  [(str,), [&quot;normal&quot;, &quot;significant&quot;,
-			  &quot;selective&quot;]],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;perf_metric_name&quot;:
-			  [(str,), self._use_case_metrics[&quot;perf&quot;]],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fair_metric_name&quot;:
-			  [(str,), self._use_case_metrics[&quot;fair&quot;]],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;model_params&quot;:[(list,),
-			  None],</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&quot;fairness_metric_value_input&quot;:[(dict,),
-			  None]</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>}</span></p>
-			  <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-GB>&nbsp;</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'></td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'></td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>spl_params : dictionary</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Dictionary of parameters that only belong
-			  to a use case</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>k : int</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Integer from Constants class to calculate
-			  confidence interval</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>array_size : int</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Integer from Constants class to fix array
-			  size</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>decimals : int</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Integer from Constants class to fix
-			  number of decimals to round off</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>err : object</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>VeritasError object</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>e_lift : float, default=None</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Empirical lift, None for CreditScoring
-			  class</span></p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span lang=EN-GB>pred_outcome: dictionary, default=None</span></b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><span lang=EN-GB>Contains the probabilities of the
-			  treatment and control groups for both rejection and acquiring, None for
-			  CreditScoring class</span></p>
 			  </td>
 			 </tr>
 			</table>
@@ -1577,7 +1394,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_true : np.ndarray</b></p>
+			  <p class=MsoNormal><b>y_true : numpy.ndarray</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -1588,7 +1405,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_pred : np.ndarray</b></p>
+			  <p class=MsoNormal><b>y_pred : numpy.ndarray</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -1599,7 +1416,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>sample_weight : array of shape (n_samples,),
+			  <p class=MsoNormal><b>sample_weight : numpy.ndarray or None,
 			  default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
@@ -1611,7 +1428,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>curr_p_var : string, default=None</b></p>
+			  <p class=MsoNormal><b>curr_p_var : str, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -1622,7 +1439,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>feature_mask : dictionary of lists, default = None</b></p>
+			  <p class=MsoNormal><b>feature_mask : dict of lists, default = None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -1670,301 +1487,229 @@ ul
 
 			<p class=MsoNormal>&nbsp;</p>
 
-			<p class=MsoNormal><b><i>veritastool.fairness.customer_marketing.CustomerMarketing(model_params,
-			fair_threshold, fair_metric_name=&quot;auto&quot;, perf_metric_name=<a
-			name="_Hlk85639513">&quot;</a>balanced_acc&quot;,
-			&nbsp;fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefit&quot;,
-			fair_impact=&quot;normal&quot;, revenue =None, treatment_cost = None,
-			fairness_metric_value_input={})</i></b></p>
+			<p class=MsoNormal><span class=GramE><b><i>veritastool.fairness</i></b></span><b><i>.customer_marketing.CustomerMarketing(model_params,
+			<span class=SpellE>fair_threshold</span>, <span class=SpellE>perf_metric_name</span>
+			=<span style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>balanced_acc</span>&quot;,
+			<span class=SpellE>fair_metric_name</span> = &quot;auto&quot;,<span
+			style='mso-spacerun:yes'>  </span><span class=SpellE>fair_concern</span> =
+			&quot;eligible&quot;, <span class=SpellE>fair_priority</span> =
+			&quot;benefit&quot;, <span class=SpellE>fair_impact</span> =
+			&quot;normal&quot;, <span class=SpellE>treatment_cost</span> = None, revenue =
+			None, <span class=SpellE>fairness_metric_value_input</span> = {}, <span
+			class=SpellE>proportion_of_interpolation_fitting</span> = 1.0)</i></b></p>
+
 
 			<p class=MsoNormal>Class to evaluate and analyse fairness in customer marketing
 			related applications.</p>
 
 			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
-			 style='width:11.0in;border-collapse:collapse'>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 style='width:11.0in;border-collapse:collapse;mso-yfti-tbllook:1184;mso-padding-alt:
+			 0in 0in 0in 0in'>
+			 <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Attributes</b></p>
 			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 0.5pt;
+			  <td width=756 valign=top style='width:566.65pt;border:solid windowtext 1.0pt;
 			  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>Description</b></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:1'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>model_params: list containing ModelContainer object(s)</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>model_params</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: list</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Data holder that contains all the attributes of the model
 			  to be assessed. Compulsory input for initialization. If a single object is
 			  provided, it will be taken as either a &quot;rejection&quot; or
-			  &quot;propensity&quot; model according to the model_type flag. </p>
-			  <p class=MsoNormal>If 2 objects are provided, while the model_type flag is
-			  &quot;uplift&quot;, the first one corresponds to rejection model while the
-			  second one corresponds to propensity model.</p>
-			  <p class=MsoNormal><span lang=EN-GB style='color:black;background:white'>**x_train[1]
-			  = x_test[1] and x_test[0]=x_test[1] must be the same when len(model_param)
+			  &quot;propensity&quot; model according to the <span class=SpellE>model_type</span>
+			  flag. </p>
+			  <p class=MsoNormal>If 2 objects are provided, while the <span class=SpellE>model_type</span>
+			  flag is &quot;uplift&quot;, the first one corresponds to rejection model
+			  while the second one corresponds to propensity model.</p>
+			  <p class=MsoNormal><span lang=EN-GB style='color:black;background:white;
+			  mso-ansi-language:EN-GB'>**<span class=SpellE>x_<span class=GramE>train</span></span><span
+			  class=GramE>[</span>1] = <span class=SpellE>x_test</span>[1] and <span
+			  class=SpellE>x_test</span>[0]=<span class=SpellE>x_test</span>[1] must be the
+			  same when <span class=SpellE>len</span>(<span class=SpellE>model_param</span>)
 			  &gt; 1</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:2'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>fair_threshold: float or int</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>model_params</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: list</span><o:p></o:p></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Value between 0 and 100. If a float between 0 and 1 (not
-			  inclusive) is provided, it is used to benchmark against the primary fairness
-			  metric value to determine the fairness_conclusion. If an integer between 1
-			  and 100 is provided, it is converted to a percentage and the p % rule is used
-			  to calculate the fairness threshold value.</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Data
+			  holder that contains all the attributes of the model to be assessed.
+			  Compulsory input for initialization. <o:p></o:p></span></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>It holds
+			  one <span class=SpellE>ModelContainer</span> object. Single object
+			  corresponding to model type of &quot;default&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:3'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>perf_metric_name: string, default =
-			  &quot;balanced_accuracy&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>perf_metric_name</span></b></span><b><span lang=EN-GB
+			  style='mso-ansi-language:EN-GB'>: str, default = &quot;<span class=SpellE>balanced_acc</span>&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Name of the primary performance metric to be used for
-			  computations in the evaluate() and/or compile() functions.</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Name of
+			  the primary performance metric to be used for computations in the <span
+			  class=GramE>evaluate(</span>) and/or compile() functions.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:4'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b><span style='color:black'>fair_metric_name: string,
-			  default =</span>&quot;<span style='color:black'>auto</span>&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fair_threshold</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: float or int</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Name of the primary fairness metric to be used for
-			  computations in the evaluate() and/or compile() functions&nbsp; </p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Value
+			  between 0 and 100. If a float between 0 and 1 (inclusive) is provided, it is
+			  used to benchmark against the primary fairness metric value to determine the <span
+			  class=SpellE>fairness_conclusion</span>. If an integer between 1 and 100 is
+			  provided, it is converted to a percentage and the p % rule is used to
+			  calculate the fairness threshold value.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:5'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>fair_concern: string, default=&quot;eligible&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fair_metric_name</span></b></span><b><span lang=EN-GB
+			  style='mso-ansi-language:EN-GB'>: str, default&nbsp;= &quot;auto&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Used to specify a single fairness concern applied to all
-			  protected variables. Could be &quot;eligible&quot; or &quot;inclusive&quot;
-			  or &quot;both&quot;.</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Name of
+			  the primary fairness metric to be used for computations in the <span
+			  class=GramE>evaluate(</span>) and/or compile() functions&nbsp; </span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:6'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>fair_priority: string, default=&quot;benefit&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fair_concern</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: str, default = &quot;eligible&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Used to pick the fairness metric according to the Fairness
-			  Tree methodology. Could be &quot;benefit&quot; or &quot;harm&quot;</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Used to
+			  specify a single fairness concern applied to all protected variables. Could
+			  be &quot;eligible&quot; or &quot;inclusive&quot; or &quot;both&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:7'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>fair_impact: string, default=&quot;normal&quot;</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fair_priority</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: str, default = &quot;benefit&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Used to pick the fairness metric according to the Fairness
-			  Tree methodology. Could be &quot;normal&quot; or &quot;significant&quot; or
-			  &quot;selective&quot;</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Used to
+			  pick the fairness metric according to the Fairness Tree methodology. Could be
+			  &quot;benefit&quot; or &quot;harm&quot;.</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:8'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>treatment_cost: int or float, default=None</b></p>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fair_impact</span></b></span><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>: str, default = &quot;normal&quot;</span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Used to
+			  pick the fairness metric according to the Fairness Tree methodology. Could be
+			  &quot;normal&quot; or &quot;significant&quot; or &quot;selective&quot;.</span></p>
+			  </td>
+			 </tr>
+			 <tr style='mso-yfti-irow:9'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
+			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span class=SpellE><b>treatment_cost</b></span><b>: int or
+			  float, default=None</b></p>
+			  </td>
+			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Cost of the marketing treatment per customer</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
+			 <tr style='mso-yfti-irow:10'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal><b>revenue: int or float, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Revenue gained per customer</p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>_model_type_to_metric_lookup: dictionary</b></p>
+			 <tr style='mso-yfti-irow:11'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
+			  border-top:none;mso-border-top-alt:solid windowtext 1.0pt;mso-border-alt:
+			  solid windowtext 1.0pt;mso-border-bottom-alt:solid windowtext .5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>fairness_metric_value_<span class=GramE>input</span></span></b></span><span
+			  class=GramE><b><span lang=EN-GB style='mso-ansi-language:EN-GB'> :</span></b></span><b><span
+			  lang=EN-GB style='mso-ansi-language:EN-GB'> <span class=SpellE>dict</span></span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  mso-border-top-alt:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext 1.0pt;
+			  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Used to associate the model type (key) with the metric
-			  type, expected size of positive and negative labels (value) &amp; length of
-			  model_params respectively. e.g. </p>
-			  <p class=MsoNormal style='margin-bottom:0in'>{&quot;rejection&quot;: (&quot;classification&quot;,
-			  2, 1), &quot;uplift&quot;: (&quot;uplift&quot;, 4, 2), &quot;a_new_type&quot;:
-			  (&quot;regression&quot;, -1, 1)}</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&nbsp;</p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Contains
+			  the <span class=SpellE>p_var</span> and respective <span class=SpellE>fairness_metric</span>
+			  and value e.g. </span><o:p></o:p></p>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>{&quot;gender&quot;:
+			  {&quot;<span class=SpellE>fnr_parity</span>&quot;: 0.2}}</span></p>
 			  </td>
 			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>_use_case_metrics: dictionary of lists, default=None</b></p>
+			 <tr style='mso-yfti-irow:12;mso-yfti-lastrow:yes'>
+			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
+			  border-top:none;mso-border-top-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span class=SpellE><b><span lang=EN-GB style='mso-ansi-language:
+			  EN-GB'>proportion_of_interpolation_<span class=GramE>fitting</span></span></b></span><span
+			  class=GramE><b><span lang=EN-GB style='mso-ansi-language:EN-GB'> :</span></b></span><b><span
+			  lang=EN-GB style='mso-ansi-language:EN-GB'> float, default=1.0<o:p></o:p></span></b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Contains all the performance &amp; fairness metrics for
-			  credit scoring. e.g.</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>{&quot;fair &quot;:
-			  [&quot;fnr_parity&quot;, ...], &quot;perf&quot;: [&quot;balanced_accuracy,
-			  ...&quot;]}</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&nbsp;</p>
-			  <p class=MsoNormal>Dynamically assigned during initialisation by using the
-			  _metric_group_map in Fairness/Performance Metrics class and the
-			  _model_type_to_metric above.</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>_input_validation_lookup: dictionary</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Contains the attribute and its correct data type for every
-			  argument passed by user. Used to perform the Utility checks. e.g.</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>_input_validation_lookup =</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>{</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&quot;fair_neutral_threshold&quot;:
-			  [&quot;numeric&quot;, (0,1)], </p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&quot;sample_weight&quot;:
-			  [&quot;numeric&quot;, (0,np.inf)], </p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&quot;perf_metric_name&quot;:
-			  [&quot;string&quot;, CustomerMarketing._use_case_metrics], </p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&quot;fair _metric_name&quot;:
-			  [&quot;string&quot;, CustomerMarketing._use_case_metrics], </p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&quot;fair_concern&quot;:
-			  [&quot;string&quot;, [&quot;deserving&quot;, &quot;inclusive&quot;,
-			  &quot;both&quot;]]</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>}</p>
-			  <p class=MsoNormal style='margin-bottom:0in'>&nbsp;</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>spl_params : dictionary</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Dictionary of parameters that only belong to a use case</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>k : int</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Integer from Constants class to calculate confidence
-			  interval</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>array_size : int</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Integer from Constants class to fix array size</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>decimals : int</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Integer from Constants class to fix number of decimals to
-			  round off</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>err : object</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>VeritasError object</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>selection_threshold : float</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Selection threshold from Constants class</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>e_lift: float, default=None</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Empirical lift</p>
-			  </td>
-			 </tr>
-			 <tr>
-			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
-			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>pred_outcome: dictionary, default=None</b></p>
-			  </td>
-			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
-			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
-			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Contains the probabilities of the treatment and control
-			  groups for both rejection and acquiring</p>
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  mso-border-top-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>Proportion
+			  of interpolation fitting<o:p></o:p></span></p>
 			  </td>
 			 </tr>
 			</table>
@@ -2023,8 +1768,7 @@ ul
 			  <p class=MsoNormal>Retrieves the fairness metric name based on the values of
 			  model_type, fair_concern, fair_impact and fair_priority. Name of the primary
 			  fairness metric to be used for computations in the evaluate() and/or
-			  compile() functions&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-			  <p class=MsoNormal>&nbsp;</p>
+			  compile() functions</p>
 			  </td>
 			 </tr>
 			 <tr>
@@ -2116,7 +1860,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_true : np.ndarray</b></p>
+			  <p class=MsoNormal><b>y_true : numpy.ndarray</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2127,7 +1871,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_pred : np.ndarray</b></p>
+			  <p class=MsoNormal><b>y_pred : numpy.ndarray</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2138,7 +1882,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>sample_weight : array of shape (n_samples,)</b></p>
+			  <p class=MsoNormal><b>sample_weight : numpy.ndarray</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2149,7 +1893,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>curr_p_var : string, default=None</b></p>
+			  <p class=MsoNormal><b>curr_p_var : str, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2160,7 +1904,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>feature_mask : dictionary of lists, default=None</b></p>
+			  <p class=MsoNormal><b>feature_mask : dict of lists, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2269,7 +2013,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>model_file: string, default=None</b></p>
+			  <p class=MsoNormal><b>model_file: str, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2280,7 +2024,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>output_file: string, default=None</b></p>
+			  <p class=MsoNormal><b>output_file: str, default=None</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2372,26 +2116,26 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>x_train: pandas Dataframe of shape (m_samples,
-			  n_features) or string</b></p>
+			  <p class=MsoNormal><b>x_train: pandas.DataFrame or str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Training dataset. m_samples refers to number of rows in
-			  the training dataset. The string refers to the dataset path acceptable by the
+			  the training dataset where shape is (m_samples, n_features).
+			  The string refers to the dataset path acceptable by the
 			  model (e.g. HDFS URI).</p>
 			  </td>
 			 </tr>
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>y_train : array of shape (m_samples,)</b></p>
+			  <p class=MsoNormal><b>y_train : numpy.ndarray </b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Ground truth for training data.</p>
+			  <p class=MsoNormal>Ground truth for training data where length is m_samples.</p>
 			  </td>
 			 </tr>
 			</table>
@@ -2417,13 +2161,13 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.0pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>x_test : pandas Dataframe or array of shape (n_samples,
-			  n_features) or string</b></p>
+			  <p class=MsoNormal><b>x_test : pandas.DataFrame or str </b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>Testing dataset. The string refers to the dataset path
+			  <p class=MsoNormal>Testing dataset where shape is (n_samples, n_features).
+			  The string refers to the dataset path
 			  acceptable by the model (e.g. HDFS URI).</p>
 			  </td>
 			 </tr>
@@ -2462,7 +2206,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>metric_type: string</b></p>
+			  <p class=MsoNormal><b>metric_type: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2473,7 +2217,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>metric_group: string</b></p>
+			  <p class=MsoNormal><b>metric_group: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2485,7 +2229,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>metric_name: string</b></p>
+			  <p class=MsoNormal><b>metric_name: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2496,7 +2240,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>metric_definition: string</b></p>
+			  <p class=MsoNormal><b>metric_definition: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2507,7 +2251,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.35pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>metric_parity_ratio: string</b></p>
+			  <p class=MsoNormal><b>metric_parity_ratio: str</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2885,7 +2629,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2917,7 +2661,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2948,7 +2692,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -2978,7 +2722,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -3020,7 +2764,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -3053,7 +2797,7 @@ ul
 			 <tr>
 			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 0.5pt;
 			  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal><b>dictionary</b></p>
+			  <p class=MsoNormal><b>dict</b></p>
 			  </td>
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
@@ -3066,10 +2810,1293 @@ ul
 			</table>
 			
 			
+			<p class=MsoNormal><span style='color:white'>&nbsp;</span></p>
+
+			<h1><a name="_Toc85640080">Supported Metrics</a></h1>
+
+			<p class=MsoNormal>&nbsp;</p>
+
+			<p class=MsoNormal>Supported performance and fairness metrics are given in the following table. User is supposed to assign short_name to perf_metric_name and fair_metric_name.&nbsp;</p>
+			
+			<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1055
+ style='width:791.3pt;margin-left:-.15pt;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><b><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>Metric Type<o:p></o:p></span></b></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><b><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>Short Name<o:p></o:p></span></b></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><b><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>Full Name<o:p></o:p></span></b></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:1;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>selection_rate</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Selection Rate<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:2;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>accuracy<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Accuracy<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:3;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>balanced_acc</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Balanced Accuracy<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:4;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>recall<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Recall<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:5;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>precision<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Precision<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:6;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>f1_score<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>F1Score<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:7;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>tnr</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>True Negative Rate<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:8;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>fnr</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>False Negative Rate<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:9;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>npv</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Negative Predictive Value<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:10;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>roc_auc</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>ROCAUC Score<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:11;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>log_loss</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Log-loss<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:12;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>rmse</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Root Mean Squared Error<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:13;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>mape</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Mean Absolute Percentage Error<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:14;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>wape</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Weighted Absolute Percentage Error<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:15;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>emp_lift</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Empirical Lift<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:16;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>expected_profit</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Expected Profit Lift<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:17;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Performance<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>expected_selection_rate</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Expected Selection Rate<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:18;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>disparate_impact</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Disparate Impact<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:19;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>demographic_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Demographic Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:20;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>equal_opportunity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Equal Opportunity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:21;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>fpr_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>False Positive Rate
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:22;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>tnr_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>True Negative Rate Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:23;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>fnr_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>False Negative Rate
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:24;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>ppv_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Positive Predictive
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:25;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>npv_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Negative Predictive
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:26;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>fdr_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>False Discovery Rate
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:27;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>for_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>False Omission Rate
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:28;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>equal_odds</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Equalized Odds<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:29;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>neg_equal_odds</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Negative Equalized Odds<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:30;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>calibration_by_group</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Calibration by Group<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:31;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>auc_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>AUC Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:32;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>log_loss_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Log-loss Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:33;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>mi_independence</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Mutual Information
+  Independence<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:34;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>mi_separation</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Mutual Information
+  Separation<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:35;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>mi_sufficiency</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Mutual Information
+  Sufficiency<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:36;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>rmse_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Root Mean Squared Error
+  Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:37;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>mape_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Mean Absolute Percentage
+  Error Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:38;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>wape_parity</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Weighted Absolute
+  Percentage Error Parity<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:39;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>rejected_harm</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Harm from Rejection<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+ <tr style='mso-yfti-irow:40;mso-yfti-lastrow:yes;height:15.0pt'>
+  <td width=130 nowrap valign=bottom style='width:1.35in;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+  0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'>Fairness<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=232 nowrap valign=bottom style='width:174.25pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span class=SpellE><span style='mso-fareast-font-family:
+  "Times New Roman";color:black'>acquire_benefit</span></span></span><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+  <td width=693 nowrap valign=bottom style='width:519.85pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='mso-bookmark:_Toc85640080'><span style='mso-fareast-font-family:"Times New Roman";
+  color:black'><span style='mso-spacerun:yes'> </span>Benefit from Acquiring<o:p></o:p></span></span></p>
+  </td>
+  <span style='mso-bookmark:_Toc85640080'></span>
+ </tr>
+</table>
 
 			<p class=MsoNormal><span style='color:white'>&nbsp;</span></p>
 
-			<h1><a name="_Toc85640080">Parameter Configuration</a></h1>
+			<h1><a name="_Toc85640081">Parameter Configuration</a></h1>
 
 			<p class=MsoNormal>&nbsp;</p>
 

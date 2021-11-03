@@ -17,25 +17,25 @@ class TradeoffRate(object):
 
         Instance attributes
         -----------
-        msg : string, default=None
+        msg : str, default=None
                 Message 
 
-        perf_metric_name : string 
+        perf_metric_name : str
                 Name of the primary performance metric to be used for computations.
 
-        fair_metric_name : string
+        fair_metric_name : str
                 Name of the primary fairness metric to be used for computations.
 
-        metric_group : string
+        metric_group : str
                 Type of fair_metric
 
         p_var : list
                 List of protected variables used for fairness analysis.
 
-        curr_p_var: string
+        curr_p_var: str
                 Current protected variable
 
-        result : dictionary, default=None
+        result : dict, default=None
                 Stores the results of the computations. Refer to the sample JSON artifact for an example.
 
         fair_neutral_tolerance : float
@@ -44,19 +44,20 @@ class TradeoffRate(object):
         proportion_of_interpolation_fitting : float
                 Proportion of interpolation fitting
 
-        y_true : array of shape (n_samples,)
+        y_true : numpy.ndarray
                 Ground truth target values.
 
-        y_prob : array of shape (n_samples, L), default=None
-                Predicted probabilities as returned by classifier. For uplift models, L = 4. Else, L = 1.
+        y_prob : numpy.ndarray, default=None
+                Predicted probabilities as returned by classifier. 
+                For uplift models, L = 4. Else, L = 1 where shape is (n_samples, L)
 
-        sample_weight : array of shape (n_samples,)
+        sample_weight : numpy.ndarray
                 Used to normalize y_true & y_pred.
 
-        feature_mask : dictionary of lists
+        feature_mask : dict of lists
                 Stores the mask array for every protected variable applied on the x_test dataset.
 
-        map_metric_to_method : dictionary
+        map_metric_to_method : dict
                 Mapping of metric name to respective compute function
         """
         self.msg = None
@@ -134,7 +135,7 @@ class TradeoffRate(object):
 
         Returns
         ------------
-        result : dictionary
+        result : dict
                 Stores the results of the computations.
                     - fairness metric name
                     - performance metric name
