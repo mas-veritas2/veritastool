@@ -460,7 +460,7 @@ ul
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>Predicted probabilities as returned by classifier. For
-			  uplift models, L = 4. Else, L = 1.</p>
+			  uplift models, L = 4. Else, L = 1 where dimensions are (n_samples, L) </p>
 			  <p class=MsoNormal>y_prob column orders should be [&quot;TR&quot;,
 			  &quot;TN&quot;, &quot;CR&quot;, &quot;CN&quot;] for uplift models.</p>
 			  </td>
@@ -488,8 +488,7 @@ ul
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
 			  <p class=MsoNormal>This variable will be used for masking. If not provided,
-			  x_test will be used and x_test must be a pandas dataframe. K = number of
-			  protected features</p>
+			  x_test will be used and x_test must be a pandas dataframe.</p>
 			  </td>
 			 </tr>
 			 <tr>
@@ -526,8 +525,20 @@ ul
 			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
 			  none;border-bottom:solid windowtext 0.5pt;border-right:solid windowtext 0.5pt;
 			  padding:0in 5.4pt 0in 5.4pt'>
-			  <p class=MsoNormal>The feature importance computed on the model object fitted
-			  to x_train. </p>
+			  <p class=MsoNormal><a name="_Hlk86846404">The feature importance computed on
+			  the model object fitted to </a><span class=SpellE><span style='mso-bookmark:
+			  _Hlk86846404'>x_train</span></span><span style='mso-bookmark:_Hlk86846404'>.</span></p>
+			  <p class=MsoNormal><span style='mso-bookmark:_Hlk86846404'>Index:<o:p></o:p></span></p>
+			  <p class=MsoNormal style='text-indent:.5in'><span style='mso-bookmark:_Hlk86846404'><span
+			  class=SpellE>RangeIndex</span><o:p></o:p></span></p>
+			  <p class=MsoNormal><span style='mso-bookmark:_Hlk86846404'>Columns:<o:p></o:p></span></p>
+			  <p class=MsoNormal style='text-indent:.5in'><span style='mso-bookmark:_Hlk86846404'>Name:
+			  Feature, <span class=SpellE>dtype</span>: str<span
+			  style='mso-spacerun:yes'>      </span><o:p></o:p></span></p>
+			  <p class=MsoNormal style='text-indent:.5in'><span style='mso-bookmark:_Hlk86846404'>Name:
+			  Importance, <span class=SpellE>dtype</span>: float<span
+			  style='mso-spacerun:yes'>   </span><span style='mso-spacerun:yes'> </span><span
+			  style='mso-spacerun:yes'> </span></span></p>
 			  </td>
 			 </tr>
 			 <tr>
