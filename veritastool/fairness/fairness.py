@@ -31,7 +31,8 @@ class Fairness:
         """
         Parameters
         ------------------
-        model_params : object of type ModelContainer
+        model_params : list
+                It holds ModelContainer object(s).
                 Data holder that contains all the attributes of the model to be assessed. Compulsory input for initialization.
 
         Instance Attributes
@@ -42,7 +43,7 @@ class Fairness:
         perf_metric_obj : object, default=None
                 Stores the PerformanceMetrics() object and contains the result of the computations.
 
-        percent_distribution : dictionary, default=None
+        percent_distribution : dict, default=None
                 Stores the percentage breakdown of the classes in y_true.
 
         calibration_score : float, default=None
@@ -54,10 +55,10 @@ class Fairness:
         correlation_output : dict, default=None
                 Pairwise correlation of most important features (top 20 feature + protected variables).
 
-        feature_mask : dictionary of lists, default=None
+        feature_mask : dict of list, default=None
                 Stores the mask array for every protected variable applied on the x_test dataset.
 
-        fair_conclusion : dictionary, default=None
+        fair_conclusion : dict, default=None
                 Contains conclusion of how the primary fairness metric compares against the fairness threshold. The key will be the protected variable and the conclusion will be "fair" or "unfair".
                 e.g. {"gender": {'fairness_conclusion': "fair", "threshold": 0.01}, "race":{'fairness_conclusion': "unfair", "threshold": 0.01}}
 
@@ -91,7 +92,7 @@ class Fairness:
                 False = Skipped (if the correlation dataframe is not provided in ModelContainer)
                 True = Complete
 
-        feature_imp_values: dictionary of lists, default = None
+        feature_imp_values: dict of list, default = None
                 Contains the difference in metric values between the original and loco models for each protected variable.
 
                 {"gender":
@@ -195,7 +196,7 @@ class Fairness:
 
         Returns
         ----------
-        out : dictionary
+        out : dict
             Fairness threshold and conclusion for the chosen protected variable
         """
         #for feature importance, when privileged metric values have been overwritten during leave-one-out analysis
@@ -236,7 +237,7 @@ class Fairness:
 
         Returns
         ----------
-        self.fair_conclusion : dictionary
+        self.fair_conclusion : dict
             fair_conclusion and threshold for every protected variable
         """
         self.fair_conclusion = {}
@@ -1487,7 +1488,7 @@ class Fairness:
 
         Returns
         ----------
-        feature_mask : dictionary of lists
+        feature_mask : dict of list
                 Stores the mask array for every protected variable applied on the x_test dataset.
         """
         feature_mask = {}
