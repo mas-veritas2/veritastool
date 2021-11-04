@@ -108,6 +108,11 @@ class Fairness:
                 }
 
                 flip = "fair to fair", "unfair to fair", "fair to unfair", "unfair to unfair"
+        
+        sigma : float or int , default = 0
+                 Standard deviation for Gaussian kernel for smoothing the contour lines of primary fairness metric. 
+                 When sigma <= 0, smoothing is turn off.
+                 Suggested to try sigma = 3 or above if noisy contours are observed.                
 
         err : object
                 VeritasError object
@@ -129,6 +134,7 @@ class Fairness:
         self.feature_imp_values = None
         self.feature_imp_status_corr = False
         self.feature_imp_status_loo = False
+        self.sigma = None
         self.err = VeritasError()
         
     def evaluate(self, visualize=False, output=True, n_threads=1, seed=None):
@@ -441,7 +447,7 @@ class Fairness:
         self._generate_model_artifact()
 
 
-    def tradeoff(self, output=True, n_threads=1):
+    def tradeoff(self, output=True, n_threads=1, sigma = 0):
         """
         Computes the trade-off between performance and fairness over a range  of threshold values. 
         If output = True, run the _print_tradeoff() function.
@@ -453,6 +459,11 @@ class Fairness:
 
         n_threads : int, default=1
                 Number of currently active threads of a job
+                
+        sigma : float or int , default = 0
+                 Standard deviation for Gaussian kernel for smoothing the contour lines of primary fairness metric. 
+                 When sigma <= 0, smoothing is turn off.
+                 Suggested to try sigma = 3 or above if noisy contours are observed.                
         """
         #if y_prob is None, skip tradeoff
         if self.model_params[0].y_prob is None:
@@ -463,6 +474,7 @@ class Fairness:
             return
         #check if tradeoff hasn't run, only run if haven't
         elif self.tradeoff_status == 0:
+            self.sigma = sigma
             n_threads = check_multiprocessing(n_threads)
             #to show progress bar
             tdff_pbar = tqdm(total=100, desc='Tradeoff', bar_format='{l_bar}{bar}')

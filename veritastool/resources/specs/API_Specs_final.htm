@@ -2520,7 +2520,9 @@ ul
 
 			<p class=MsoNormal><b><i><span style='color:black'>&nbsp;</span></i></b></p>
 
-			<p class=MsoNormal><b><i>veritastool.fairness.fairness.Fairness.tradeoff(output=True,n_threads=1)</i></b></p>
+			<p class=MsoNormal><span style='mso-bookmark:_Toc84925226'><span
+			style='mso-bookmark:_Toc85640078'><span class=GramE><b><i>veritastool.fairness</i></b></span><b><i>.fairness.Fairness.tradeoff(output=True,n_threads=1,
+			sigma =0)</i></b></span></span></p>
 
 			<p class=MsoNormal>Computes the trade-off between performance and fairness over
 			a range&nbsp; of threshold values. If output = True, run the _print_tradeoff()
@@ -2561,6 +2563,28 @@ ul
 			  <p class=MsoNormal>Number of currently active threads of a job</p>
 			  </td>
 			 </tr>
+			 <tr style='mso-yfti-irow:2'>
+			  <td width=300 valign=top style='width:225.05pt;border:solid windowtext 1.0pt;
+			  border-top:none;mso-border-left-alt:solid windowtext .5pt;mso-border-bottom-alt:
+			  solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;padding:
+			  0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span style='mso-bookmark:_Toc84925226'><span
+			  style='mso-bookmark:_Toc85640078'><b>sigma: float or int, default = 0</b><o:p></o:p></span></span></p>
+			  </td>
+			  <span style='mso-bookmark:_Toc84925226'><span style='mso-bookmark:_Toc85640078'></span></span>
+			  <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
+			  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+			  mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext .5pt;
+			  padding:0in 5.4pt 0in 5.4pt'>
+			  <p class=MsoNormal><span style='mso-bookmark:_Toc84925226'><span
+			  style='mso-bookmark:_Toc85640078'>Standard deviation for Gaussian kernel for
+			  smoothing the contour lines of primary fairness metric. <span
+			  style='mso-spacerun:yes'> </span>When sigma &lt;= 0, smoothing is turn off. Suggested
+			  to try sigma = 3 or above if noisy contours are observed.<span
+			  style='mso-spacerun:yes'>                </span><o:p></o:p></span></span></p>
+			  </td>
+			  <span style='mso-bookmark:_Toc84925226'><span style='mso-bookmark:_Toc85640078'></span></span>
+			 </tr>			 
 			</table>
 
 			<p class=MsoNormal><span style='color:white'>&nbsp;&nbsp;</span></p>
