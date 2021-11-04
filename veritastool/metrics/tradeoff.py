@@ -3,6 +3,7 @@ import sklearn.metrics as skm
 from .fairness_metrics import FairnessMetrics
 from .modelrates import *
 from ..config.constants import Constants
+from scipy.ndimage.filters import gaussian_filter
 
 class TradeoffRate(object):
     """
@@ -59,6 +60,11 @@ class TradeoffRate(object):
 
         map_metric_to_method : dict
                 Mapping of metric name to respective compute function
+                
+        sigma : float or integer , default = 0
+                 Standard deviation for Gaussian kernel for smoothing the contour lines of primary fairness metric. 
+                 When sigma <= 0, smoothing is turn off.
+                 Suggested to try sigma = 3 or above if noisy contours are observed.
         """
         self.msg = None
         self.perf_metric_name = usecase_obj.perf_metric_name
@@ -120,7 +126,7 @@ class TradeoffRate(object):
         'expected_profit': self._compute_expected_profit_tr,
         'emp_lift': self._compute_emp_lift_tr
         }
-
+        self.sigma = usecase_obj.sigma
     def compute_tradeoff(self, n_threads, tdff_pbar):
         """
         Computes the tradeoff values.
@@ -178,7 +184,8 @@ class TradeoffRate(object):
 
                 self.result[i]['perf'] = perf_values
 
-                self.result[i]['fair'] = fair_values
+                fair_values_smooted = gaussian_filter(fair_values, self.sigma)
+                self.result[i]['fair'] = fair_values_smooted
 
                 self.result[i]['th_x'] = self.th_x
                 self.result[i]['th_y'] = self.th_y
@@ -226,7 +233,9 @@ class TradeoffRate(object):
 
                 perf_values = self.map_metric_to_method[self.perf_metric_name]()
 
-                self.result[i]['fair'] = fair_values
+                fair_values_smooted = gaussian_filter(fair_values, self.sigma)
+                self.result[i]['fair'] = fair_values_smooted
+                
                 self.result[i]['perf'] = perf_values
 
                 self.result[i]['th_x'] = self.th_x
@@ -236,6 +245,7 @@ class TradeoffRate(object):
                 self.result[i]['max_perf_point'] = best_th2
                 self.result[i]['max_perf_single_th'] = best_th1
                 self.result[i]['max_perf_neutral_fair'] = best_th3
+                    
                 tdff_pbar.update(prog)
         else :
             self.result = None
