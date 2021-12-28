@@ -728,7 +728,7 @@ class Fairness:
             else:
                 n = 1
 
-            if (n - baseline_fair_values_j) * (deltas_fair) > 0:
+            if abs(loo_fair_value  - n) < abs(baseline_fair_values_j - n):  
                 if PerformanceMetrics.map_perf_metric_to_group.get(use_case_object.perf_metric_name)[1] == "regression" :
                     if deltas_perf <= 0:
                         suggestion = 'exclude'
@@ -740,7 +740,7 @@ class Fairness:
                     else:
                         suggestion = 'examine further'                    
                 delta_conclusion += " (+)"
-            elif (n - baseline_fair_values_j) * (deltas_fair) < 0:
+            elif abs(loo_fair_value  - n) > abs(baseline_fair_values_j - n):  
                 if PerformanceMetrics.map_perf_metric_to_group.get(use_case_object.perf_metric_name)[1] == "regression" :
                     if deltas_perf >= 0:
                         suggestion = 'include'
@@ -1389,7 +1389,7 @@ class Fairness:
                         decimal_pts=self.decimals))
 
                     fair5_2.value = html_fair_bold.format("{:.{decimal_pts}f}".format(self.fair_conclusion.get(chosen_p_v).get("threshold"), decimal_pts=self.decimals))
-                    
+
                     plot_output.clear_output()
                     for metric in NewMetric.__subclasses__():
                         if metric.metric_name in result_fairness[protected_feature]['fair_metric_values'].keys():
