@@ -3,7 +3,7 @@ from veritastool.model.model_container import ModelContainer
 from veritastool.fairness.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
 from veritastool.metrics.fairness_metrics import FairnessMetrics
-from veritastool.fairness.fairness import Fairness
+from veritastool.principles.fairness import Fairness
 from veritastool.model.modelwrapper import ModelWrapper
 from veritastool.metrics.newmetric import NewMetric
 import numpy as np

@@ -6,7 +6,7 @@ from copy import deepcopy
 from tqdm.auto import tqdm
 from sklearn.linear_model import LogisticRegression
 from veritastool.model.model_container import ModelContainer
-from veritastool.fairness.fairness import Fairness
+from veritastool.principles.fairness import Fairness
 from veritastool.fairness.credit_scoring import CreditScoring
 from veritastool.fairness.customer_marketing import CustomerMarketing
 from veritastool.metrics.fairness_metrics import FairnessMetrics

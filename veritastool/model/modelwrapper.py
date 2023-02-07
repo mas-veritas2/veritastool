@@ -4,7 +4,7 @@ class ModelWrapper(object):
     Serves as a template for users to define the model_object
     """
 
-    def __init__(self, model_obj = None, model_file = None, output_file = None):
+    def __init__(self, model_obj = None, model_file = None, output_file = None,classes=[]):
         """
         Instance attributes
         ----------
@@ -20,6 +20,7 @@ class ModelWrapper(object):
         self.model_obj = model_obj
         self.model_file = model_file
         self.output_file = output_file
+        self.classes_ = classes
 
     def fit(self, x_train, y_train):
         """
@@ -56,11 +57,34 @@ class ModelWrapper(object):
         import subprocess
         process = subprocess.Popen(pred_cmd.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
+        return pd.read_csv(output_file) // any preprocessing required has to be done too
 
         Parameters
         -----------
         x_test : pandas.DataFrame or str
                 Testing dataset where shape is (n_samples, n_features)
                 The string refers to the dataset path acceptable by the model (e.g. HDFS URI).
+        Returns
+        ----------
+        y_pred: list, np.ndarray or pd.Series
+                Predictions of model_obj on x_test                  
+        """
+        pass
+
+
+    def predict_proba(self, x):
+        """
+        This function is a template for user to specify a custom predict_proba() method
+        that uses the model saved in self.model_file to get probabilities on the given dataset.
+
+        Parameters
+        -----------
+        x : pandas.DataFrame or str
+                Testing dataset where shape is (n_samples, n_features)
+                The string refers to the dataset path acceptable by the model (e.g. HDFS URI).
+        Returns
+        ----------
+        y_prob: list, np.ndarray, pd.Series, pd.DataFrame
+                Prediction probabilities of model_obj on x_test    
         """
         pass

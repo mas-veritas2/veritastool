@@ -7,6 +7,9 @@ from ..util.utility import *
 from ..metrics import *
 import concurrent.futures
 from itertools import product
+from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.impute import SimpleImputer
 
 class FairnessMetrics:
     """
@@ -15,39 +18,61 @@ class FairnessMetrics:
     Class Attributes
     ----------
     map_fair_metric_to_group : dict
-        Maps the fairness metrics to its name, metric_group (classification, uplift, or regression), type (parity or odds), whether the metric is related to tradeoff and whether the metric can be a primary metric.
-        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'parity', True, True), 'equal_odds': ('Equalized Odds', 'classification', 'parity', True, True)}
+        Maps the fairness metrics to its name, metric_group (classification, uplift, or regression), type (difference or ratio), whether the metric is related to tradeoff, whether the metric can be a primary metric, and its short-form name.
+        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds')}
     """
     map_fair_metric_to_group = {
-        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True),
-        'demographic_parity': ('Demographic Parity', 'classification', 'parity', True, True),
-        'equal_opportunity': ('Equal Opportunity', 'classification', 'parity', True, True),
-        'fpr_parity': ('False Positive Rate Parity', 'classification', 'parity', True, True),
-        'tnr_parity': ('True Negative Rate Parity', 'classification', 'parity', True, True),
-        'fnr_parity': ('False Negative Rate Parity', 'classification', 'parity', True, True),
-        'ppv_parity': ('Positive Predictive Parity', 'classification', 'parity', True, True),
-        'npv_parity': ('Negative Predictive Parity', 'classification', 'parity', True, True),
-        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'parity', True, True),
-        'for_parity': ('False Omission Rate Parity', 'classification', 'parity', True, True),
-        'equal_odds': ('Equalized Odds', 'classification', 'parity', True, True),
-        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'parity', True, True),
-        'calibration_by_group': ('Calibration by Group', 'classification', 'parity', True, True),
-        'auc_parity': ('AUC Parity', 'classification', 'parity', False, True),
-        'log_loss_parity': ('Log-loss Parity', 'classification', 'parity', False, True),
-        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False),
-        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False),
-        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False),
-        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'parity', False, True),
-        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'parity', False, True),
-        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'parity', False, True),
-        'rejected_harm': ('Harm from Rejection', 'uplift', 'parity', True, True),
-        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'parity', False, True)
+        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate'),
+        'demographic_parity': ('Demographic Parity', 'classification', 'difference', True, True, 'Demo Parity','selection_rate'),
+        'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo','recall'),
+        'fpr_parity': ('False Positive Rate Parity', 'classification', 'difference', True, True, 'FPR Parity','balanced_acc'),
+        'tnr_parity': ('True Negative Rate Parity', 'classification', 'difference', True, True, 'TNR Parity','tnr'),
+        'fnr_parity': ('False Negative Rate Parity', 'classification', 'difference', True, True, 'FNR Parity','fnr'),
+        'ppv_parity': ('Positive Predictive Parity', 'classification', 'difference', True, True, 'PPV Parity','precision'),
+        'npv_parity': ('Negative Predictive Parity', 'classification', 'difference', True, True, 'NPV Parity','npv'),
+        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'difference', True, True, 'FDR Parity','recall'), 
+        'for_parity': ('False Omission Rate Parity', 'classification', 'difference', True, True, 'FOR Parity','balanced_acc'),
+        'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds','balanced_acc'),
+        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'difference', True, True, 'Neg Equal Odds','balanced_acc'),
+        'calibration_by_group': ('Calibration by Group', 'classification', 'difference', True, True, 'Cali By Group','balanced_acc'),
+        'auc_parity': ('AUC Parity', 'classification', 'difference', False, True, 'AUC Parity','roc_auc'),
+        'log_loss_parity': ('Log-loss Parity', 'classification', 'difference', False, True, 'Log-loss Parity','log_loss'),
+        'equal_opportunity_ratio': ('Equal Opportunity Ratio', 'classification', 'ratio', True, True, 'Equal Opp Ratio','recall'),
+        'fpr_ratio': ('False Positive Rate Ratio', 'classification', 'ratio', True, True, 'FPR Ratio','balanced_acc'),
+        'tnr_ratio': ('True Negative Rate Ratio', 'classification', 'ratio', True, True, 'TNR Ratio','tnr'),
+        'fnr_ratio': ('False Negative Rate Ratio', 'classification', 'ratio', True, True, 'FNR Ratio','fnr'),
+        'ppv_ratio': ('Positive Predictive Ratio', 'classification', 'ratio', True, True, 'PPV Ratio','precision'),
+        'npv_ratio': ('Negative Predictive Ratio', 'classification', 'ratio', True, True, 'NPV Ratio','npv'),
+        'fdr_ratio': ('False Discovery Rate Ratio', 'classification', 'ratio', True, True, 'FDR Ratio','recall'),
+        'for_ratio': ('False Omission Rate Ratio', 'classification', 'ratio', True, True, 'FOR Ratio','balanced_acc'),
+        'equal_odds_ratio': ('Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Equalized OR','balanced_acc'),
+        'neg_equal_odds_ratio': ('Negative Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Neg Equalized OR','balanced_acc'),
+        'calibration_by_group_ratio': ('Calibration by Group Ratio', 'classification', 'ratio', True, True, 'Cali By Group Ratio','balanced_acc'),
+        'auc_ratio': ('AUC Ratio', 'classification', 'ratio', False, True, 'AUC Ratio','roc_auc'),
+        'log_loss_ratio': ('Log-loss Ratio', 'classification', 'ratio', False, True, 'Log-loss Ratio','log_loss'),
+        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False, 'MI Independence',None),
+        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False, 'MI Separation',None),
+        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False, 'MI Sufficiency',None),
+        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'difference', False, True, 'RMSE Parity','rmse'),
+        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'MAPE Parity','mape'),
+        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'WAPE Parity','wape'),
+        'rmse_ratio': ('Root Mean Squared Error Ratio', 'regression', 'ratio', False, True, 'RMSE Ratio','rmse'),
+        'mape_ratio': ('Mean Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'MAPE Ratio','mape'),
+        'wape_ratio': ('Weighted Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'WAPE Ratio','wape'),
+        'rejected_harm': ('Harm from Rejection', 'uplift', 'difference', True, True, 'Rejected Harm','emp_lift'),
+        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'difference', False, True, 'Acquire Benefit','emp_lift')
     }
 
-    #to get cutomized metrics inherited from NewMetric class 
-    for metric in newmetric.NewMetric.__subclasses__() :
-        if metric.enable_flag ==True and metric.metric_type == "fair":
-            map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_parity_ratio, False, False)
+    map_indiv_fair_metric_to_group = {
+        'consistency_score': ('Consistency Score', 'classification'),
+    }
+
+    @staticmethod
+    def add_user_defined_metrics():
+        #to get cutomized metrics inherited from NewMetric class 
+        for metric in newmetric.NewMetric.__subclasses__() :
+            if metric.enable_flag == True and metric.metric_type == "fair":
+                FairnessMetrics.map_fair_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name,'balanced_acc')    
 
     def __init__(self, use_case_object):
         """
@@ -101,6 +126,9 @@ class FairnessMetrics:
             'rmse_parity': self._compute_rmse_parity,
             'mape_parity': self._compute_mape_parity,
             'wape_parity': self._compute_wape_parity,
+            'rmse_ratio': self._compute_rmse_ratio,
+            'mape_ratio': self._compute_mape_ratio,
+            'wape_ratio': self._compute_wape_ratio,
             'rejected_harm': self._compute_rejected_harm,
             'acquire_benefit': self._compute_benefit_from_acquiring
         }
@@ -121,16 +149,33 @@ class FairnessMetrics:
             'calibration_by_group': self._compute_calibration_by_group,
             'auc_parity': self._compute_auc_parity,
             'log_loss_parity': self._compute_log_loss_parity,
+            'equal_opportunity_ratio': self._compute_equal_opportunity_ratio,
+            'fpr_ratio': self._compute_fpr_ratio,
+            'tnr_ratio': self._compute_tnr_ratio,
+            'fnr_ratio': self._compute_fnr_ratio,
+            'ppv_ratio': self._compute_positive_predictive_ratio,
+            'npv_ratio': self._compute_negative_predictive_ratio,
+            'fdr_ratio': self._compute_false_discovery_rate_ratio,
+            'for_ratio': self._compute_false_omission_rate_ratio,
+            'equal_odds_ratio': self._compute_equalized_odds_ratio,
+            'neg_equal_odds_ratio': self._compute_negative_equalized_odds_ratio,
+            'calibration_by_group_ratio': self._compute_calibration_by_group_ratio,
+            'auc_ratio': self._compute_auc_ratio,
+            'log_loss_ratio': self._compute_log_loss_ratio,
             'mi_independence': self._compute_mi_independence, 
             'mi_separation': self._compute_mi_separation, 
             'mi_sufficiency': self._compute_mi_sufficiency, 
+        }
+
+        self.map_indiv_fair_metric_to_method = {
+            'consistency_score': self._consistency_score
         }
         
         #to get cutomized metrics inherited from NewMetric class
         for metric in NewMetric.__subclasses__() :
             if metric.enable_flag ==True and metric.metric_type == "fair":
                 self.map_fair_metric_to_method[metric.metric_name] =  metric.compute
-                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_parity_ratio, False, False)
+                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name)
                 if metric.metric_name not in use_case_object._use_case_metrics["fair"]:
                     use_case_object._use_case_metrics["fair"].append(metric.metric_name)
                     
@@ -182,13 +227,15 @@ class FairnessMetrics:
         for i in self.p_var[0]:
             self.result[i] = {}
             idx = self.feature_mask[i]
-            p_perc = sum(idx)/len(idx)
+            p_perc = sum(idx[idx!=-1])/len(idx[idx!=-1]) # removing rows which don't belong to priviledged or unpriviledged groups
             feature_dist = { "privileged_group":p_perc, "unprivileged_group":1 - p_perc }  
             self.result[i]["feature_distribution"] = feature_dist
             self.result[i]["fair_metric_values"] = {}
             for j in self._use_case_metrics['fair']:
                 if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
                     self.result[i]["fair_metric_values"][j] = [] 
+        
+        self.result["indiv_fair"] = {}
         
         #update progress bar by 10
         eval_pbar.update(10)
@@ -245,8 +292,12 @@ class FairnessMetrics:
                     if self.result[i]["fair_metric_values"][j][-1][0] is None :
                         self.result[i]["fair_metric_values"][j] = (None, None, None)
                     else:
-                        self.result[i]["fair_metric_values"][j] = self.result[i]['fair_metric_values'][j][-1] + (2*np.std([a_tuple[0] for a_tuple in self.result[i]["fair_metric_values"][j]]),)
+                        self.result[i]["fair_metric_values"][j] = self.result[i]['fair_metric_values'][j][-1] + (2*np.nanstd([a_tuple[0] for a_tuple in self.result[i]["fair_metric_values"][j]]),)
+        
+        FairnessMetrics._execute_all_indiv_fair_map(self)
         eval_pbar.update(6)
+
+        
 
     def _execute_all_fair_map(metric_obj, index, eval_pbar, worker_progress):
         """
@@ -278,7 +329,7 @@ class FairnessMetrics:
             metric_obj.sample_weight = [model.sample_weight[idx] if model.sample_weight is not None else None for model in metric_obj.use_case_object.model_params]
             metric_obj.e_lift = metric_obj.use_case_object.e_lift[idx] if metric_obj.use_case_object.e_lift is not None else None
             metric_obj.pred_outcome = {k: v[idx] for k, v in metric_obj.use_case_object.pred_outcome.items()} if metric_obj.use_case_object.pred_outcome is not None else {None}
-            metric_obj.feature_mask = {k: v[idx] for k, v in metric_obj.use_case_object.feature_mask.items()}
+            metric_obj.feature_mask = {k: v[idx] for k, v in metric_obj.use_case_object.feature_mask.items()}            
 
             metric_obj.y_trues.append(metric_obj.y_true)
             metric_obj.y_probs.append(metric_obj.y_prob)
@@ -295,8 +346,11 @@ class FairnessMetrics:
         metric_obj.y_trues = np.array(metric_obj.y_trues)
         metric_obj.y_probs = np.array(metric_obj.y_probs)
         metric_obj.y_preds = np.array(metric_obj.y_preds)
-        metric_obj.sample_weights = np.array(metric_obj.sample_weights)
-        
+        if all(v[0] is None for v in metric_obj.sample_weights):
+                metric_obj.sample_weights = None   
+        else:
+            metric_obj.sample_weights = np.array(metric_obj.sample_weights)
+                
         # Initialise entropy variables
         metric_obj.e_y_true = None
         metric_obj.e_y_pred = None
@@ -316,7 +370,6 @@ class FairnessMetrics:
 
             for feature_mask in metric_obj.feature_masks_list:
                 metric_obj.feature_masks[i].append((np.array(feature_mask[i])*1).reshape(1,1,-1)) #convert bool to int and reshape
-            
             metric_obj.feature_masks[i] = np.concatenate(metric_obj.feature_masks[i])
             
             metric_obj.tp_ps, metric_obj.fp_ps, metric_obj.tn_ps, metric_obj.fn_ps, metric_obj.tp_us, metric_obj.fp_us, metric_obj.tn_us, metric_obj.fn_us = \
@@ -331,6 +384,23 @@ class FairnessMetrics:
             for j in metric_obj._use_case_metrics['fair']:
                 if j in metric_obj.map_fair_metric_to_method_optimized.keys():
                     metric_obj.result[i]["fair_metric_values"][j] += metric_obj.map_fair_metric_to_method_optimized[j](obj=metric_obj)
+                    
+        return metric_obj.result
+
+    def _execute_all_indiv_fair_map(metric_obj):
+        """
+        Maps each thread's work for execute_all_indiv_fair()
+        Parameters
+        ----------
+        metric_obj : FairnessMetrics object
+        """
+
+        if len(metric_obj._use_case_metrics["indiv_fair"]) > 0:   
+            for j in metric_obj._use_case_metrics['indiv_fair']:
+                if j in metric_obj.map_indiv_fair_metric_to_method.keys():
+                    metric_obj.result["indiv_fair"][j] = metric_obj.map_indiv_fair_metric_to_method[j](obj=metric_obj)
+        else:            
+            metric_obj.result["indiv_fair"]='NA'
                     
         return metric_obj.result
 
@@ -380,11 +450,11 @@ class FairnessMetrics:
             )
             pr_p = (tp_p + fp_p) / (tp_p + fp_p + tn_p + fn_p)
             pr_u = (tp_u + fp_u) / (tp_u + fp_u + tn_u + fn_u)
-            return ((pr_p/pr_u)[0][0], pr_p[0][0])
+            return ((pr_u/pr_p)[0][0], pr_p[0][0])
         else:
             pr_p = (self.tp_ps + self.fp_ps) / (self.tp_ps + self.fp_ps + self.tn_ps + self.fn_ps)
             pr_u = (self.tp_us + self.fp_us) / (self.tp_us + self.fp_us + self.tn_us + self.fn_us)
-            return list(map(tuple, np.stack((pr_p/pr_u, pr_p), axis=1).reshape(-1, 2).tolist()))
+            return list(map(tuple, np.stack((pr_u/pr_p, pr_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_demographic_parity(self, **kwargs):
         """
@@ -415,7 +485,7 @@ class FairnessMetrics:
 
     def _compute_false_omission_rate_parity(self, **kwargs):
         """
-        Computes the difference in negative predictive values between the privileged and unprivileged groups
+        Computes the difference in false omission rate values between the privileged and unprivileged groups
 
         Returns
         ----------
@@ -438,6 +508,32 @@ class FairnessMetrics:
             for_p = self.fn_ps / (self.tn_ps + self.fn_ps)
             for_u = self.fn_us / (self.tn_us + self.fn_us)
             return list(map(tuple, np.stack((for_p - for_u, for_p), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_false_omission_rate_ratio(self, **kwargs):
+        """
+        Computes the ratio of false omission rate values between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_false_omission_rate_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            for_p = fn_p / (tn_p + fn_p)
+            for_u = fn_u / (tn_u + fn_u)
+            return ((for_u/for_p)[0][0], for_p[0][0])
+        else:
+            for_p = self.fn_ps / (self.tn_ps + self.fn_ps)
+            for_u = self.fn_us / (self.tn_us + self.fn_us)
+            return list(map(tuple, np.stack((for_u/for_p, for_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_false_discovery_rate_parity(self, **kwargs):
         """
@@ -465,6 +561,32 @@ class FairnessMetrics:
             fdr_u = self.fp_us / (self.tp_us + self.fp_us)
             return list(map(tuple, np.stack((fdr_p - fdr_u, fdr_p), axis=1).reshape(-1, 2).tolist()))
 
+    def _compute_false_discovery_rate_ratio(self, **kwargs):
+        """
+        Computes the ratio of false discovery rate values between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_false_discovery_rate_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            fdr_p = fp_p / (tp_p + fp_p)
+            fdr_u = fp_u / (tp_u + fp_u)
+            return ((fdr_u/fdr_p)[0][0], fdr_p[0][0])
+        else:
+            fdr_p = self.fp_ps / (self.tp_ps + self.fp_ps)
+            fdr_u = self.fp_us / (self.tp_us + self.fp_us)
+            return list(map(tuple, np.stack((fdr_u/fdr_p, fdr_p), axis=1).reshape(-1, 2).tolist()))
+
     def _compute_positive_predictive_parity(self, **kwargs):
         """
         Computes the difference in positive predictive values between the privileged and unprivileged groups
@@ -490,6 +612,32 @@ class FairnessMetrics:
             ppv_p = self.tp_ps / (self.tp_ps + self.fp_ps)
             ppv_u = self.tp_us / (self.tp_us + self.fp_us)
             return list(map(tuple, np.stack((ppv_p - ppv_u, ppv_p), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_positive_predictive_ratio(self, **kwargs):
+        """
+        Computes the ratio of positive predictive values between the privileged and unprivileged groups
+        
+        Returns
+        ----------
+        _compute_positive_predictive_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            ppv_p = tp_p / (tp_p + fp_p)
+            ppv_u = tp_u / (tp_u + fp_u)
+            return ((ppv_u/ppv_p)[0][0], ppv_p[0][0])
+        else:
+            ppv_p = self.tp_ps / (self.tp_ps + self.fp_ps)
+            ppv_u = self.tp_us / (self.tp_us + self.fp_us)
+            return list(map(tuple, np.stack((ppv_u/ppv_p, ppv_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_negative_predictive_parity(self, **kwargs):
         """
@@ -517,6 +665,32 @@ class FairnessMetrics:
             npv_u = self.tn_us / (self.tn_us + self.fn_us)
             return list(map(tuple, np.stack((npv_p - npv_u, npv_p), axis=1).reshape(-1, 2).tolist()))
 
+    def _compute_negative_predictive_ratio(self, **kwargs):
+        """
+        Computes the ratio of negative predictive values between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_negative_predictive_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            npv_p = tn_p / (tn_p + fn_p)
+            npv_u = tn_u / (tn_u + fn_u)
+            return ((npv_u/npv_p)[0][0], npv_p[0][0])
+        else:
+            npv_p = self.tn_ps / (self.tn_ps + self.fn_ps)
+            npv_u = self.tn_us / (self.tn_us + self.fn_us)
+            return list(map(tuple, np.stack((npv_u/npv_p, npv_p), axis=1).reshape(-1, 2).tolist()))
+
     def _compute_fnr_parity(self, **kwargs):
         """
         Computes the difference in false negative rates between the privileged and unprivileged groups
@@ -542,6 +716,32 @@ class FairnessMetrics:
             fnr_p = self.fn_ps / (self.tp_ps + self.fn_ps)
             fnr_u = self.fn_us / (self.tp_us + self.fn_us)
             return list(map(tuple, np.stack((fnr_p - fnr_u, fnr_p), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_fnr_ratio(self, **kwargs):
+        """
+        Computes the ratio of false negative rates between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_fnr_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            fnr_p = fn_p / (tp_p + fn_p)
+            fnr_u = fn_u / (tp_u + fn_u)
+            return ((fnr_u/fnr_p)[0][0], fnr_p[0][0])
+        else:
+            fnr_p = self.fn_ps / (self.tp_ps + self.fn_ps)
+            fnr_u = self.fn_us / (self.tp_us + self.fn_us)
+            return list(map(tuple, np.stack((fnr_u/fnr_p, fnr_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_fpr_parity(self, **kwargs): 
         """
@@ -569,9 +769,35 @@ class FairnessMetrics:
             fpr_u = self.fp_us / (self.tn_us + self.fp_us)
             return list(map(tuple, np.stack((fpr_p - fpr_u, fpr_p), axis=1).reshape(-1, 2).tolist()))
 
+    def _compute_fpr_ratio(self, **kwargs): 
+        """
+        Computes the ratio of false positive rates between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_fpr_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            fpr_p = fp_p / (tn_p + fp_p)
+            fpr_u = fp_u / (tn_u + fp_u)
+            return ((fpr_u/fpr_p)[0][0], fpr_p[0][0])
+        else:
+            fpr_p = self.fp_ps / (self.tn_ps + self.fp_ps)
+            fpr_u = self.fp_us / (self.tn_us + self.fp_us)
+            return list(map(tuple, np.stack((fpr_u/fpr_p, fpr_p), axis=1).reshape(-1, 2).tolist()))
+
     def _compute_tnr_parity(self, **kwargs):
         """
-        Computes the difference in false negative rates between the privileged and unprivileged groups
+        Computes the difference in true negative rates between the privileged and unprivileged groups
 
         Returns
         ----------
@@ -595,6 +821,32 @@ class FairnessMetrics:
             tnr_u = self.tn_us / (self.tn_us + self.fp_us)
             return list(map(tuple, np.stack((tnr_p - tnr_u, tnr_p), axis=1).reshape(-1, 2).tolist()))
 
+    def _compute_tnr_ratio(self, **kwargs):
+        """
+        Computes the ratio of true negative rates between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_tnr_ratio : list tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            tnr_p = tn_p / (tn_p + fp_p)
+            tnr_u = tn_u / (tn_u + fp_u)
+            return ((tnr_u/tnr_p)[0][0], tnr_p[0][0])
+        else:
+            tnr_p = self.tn_ps / (self.tn_ps + self.fp_ps)
+            tnr_u = self.tn_us / (self.tn_us + self.fp_us)
+            return list(map(tuple, np.stack((tnr_u/tnr_p, tnr_p), axis=1).reshape(-1, 2).tolist()))
+
     def _compute_equalized_odds(self, **kwargs):
         """
         Computes the equalized odds
@@ -617,13 +869,43 @@ class FairnessMetrics:
             tpr_u = tp_u / (tp_u + fn_u)
             fpr_p = fp_p / (fp_p + tn_p)
             fpr_u = fp_u / (fp_u + tn_u)
-            return ((((tpr_p - tpr_u) + (fpr_p - fpr_u))/2)[0][0], ((tpr_p + fpr_p)/2)[0][0])
+            return ((((tpr_p + fpr_p) - (tpr_u + fpr_u))/2)[0][0], ((tpr_p + fpr_p)/2)[0][0])
         else:
             tpr_p = self.tp_ps / (self.tp_ps + self.fn_ps)
             tpr_u = self.tp_us / (self.tp_us + self.fn_us)
             fpr_p = self.fp_ps / (self.fp_ps + self.tn_ps)
             fpr_u = self.fp_us / (self.fp_us + self.tn_us)
-            return list(map(tuple, np.stack((((tpr_p - tpr_u) + (fpr_p - fpr_u))/2, (tpr_p + fpr_p)/2), axis=1).reshape(-1, 2).tolist()))
+            return list(map(tuple, np.stack((((tpr_p + fpr_p) - (tpr_u + fpr_u))/2, (tpr_p + fpr_p)/2), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_equalized_odds_ratio(self, **kwargs):
+        """
+        Computes the equalized odds ratio
+        
+        Returns
+        ----------
+        _compute_equalized_odds_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            tpr_p = tp_p / (tp_p + fn_p)
+            tpr_u = tp_u / (tp_u + fn_u)
+            fpr_p = fp_p / (fp_p + tn_p)
+            fpr_u = fp_u / (fp_u + tn_u)
+            return ((((tpr_u + fpr_u) / (tpr_p + fpr_p))/2)[0][0], ((tpr_p + fpr_p)/2)[0][0])
+        else:
+            tpr_p = self.tp_ps / (self.tp_ps + self.fn_ps)
+            tpr_u = self.tp_us / (self.tp_us + self.fn_us)
+            fpr_p = self.fp_ps / (self.fp_ps + self.tn_ps)
+            fpr_u = self.fp_us / (self.fp_us + self.tn_us)
+            return list(map(tuple, np.stack((((tpr_u + fpr_u) / (tpr_p + fpr_p))/2, (tpr_p + fpr_p)/2), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_negative_equalized_odds(self, **kwargs):
         """
@@ -647,13 +929,43 @@ class FairnessMetrics:
             tnr_u = tn_u / (tn_u + fp_u)
             fnr_p = fn_p / (fn_p + tp_p)
             fnr_u = fn_u / (fn_u + tp_u)
-            return ((((tnr_p - tnr_u) + (fnr_p - fnr_u)) / 2)[0][0], ((tnr_p + fnr_p) / 2)[0][0])
+            return ((((tnr_p + fnr_p) - (tnr_u + fnr_u)) / 2)[0][0], ((tnr_p + fnr_p) / 2)[0][0])
         else:
             tnr_p = self.tn_ps / (self.tn_ps + self.fp_ps)
             tnr_u = self.tn_us / (self.tn_us + self.fp_us)
             fnr_p = self.fn_ps / (self.fn_ps + self.tp_ps)
             fnr_u = self.fn_us / (self.fn_us + self.tp_us)
-            return list(map(tuple, np.stack((((tnr_p - tnr_u) + (fnr_p - fnr_u)) / 2, (tnr_p + fnr_p) / 2), axis=1).reshape(-1, 2).tolist()))
+            return list(map(tuple, np.stack((((tnr_p + fnr_p) - (tnr_u + fnr_u)) / 2, (tnr_p + fnr_p) / 2), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_negative_equalized_odds_ratio(self, **kwargs):
+        """
+        Computes the negative equalized odds ratio
+
+        Returns
+        ----------
+        _compute_negative_equalized_odds_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            tnr_p = tn_p / (tn_p + fp_p)
+            tnr_u = tn_u / (tn_u + fp_u)
+            fnr_p = fn_p / (fn_p + tp_p)
+            fnr_u = fn_u / (fn_u + tp_u)
+            return ((((tnr_u + fnr_u) / (tnr_p + fnr_p)) / 2)[0][0], ((tnr_p + fnr_p) / 2)[0][0])
+        else:
+            tnr_p = self.tn_ps / (self.tn_ps + self.fp_ps)
+            tnr_u = self.tn_us / (self.tn_us + self.fp_us)
+            fnr_p = self.fn_ps / (self.fn_ps + self.tp_ps)
+            fnr_u = self.fn_us / (self.fn_us + self.tp_us)
+            return list(map(tuple, np.stack((((tnr_u + fnr_u) / (tnr_p + fnr_p)) / 2, (tnr_p + fnr_p) / 2), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_rmse_parity(self, **kwargs):
         """
@@ -670,9 +982,13 @@ class FairnessMetrics:
                 Fairness metric value and privileged group metric value
         """
         mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
 
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
         
@@ -686,6 +1002,41 @@ class FairnessMetrics:
         rmse_p = mean_squared_error(y_true=np.array(y_true)[mask], y_pred=np.array(y_pred)[mask], sample_weight=sample_weight_p) ** 0.5
         rmse_u = mean_squared_error(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask], sample_weight=sample_weight_u) ** 0.5
         return (rmse_p - rmse_u, rmse_p)
+
+    def _compute_rmse_ratio(self, **kwargs):
+        """
+        Computes the ratio of root mean squared error between the privileged and unprivileged groups
+
+        Other Parameters
+        ----------
+        y_pred_new : numpy.ndarray
+            Copy of predicted targets as returned by classifier.
+
+        Returns
+        ----------
+        _compute_rmse_ratio : tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
+        y_true = self.y_true[0]
+        y_pred = self.y_pred[0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
+        if 'y_pred_new' in kwargs:
+            y_pred=kwargs['y_pred_new'][0]
+        
+        if self.sample_weight[0] is not None: 
+            sample_weight_p = np.array(self.sample_weight[0])[mask]
+            sample_weight_u = np.array(self.sample_weight[0])[~mask]
+        else:
+            sample_weight_p = None
+            sample_weight_u = None
+        
+        rmse_p = mean_squared_error(y_true=np.array(y_true)[mask], y_pred=np.array(y_pred)[mask], sample_weight=sample_weight_p) ** 0.5
+        rmse_u = mean_squared_error(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask], sample_weight=sample_weight_u) ** 0.5
+        return (rmse_p/rmse_u, rmse_p)
 
     def _compute_mape_parity(self, **kwargs):
         """
@@ -702,9 +1053,12 @@ class FairnessMetrics:
                 Fairness metric value and privileged group metric value
         """
         mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
             
@@ -719,6 +1073,43 @@ class FairnessMetrics:
         mape_u = mean_absolute_percentage_error(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask], sample_weight=sample_weight_u)
 
         return (mape_p - mape_u, mape_p)
+
+    def _compute_mape_ratio(self, **kwargs):
+        """
+        Computes the ratio of mean average percentage error between the privileged and unprivileged groups
+
+        Other Parameters
+        ----------
+        y_pred_new : numpy.ndarray
+            Copy of predicted targets as returned by classifier.
+
+        Returns
+        ----------
+        _compute_mape_ratio : tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
+        y_true = self.y_true[0]
+        y_pred = self.y_pred[0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
+
+        if 'y_pred_new' in kwargs:
+            y_pred=kwargs['y_pred_new'][0]
+            
+        if self.sample_weight[0] is not None: 
+            sample_weight_p = np.array(self.sample_weight[0])[mask]
+            sample_weight_u = np.array(self.sample_weight[0])[~mask]
+        else:
+            sample_weight_p = None
+            sample_weight_u = None
+
+        mape_p = mean_absolute_percentage_error(y_true=np.array(y_true)[mask], y_pred=np.array(y_pred)[mask], sample_weight=sample_weight_p)
+        mape_u = mean_absolute_percentage_error(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask], sample_weight=sample_weight_u)
+
+        return (mape_p/mape_u, mape_p)
 
     def _compute_wape_parity(self, **kwargs):
         """
@@ -735,9 +1126,12 @@ class FairnessMetrics:
                 Fairness metric value and privileged group metric value
         """
         mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-    
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
     
@@ -745,6 +1139,35 @@ class FairnessMetrics:
         wape_u = np.sum(np.absolute(np.subtract(y_true[~mask], y_pred[~mask])))/ np.sum(y_true[~mask])
             
         return (wape_p - wape_u, wape_p)
+
+    def _compute_wape_ratio(self, **kwargs):
+        """
+        Computes the ratio of weighted average percentage error between the privileged and unprivileged groups
+    
+        Other Parameters
+        ----------
+        y_pred_new : numpy.ndarray
+            Copy of predicted targets as returned by classifier.
+    
+        Returns
+        ----------
+        _compute_wape_ratio : tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        mask = self.feature_mask[self.curr_p_var]
+        maskFilter = mask!=-1
+        mask= mask[maskFilter].astype(bool)
+        y_true = self.y_true[0]
+        y_pred = self.y_pred[0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
+        if 'y_pred_new' in kwargs:
+            y_pred=kwargs['y_pred_new'][0]
+    
+        wape_p = np.sum(np.absolute(np.subtract(y_true[mask], y_pred[mask])))/ np.sum(y_true[mask])
+        wape_u = np.sum(np.absolute(np.subtract(y_true[~mask], y_pred[~mask])))/ np.sum(y_true[~mask])
+            
+        return (wape_p/wape_u, wape_p)
 
     def _compute_log_loss_parity(self, **kwargs):
         """
@@ -755,25 +1178,72 @@ class FairnessMetrics:
         _compute_log_loss_parity : list of tuple of floats
                 Fairness metric value and privileged group metric value
         """
-        if 'y_pred_new' in kwargs:
+        if 'y_prob_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
+            maskFilter = mask!=1
             y_true = self.y_true[0]
-            y_prob=kwargs['y_pred_new'][0]
+            y_prob=kwargs['y_prob_new'][0]
             if self.sample_weight[0] is not None: 
-                sample_weight_p = np.array(self.sample_weight[0])[mask]
-                sample_weight_u = np.array(self.sample_weight[0])[~mask]
+                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
+                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
             else:
                 sample_weight_p = None
                 sample_weight_u = None   
-            log_loss_p = log_loss(y_true=np.array(y_true)[mask], y_pred=np.array(y_prob)[mask], sample_weight = sample_weight_p)
-            log_loss_u = log_loss(y_true=np.array(y_true)[~mask], y_pred=np.array(y_prob)[~mask], sample_weight = sample_weight_u)
+            log_loss_p = log_loss(y_true=np.ma.array(y_true, mask=maskFilter), y_pred=np.ma.array(y_prob, mask=maskFilter), sample_weight = sample_weight_p)
+            log_loss_u = log_loss(y_true=np.ma.array(y_true, mask=~maskFilter), y_pred=np.ma.array(y_prob, mask=~maskFilter), sample_weight = sample_weight_u)
             return (log_loss_p - log_loss_u, log_loss_p)
         else:
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()   
             mask = self.feature_masks[self.curr_p_var]
-            log_loss_score = -(self.y_trues*ma.log(self.y_probs) + (1-self.y_trues)*ma.log(1-self.y_probs))
-            log_loss_p = np.sum(log_loss_score*mask, 2)/np.sum(mask, 2)
-            log_loss_u = np.sum(log_loss_score*(1-mask), 2)/np.sum((1-mask), 2)
+            maskFilterNeg = mask==-1
+
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+            log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+            log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+            log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
             return list(map(tuple, np.stack((log_loss_p - log_loss_u, log_loss_p), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_log_loss_ratio(self, **kwargs):
+        """
+        Computes the ratio of logistic loss or cross entropy loss between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_log_loss_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_prob_new' in kwargs:
+            mask = self.feature_mask[self.curr_p_var]
+            maskFilter = mask!=1
+            y_true = self.y_true[0]
+            y_prob=kwargs['y_prob_new'][0]
+            if self.sample_weight[0] is not None: 
+                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
+                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
+            else:
+                sample_weight_p = None
+                sample_weight_u = None   
+            log_loss_p = log_loss(y_true=np.ma.array(y_true, mask=maskFilter), y_pred=np.ma.array(y_prob, mask=maskFilter), sample_weight = sample_weight_p)
+            log_loss_u = log_loss(y_true=np.ma.array(y_true, mask=~maskFilter), y_pred=np.ma.array(y_prob, mask=~maskFilter), sample_weight = sample_weight_u)
+            return (log_loss_u/log_loss_p, log_loss_p)
+        else:
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
+            mask = self.feature_masks[self.curr_p_var]
+            maskFilterNeg = mask==-1
+
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+            log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+            log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+            log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+            return list(map(tuple, np.stack((log_loss_u/log_loss_p, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_auc_parity(self, **kwargs):
         """
@@ -784,38 +1254,96 @@ class FairnessMetrics:
         _compute_auc_parity : list of tuple of floats
                 Fairness metric value and privileged group metric value
         """
-        if 'y_pred_new' in kwargs:
+        if 'y_prob_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
+            maskFilter = mask!=1
             y_true = self.y_true[0]
-            y_prob=kwargs['y_pred_new'][0]
+            y_prob=kwargs['y_prob_new'][0]
             if self.sample_weight[0] is not None: 
-                sample_weight_p = np.array(self.sample_weight[0])[mask]
-                sample_weight_u = np.array(self.sample_weight[0])[~mask]
+                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
+                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
             else:
                 sample_weight_p = None
                 sample_weight_u = None
-            roc_auc_score_p = roc_auc_score(y_true=np.array(y_true)[mask], y_score=np.array(y_prob)[mask], sample_weight=sample_weight_p)
-            roc_auc_score_u = roc_auc_score(y_true=np.array(y_true)[~mask], y_score=np.array(y_prob)[~mask], sample_weight=sample_weight_u)
+            roc_auc_score_p = roc_auc_score(y_true=np.ma.array(y_true, mask=maskFilter), y_score=np.ma.array(y_prob, mask=maskFilter), sample_weight=sample_weight_p)
+            roc_auc_score_u = roc_auc_score(y_true=np.ma.array(y_true, mask=~maskFilter), y_score=np.ma.array(y_prob, mask=~maskFilter), sample_weight=sample_weight_u)
             return (roc_auc_score_p - roc_auc_score_u, roc_auc_score_p)
         else:
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
             mask = self.feature_masks[self.curr_p_var]
+            maskFilterNeg = mask==-1
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
             idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-            y_probs = np.take_along_axis(self.y_probs, idx, axis=2)
-            y_trues = np.take_along_axis(self.y_trues, idx, axis=2)
-            mask = np.take_along_axis(mask, idx, axis=2)
+
+            y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+            #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+            mask = np.take_along_axis(mask_ma, idx, axis=2)
 
             TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
-            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
-            TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
-            FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
-            auc_p = np.trapz(TPR_p, FPR_p, axis=2)
-
+            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+            TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
+            FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
+            auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
             TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
             FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-            TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-            FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+            TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+            FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
             auc_u = np.trapz(TPR_u, FPR_u, axis=2)
             return list(map(tuple, np.stack((auc_p - auc_u, auc_p), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_auc_ratio(self, **kwargs):
+        """
+        Computes the ratio of area under roc curve between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_auc_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_prob_new' in kwargs:
+            mask = self.feature_mask[self.curr_p_var]
+            maskFilter = mask!=1
+            y_true = self.y_true[0]
+            y_prob=kwargs['y_prob_new'][0]
+            if self.sample_weight[0] is not None: 
+                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
+                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
+            else:
+                sample_weight_p = None
+                sample_weight_u = None
+            roc_auc_score_p = roc_auc_score(y_true=np.ma.array(y_true, mask=maskFilter), y_score=np.ma.array(y_prob, mask=maskFilter), sample_weight=sample_weight_p)
+            roc_auc_score_u = roc_auc_score(y_true=np.ma.array(y_true, mask=~maskFilter), y_score=np.ma.array(y_prob, mask=~maskFilter), sample_weight=sample_weight_u)
+            return (roc_auc_score_u/roc_auc_score_p, roc_auc_score_p)
+        else:
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
+            mask = self.feature_masks[self.curr_p_var]
+            maskFilterNeg = mask==-1
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+            idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+            y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+            #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+            mask = np.take_along_axis(mask_ma, idx, axis=2)
+
+            TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
+            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+            TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
+            FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
+            auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
+            TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+            FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+            TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+            FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+            auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+            return list(map(tuple, np.stack((auc_u/auc_p, auc_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_equal_opportunity(self, **kwargs):
         """
@@ -843,6 +1371,32 @@ class FairnessMetrics:
             tpr_u = self.tp_us / (self.tp_us + self.fn_us)
             return list(map(tuple, np.stack((tpr_p - tpr_u, tpr_p), axis=1).reshape(-1, 2).tolist()))
 
+    def _compute_equal_opportunity_ratio(self, **kwargs):
+        """
+        Computes the equal opportunity ratio
+
+        Returns
+        ----------
+        _compute_equal_opportunity_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            tpr_p = tp_p / (tp_p + fn_p)
+            tpr_u = tp_u / (tp_u + fn_u)
+            return ((tpr_u/tpr_p)[0][0], tpr_p[0][0])
+        else:
+            tpr_p = self.tp_ps / (self.tp_ps + self.fn_ps)
+            tpr_u = self.tp_us / (self.tp_us + self.fn_us)
+            return list(map(tuple, np.stack((tpr_u/tpr_p, tpr_p), axis=1).reshape(-1, 2).tolist()))
+
     def _compute_calibration_by_group(self, **kwargs):
         """
         Computes the calibration by group within protected variable
@@ -865,13 +1419,43 @@ class FairnessMetrics:
             ppv_u = tp_u / (tp_u + fp_u)
             for_p = fn_p / (tn_p + fn_p)
             for_u = fn_u / (tn_u + fn_u)
-            return ((((ppv_p - ppv_u) + (for_p - for_u)) / 2)[0][0], ((ppv_p - ppv_u) / 2)[0][0])
+            return ((((ppv_p + for_p) - (ppv_u + for_u)) / 2)[0][0], ((ppv_p + for_p) / 2)[0][0])
         else:
             ppv_p = self.tp_ps / (self.tp_ps + self.fp_ps)
             ppv_u = self.tp_us / (self.tp_us + self.fp_us)
             for_p = self.fn_ps / (self.tn_ps + self.fn_ps)
             for_u = self.fn_us / (self.tn_us + self.fn_us)  
-            return list(map(tuple, np.stack((((ppv_p - ppv_u) + (for_p - for_u)) / 2, (ppv_p - ppv_u) / 2), axis=1).reshape(-1, 2).tolist()))
+            return list(map(tuple, np.stack((((ppv_p + for_p) - (ppv_u + for_u)) / 2, (ppv_p + for_p) / 2), axis=1).reshape(-1, 2).tolist()))
+
+    def _compute_calibration_by_group_ratio(self, **kwargs):
+        """
+        Computes the calibration by group ratio within protected variable
+
+        Returns
+        ----------
+        _compute_calibration_by_group_ratio : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_pred_new' in kwargs:
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
+                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
+                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+                curr_p_var=self.curr_p_var, 
+                feature_mask=feature_mask,
+            )
+            ppv_p = tp_p / (tp_p + fp_p)
+            ppv_u = tp_u / (tp_u + fp_u)
+            for_p = fn_p / (tn_p + fn_p)
+            for_u = fn_u / (tn_u + fn_u)
+            return ((((ppv_u + for_u) / (ppv_p + for_p)) / 2)[0][0], ((ppv_p + for_p) / 2)[0][0])
+        else:
+            ppv_p = self.tp_ps / (self.tp_ps + self.fp_ps)
+            ppv_u = self.tp_us / (self.tp_us + self.fp_us)
+            for_p = self.fn_ps / (self.tn_ps + self.fn_ps)
+            for_u = self.fn_us / (self.tn_us + self.fn_us)
+            return list(map(tuple, np.stack((((ppv_u + for_u) / (ppv_p + for_p)) / 2, (ppv_p + for_p) / 2), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_mi_independence(self, **kwargs) :
         """
@@ -892,43 +1476,47 @@ class FairnessMetrics:
             mi_independence = (e_y_pred + e_curr_p_var - e_joint)/e_curr_p_var
             return (mi_independence, None)
     
-        else:
-            mask = self.feature_masks[self.curr_p_var]
-            if self.e_y_pred is None:
-                proportion_pred = [
-                    np.sum(self.y_preds, 2)/self.y_preds.shape[2],
-                    np.sum(1-self.y_preds, 2)/self.y_preds.shape[2],
-                ]
-                proportion_pred = np.stack(proportion_pred, axis=2)
-                e_y_pred = -np.sum(proportion_pred*ma.log(proportion_pred), axis=2) 
-                self.e_y_pred = e_y_pred    
-            else:
-                e_y_pred = self.e_y_pred
+        else:            
+            mask = self.feature_masks[self.curr_p_var]            
+            maskFilter = mask!=-1
+            
+            proportion_pred = [
+                np.sum(self.y_preds, 2, where=maskFilter),
+                np.sum(1-self.y_preds, 2, where=maskFilter ),
+            ]
+            
+            proportion_pred_denom = maskFilter.sum(axis=2)            
+            proportion_pred[0] = proportion_pred[0]/proportion_pred_denom
+            proportion_pred[1] = proportion_pred[1]/proportion_pred_denom            
+            proportion_pred = np.stack(proportion_pred, axis=2)
 
-            if self.e_curr_p_var is None:    
-                proportion_p_var = [
-                    np.sum(mask, 2)/mask.shape[2],
-                    np.sum(1-mask, 2)/mask.shape[2]
-                ]
-                proportion_p_var = np.stack(proportion_p_var, axis=2)
-                e_curr_p_var = -np.sum(proportion_p_var*ma.log(proportion_p_var), axis=2) 
-                self.e_curr_p_var = e_curr_p_var
-            else:
-                e_curr_p_var = self.e_curr_p_var
+            e_y_pred = -np.sum(proportion_pred*ma.log(proportion_pred), axis=2) 
+            self.e_y_pred = e_y_pred    
 
-            if self.e_joint is None:
-                proportion_join = []
-                cart_product = product([self.y_preds, 1-self.y_preds], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_joint = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_joint = e_joint
-            else:
-                e_joint = self.e_joint
+            proportion_p_var = [
+                np.sum(mask, 2, where=maskFilter),
+                np.sum(1-mask, 2, where=maskFilter)
+            ]
+
+            proportion_p_var_denom = maskFilter.sum(axis=2)
+            proportion_p_var[0]= proportion_p_var[0]/proportion_p_var_denom
+            proportion_p_var[1]= proportion_p_var[1]/proportion_p_var_denom
+
+            proportion_p_var = np.stack(proportion_p_var, axis=2)
+            e_curr_p_var = -np.sum(proportion_p_var*ma.log(proportion_p_var), axis=2) 
+            self.e_curr_p_var = e_curr_p_var
+
+            proportion_join = []
+            cart_product = product([self.y_preds, 1-self.y_preds], [mask, 1-mask])
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:
+                p = i[0]*i[1]
+                proportion_join.append(
+                    np.sum(p, 2, where=maskFilter)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_joint = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_joint = e_joint
 
             mi_independence = (e_y_pred + e_curr_p_var - e_joint)/e_curr_p_var
             mi_independence = mi_independence.reshape(-1).tolist()
@@ -947,7 +1535,7 @@ class FairnessMetrics:
         if 'y_pred_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
             y_pred=kwargs['y_pred_new'][0]
-            df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred, 'curr_p_var': mask})
+            df = pd.DataFrame({'y_true': self.y_true, 'y_pred': y_pred, 'curr_p_var': mask})
             e_y_true_curr_p_var = self._get_entropy(df,['y_true', 'curr_p_var'])
             e_y_pred_curr_p_var = self._get_entropy(df,['y_pred', 'curr_p_var'])
             e_y_true_y_pred_curr_p_var = self._get_entropy(df,['y_true', 'y_pred', 'curr_p_var'])
@@ -956,62 +1544,71 @@ class FairnessMetrics:
             mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
             return (mi_separation, None)   
         
-        else:
+        else:            
             mask = self.feature_masks[self.curr_p_var]
-            if self.e_y_true is None:
-                proportion_true = [
-                    np.sum(self.y_trues, 2)/self.y_trues.shape[2],
-                    np.sum(1-self.y_trues, 2)/self.y_trues.shape[2],
-                ]
-                proportion_true = np.stack(proportion_true, axis=2)
-                e_y_true = -np.sum(proportion_true*ma.log(proportion_true), axis=2) 
-                self.e_y_true = e_y_true    
-            else:
-                e_y_true = self.e_y_true
+            maskFilter = mask!=-1
+            maskFilterNeg = mask==-1
+            
+            proportion_true = [
+                np.sum(self.y_trues, 2, where=maskFilter),
+                np.sum(1-self.y_trues, 2, where=maskFilter)
+            ]
 
-            if self.e_y_true_curr_p_var is None:
-                proportion_join = []
-                cart_product = product([self.y_trues, 1-self.y_trues], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_true_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_true_curr_p_var = e_y_true_curr_p_var
-            else:
-                e_y_true_curr_p_var = self.e_y_true_curr_p_var
+            proportion_true_denom = maskFilter.sum(axis=2)
+            proportion_true[0] = proportion_true[0]/proportion_true_denom
+            proportion_true[1] = proportion_true[1]/proportion_true_denom
 
-            if self.e_y_pred_curr_p_var is None:
-                proportion_join = []
-                cart_product = product([self.y_preds, 1-self.y_preds], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_pred_curr_p_var = e_y_pred_curr_p_var
-            else:
-                e_y_pred_curr_p_var = self.e_y_pred_curr_p_var
+            proportion_true = np.stack(proportion_true, axis=2)
+            e_y_true = -np.sum(proportion_true*ma.log(proportion_true), axis=2) 
+            self.e_y_true = e_y_true    
+            
+            proportion_join = []
 
-            if self.e_y_true_y_pred_curr_p_var is None:
-                proportion_join = []
-                cart_product = product([self.y_trues, 1-self.y_trues], [self.y_preds, 1-self.y_preds], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]*i[2]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_true_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_true_y_pred_curr_p_var = e_y_true_y_pred_curr_p_var
-            else:
-                e_y_true_y_pred_curr_p_var = self.e_y_true_y_pred_curr_p_var
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg) 
+            cart_product = product([y_trues_ma, 1-y_trues_ma], [mask_ma, 1-mask_ma])
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:        
+                p = i[0]*i[1]                
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            
+            proportion_join = np.stack(proportion_join, axis=2)    
+            e_y_true_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_true_curr_p_var = e_y_true_curr_p_var            
+            proportion_join = []
 
-            e_curr_p_var_y_true_conditional = e_y_true_curr_p_var - e_y_true
+            y_preds_ma = np.ma.array(self.y_preds, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg) 
+            cart_product = product([y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
+
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:
+                p = i[0]*i[1]
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_pred_curr_p_var = e_y_pred_curr_p_var
+            
+            proportion_join = []
+
+            cart_product = product([y_trues_ma, 1-y_trues_ma], [y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
+
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:
+                p = i[0]*i[1]*i[2]
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_y_true_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_true_y_pred_curr_p_var = e_y_true_y_pred_curr_p_var
+            
+
+            e_curr_p_var_y_true_conditional = e_y_true_curr_p_var - e_y_true            
             mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
             mi_separation = mi_separation.reshape(-1).tolist()
 
@@ -1029,7 +1626,7 @@ class FairnessMetrics:
         if 'y_pred_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
             y_pred=kwargs['y_pred_new'][0]
-            df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred, 'curr_p_var': mask})
+            df = pd.DataFrame({'y_true': self.y_true, 'y_pred': y_pred, 'curr_p_var': mask})
             e_y_pred_curr_p_var = self._get_entropy(df,['y_pred', 'curr_p_var'])
             e_y_true_y_pred = self._get_entropy(df,['y_true', 'y_pred'])
             e_y_true_y_pred_curr_p_var = self._get_entropy(df,['y_true', 'y_pred', 'curr_p_var'])
@@ -1040,58 +1637,71 @@ class FairnessMetrics:
         
         else:
             mask = self.feature_masks[self.curr_p_var]
-            if self.e_y_pred is None:
-                proportion_pred = [
-                    np.sum(self.y_preds, 2)/self.y_preds.shape[2],
-                    np.sum(1-self.y_preds, 2)/self.y_preds.shape[2],
-                ]
-                proportion_pred = np.stack(proportion_pred, axis=2)
-                e_y_pred = -np.sum(proportion_pred*ma.log(proportion_pred), axis=2) 
-                self.e_y_pred = e_y_pred    
-            else:
-                e_y_pred = self.e_y_pred
+            maskFilter = mask!=-1
+            maskFilterNeg = mask==-1
+            
+            proportion_pred = [
+                np.sum(self.y_preds, 2, where=maskFilter),
+                np.sum(1-self.y_preds, 2, where=maskFilter ),
+            ]
+                        
+            proportion_pred_denom = maskFilter.sum(axis=2)
+            
+            
+            proportion_pred[0] = proportion_pred[0]/proportion_pred_denom
+            proportion_pred[1] = proportion_pred[1]/proportion_pred_denom
 
-            if self.e_y_true_y_pred is None:
-                proportion_join = []
-                cart_product = product([self.y_trues, 1-self.y_trues], [self.y_preds, 1-self.y_preds])
-                for i in cart_product:
-                    p = i[0]*i[1]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_true_y_pred = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_true_y_pred = e_y_true_y_pred
-            else:
-                e_y_true_y_pred = self.e_y_true_y_pred
+            proportion_pred = np.stack(proportion_pred, axis=2)
+            e_y_pred = -np.sum(proportion_pred*ma.log(proportion_pred), axis=2) 
+            self.e_y_pred = e_y_pred    
+            
+            proportion_join = []
 
-            if self.e_y_pred_curr_p_var is None:
-                proportion_join = []
-                cart_product = product([self.y_preds, 1-self.y_preds], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_pred_curr_p_var = e_y_pred_curr_p_var
-            else:
-                e_y_pred_curr_p_var = self.e_y_pred_curr_p_var
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            y_preds_ma = np.ma.array(self.y_preds, mask = maskFilterNeg)
+            cart_product = product([y_trues_ma, 1-y_trues_ma], [y_preds_ma, 1-y_preds_ma])
+            proportion_join_denom = maskFilter.sum(axis=2)
+            
+            for i in cart_product:
+                p = i[0]*i[1]
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_y_true_y_pred = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_true_y_pred = e_y_true_y_pred
 
-            if self.e_y_true_y_pred_curr_p_var is None:
-                proportion_join = []
-                cart_product = product([self.y_trues, 1-self.y_trues], [self.y_preds, 1-self.y_preds], [mask, 1-mask])
-                for i in cart_product:
-                    p = i[0]*i[1]*i[2]
-                    proportion_join.append(
-                        np.sum(p, 2)/p.shape[2]
-                    )    
-                proportion_join = np.stack(proportion_join, axis=2)
-                e_y_true_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-                self.e_y_true_y_pred_curr_p_var = e_y_true_y_pred_curr_p_var
-            else:
-                e_y_true_y_pred_curr_p_var = self.e_y_true_y_pred_curr_p_var
+
+            
+            proportion_join = []
+
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg) 
+            cart_product = product([y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
+            
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:
+                p = i[0]*i[1]
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_pred_curr_p_var = e_y_pred_curr_p_var
+            
+            
+            proportion_join = []
+            
+            cart_product = product([y_trues_ma, 1-y_trues_ma], [y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
+            proportion_join_denom = maskFilter.sum(axis=2)
+            for i in cart_product:
+                p = i[0]*i[1]*i[2]
+                proportion_join.append(
+                    np.sum(p, 2)/proportion_join_denom
+                )
+            proportion_join = np.stack(proportion_join, axis=2)
+            e_y_true_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_true_y_pred_curr_p_var = e_y_true_y_pred_curr_p_var
+            
 
             e_curr_p_var_y_pred_conditional = e_y_pred_curr_p_var - e_y_pred
             mi_sufficiency = (e_y_pred_curr_p_var + e_y_true_y_pred - e_y_true_y_pred_curr_p_var - e_y_pred)/e_curr_p_var_y_pred_conditional
@@ -1132,8 +1742,8 @@ class FairnessMetrics:
 
         Other Parameters
         ----------
-        y_pred_new : numpy.ndarray
-            Copy of predicted targets as returned by classifier.
+        y_prob_new : numpy.ndarray
+            Copy of predicted probabilities as returned by classifier.
 
         Returns
         ----------
@@ -1144,14 +1754,16 @@ class FairnessMetrics:
             selection_threshold = self.use_case_object.selection_threshold
 
         mask_list = self.feature_mask[self.curr_p_var]
+        mask_p = mask_list==1                
+        mask_up = mask_list==0
         e_lift =  self.e_lift
         pred_outcome = self.pred_outcome
         
         if pred_outcome is None or e_lift is None:
             return (None, None)
         
-        if 'y_pred_new' in kwargs:
-            y_prob=kwargs['y_pred_new']
+        if 'y_prob_new' in kwargs:
+            y_prob=kwargs['y_prob_new']
             e_lift = self.use_case_object._get_e_lift(y_pred_new=y_prob[1])
             pred_outcome = self.use_case_object._compute_pred_outcome(y_pred_new=y_prob)
 
@@ -1162,8 +1774,8 @@ class FairnessMetrics:
             reject_harm = sum(pRcT - pRcC) / len(bools)
             return reject_harm
 
-        rej_harm_p = _rej_harm(pred_outcome, selection_threshold, e_lift, mask_list)
-        rej_harm_u = _rej_harm(pred_outcome, selection_threshold, e_lift, ~mask_list)
+        rej_harm_p = _rej_harm(pred_outcome, selection_threshold, e_lift, mask_p)
+        rej_harm_u = _rej_harm(pred_outcome, selection_threshold, e_lift, mask_up)
 
         return ((rej_harm_p - rej_harm_u), rej_harm_p)
 
@@ -1179,8 +1791,8 @@ class FairnessMetrics:
 
         Other Parameters
         ----------
-        y_pred_new : numpy.ndarray
-                Copy of predicted targets as returned by classifier.
+        y_prob_new : numpy.ndarray
+                Copy of predicted probabilities as returned by classifier.
 
         Returns
         ----------
@@ -1191,14 +1803,16 @@ class FairnessMetrics:
             selection_threshold = self.use_case_object.selection_threshold
 
         mask_list = self.feature_mask[self.curr_p_var]
+        mask_p = mask_list==1                
+        mask_up = mask_list==0
         e_lift =  self.e_lift
         pred_outcome = self.pred_outcome
         
         if pred_outcome is None or e_lift is None:
             return (None, None)
         
-        if 'y_pred_new' in kwargs:
-            y_prob=kwargs['y_pred_new']
+        if 'y_prob_new' in kwargs:
+            y_prob=kwargs['y_prob_new']
             e_lift = self.use_case_object._get_e_lift(y_pred_new=y_prob[1])
             pred_outcome = self.use_case_object._compute_pred_outcome(y_pred_new=y_prob)
 
@@ -1210,7 +1824,63 @@ class FairnessMetrics:
             benefit_acq = sum(pRcT - pRcC) / len(bools)
             return benefit_acq
         
-        benefit_acq_p = _acq_benefit(pred_outcome, selection_threshold, e_lift, mask_list)
-        benefit_acq_u = _acq_benefit(pred_outcome, selection_threshold, e_lift, ~mask_list)
+        benefit_acq_p = _acq_benefit(pred_outcome, selection_threshold, e_lift, mask_p)
+        benefit_acq_u = _acq_benefit(pred_outcome, selection_threshold, e_lift, mask_up)
 
         return ((benefit_acq_p - benefit_acq_u), benefit_acq_p)
+
+    def _consistency_score(self,**kwargs):
+        """
+        Individual fairness metric that measures how similar the labels are for similar instances.
+        Computes the overall mean of the difference between an outcome of a sample and mean outcome of neigbours.  
+
+        Returns
+        ----------
+        _consistency_score : float
+                Individual fairness metric value 
+        """
+        
+        if (self.use_case_object.model_params[0].x_test is None) or (self.use_case_object.model_params[0].y_pred is None) :
+            return None
+        
+        x_test = self.prefit_processing(self.use_case_object.model_params[0].x_test)
+        n_neighbors=5
+        # learn a KNN on the features
+        nbrs = NearestNeighbors(n_neighbors=n_neighbors, algorithm='kd_tree',n_jobs=-1)
+        nbrs.fit(x_test)
+        indices = nbrs.kneighbors(x_test, return_distance=False)
+        # compute consistency score
+        consistency_score = 1 - abs(self.use_case_object.model_params[0].y_pred - self.use_case_object.model_params[0].y_pred[indices].mean(axis=1)).mean()
+        return consistency_score
+
+    def prefit_processing(self, df):
+        """
+        Preprocessing dataframes before fitting to a model (e.g. sklearn.neighbors.NearestNeighbors) .  
+        It consists of imputing missing values with most frequent strategy and converting categorical values to numerical.
+
+        Parameters
+        -----------
+        df : pd.DataFrame
+
+        Returns
+        ----------
+        df : pd.DataFrame
+                Processed DataFrame
+        """
+        # Find columns with missing values and impute them
+        for col in df.columns[df.isna().any()].tolist():
+            imp = SimpleImputer(missing_values=pd.NA, strategy='most_frequent')
+            col_dtype = df[col].dtype
+            if isinstance(col_dtype,pd.CategoricalDtype):
+                col_dtype = "category"
+
+            df[col] = imp.fit_transform(df[[col]])
+            df[col] = df[col].astype(col_dtype)
+
+        # Find columns containing categorical values and convert to numerical
+        for col in df.select_dtypes(include=["object_","category"]).columns:
+            ord_enc = OrdinalEncoder()
+            df[col] = ord_enc.fit_transform(df[[col]])
+
+        return df
+
