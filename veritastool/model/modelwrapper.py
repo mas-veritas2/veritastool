@@ -1,10 +1,12 @@
+import numpy as np
+import pandas as pd
 class ModelWrapper(object):
     """
     Abstract Base class to provide an interface that supports non-pythonic models.
     Serves as a template for users to define the model_object
     """
 
-    def __init__(self, model_obj = None, model_file = None, output_file = None):
+    def __init__(self, model_obj = None, model_file = None, output_file = None,classes=[]):
         """
         Instance attributes
         ----------
@@ -20,6 +22,7 @@ class ModelWrapper(object):
         self.model_obj = model_obj
         self.model_file = model_file
         self.output_file = output_file
+        self.classes_ = classes
 
     def fit(self, x_train, y_train):
         """
@@ -56,11 +59,62 @@ class ModelWrapper(object):
         import subprocess
         process = subprocess.Popen(pred_cmd.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
+        return pd.read_csv(output_file) // any preprocessing required has to be done too
 
         Parameters
         -----------
         x_test : pandas.DataFrame or str
                 Testing dataset where shape is (n_samples, n_features)
                 The string refers to the dataset path acceptable by the model (e.g. HDFS URI).
+        Returns
+        ----------
+        y_pred: list, np.ndarray or pd.Series
+                Predictions of model_obj on x_test                  
         """
         pass
+
+
+    def predict_proba(self, x):
+        """
+        This function is a template for user to specify a custom predict_proba() method
+        that uses the model saved in self.model_file to get probabilities on the given dataset.
+
+        Parameters
+        -----------
+        x : pandas.DataFrame or str
+                Testing dataset where shape is (n_samples, n_features)
+                The string refers to the dataset path acceptable by the model (e.g. HDFS URI).
+        Returns
+        ----------
+        y_prob: list, np.ndarray, pd.Series, pd.DataFrame
+                Prediction probabilities of model_obj on x_test    
+        """
+        pass
+
+    def check_fit_predict(self, model):
+        try:
+                model.fit(self.x_train_sample,self.y_train_sample)
+                print("Fit Success")
+
+        except Exception as error:
+                print("Error during fit ", error)
+                return 0
+        try:
+                model.predict(self.x_test_sample)
+                print("Predict success")
+                return 1
+        except Exception as error:
+                print("Error during predict ", error)
+                return 0
+
+    def sampling(self, x_train, y_train, x_test):
+
+        if classification_type == "regression":
+                self.xtrain_sample = x_train(100)
+                self.ytrain_sample = y_train(100)
+                self.xtest_sample = x_test(100)
+
+        else:
+                self.x_train_sample = x_train.groupby(y_train).head(50)
+                self.y_train_sample = np.array(pd.DataFrame(y_train).groupby(0).head(50)[0])
+                self.x_test_sample = x_test.groupby(y_true).head(50)

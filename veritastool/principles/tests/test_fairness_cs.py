@@ -3,7 +3,7 @@ from veritastool.model.model_container import ModelContainer
 from veritastool.fairness.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
 from veritastool.metrics.fairness_metrics import FairnessMetrics
-from veritastool.fairness.fairness import Fairness
+from veritastool.principles.fairness import Fairness
 # from veritastool.custom.LRwrapper import LRwrapper
 import numpy as np
 import pandas as pd
@@ -333,5 +333,3 @@ def test_fairness_tree():
     cre_sco_obj.fair_priority = 'harm'
     cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
     assert cre_sco_obj.fair_metric_name == 'fnr_parity'
-
-    
