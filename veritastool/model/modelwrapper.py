@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 class ModelWrapper(object):
     """
     Abstract Base class to provide an interface that supports non-pythonic models.
@@ -88,3 +90,31 @@ class ModelWrapper(object):
                 Prediction probabilities of model_obj on x_test    
         """
         pass
+
+    def check_fit_predict(self, model):
+        try:
+                model.fit(self.x_train_sample,self.y_train_sample)
+                print("Fit Success")
+
+        except Exception as error:
+                print("Error during fit ", error)
+                return 0
+        try:
+                model.predict(self.x_test_sample)
+                print("Predict success")
+                return 1
+        except Exception as error:
+                print("Error during predict ", error)
+                return 0
+
+    def sampling(self, x_train, y_train, x_test):
+
+        if classification_type == "regression":
+                self.xtrain_sample = x_train(100)
+                self.ytrain_sample = y_train(100)
+                self.xtest_sample = x_test(100)
+
+        else:
+                self.x_train_sample = x_train.groupby(y_train).head(50)
+                self.y_train_sample = np.array(pd.DataFrame(y_train).groupby(0).head(50)[0])
+                self.x_test_sample = x_test.groupby(y_true).head(50)

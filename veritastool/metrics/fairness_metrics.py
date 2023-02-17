@@ -222,6 +222,8 @@ class FairnessMetrics:
         self.feature_mask = self.use_case_object.feature_mask
         self.curr_p_var = None
         self.result = {}
+        
+        map_fair_metric_keys = set(list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()))
 
         #initialize result structure
         for i in self.p_var[0]:
@@ -232,7 +234,7 @@ class FairnessMetrics:
             self.result[i]["feature_distribution"] = feature_dist
             self.result[i]["fair_metric_values"] = {}
             for j in self._use_case_metrics['fair']:
-                if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                if j in map_fair_metric_keys:
                     self.result[i]["fair_metric_values"][j] = [] 
         
         self.result["indiv_fair"] = {}
@@ -276,7 +278,7 @@ class FairnessMetrics:
                     mp_result = thread.result()
                     for i in self.p_var[0]:
                         for j in self._use_case_metrics['fair']:
-                            if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                            if j in map_fair_metric_keys:
                                 self.result[i]["fair_metric_values"][j] += mp_result[i]["fair_metric_values"][j]
         else:   
             #if multithreading is not triggered, directly update the progress bar by 36
@@ -288,7 +290,7 @@ class FairnessMetrics:
         #generate the final fairness metrics values and their CI based on k times of computation
         for i in self.p_var[0]:
             for j in self._use_case_metrics['fair']:
-                if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                if j in map_fair_metric_keys:
                     if self.result[i]["fair_metric_values"][j][-1][0] is None :
                         self.result[i]["fair_metric_values"][j] = (None, None, None)
                     else:
