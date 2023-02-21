@@ -1,9 +1,11 @@
 import pickle
-from veritastool.model.model_container import ModelContainer
-from veritastool.fairness.credit_scoring import CreditScoring
-from veritastool.metrics.performance_metrics import PerformanceMetrics
-from veritastool.metrics.fairness_metrics import FairnessMetrics
-from veritastool.principles.fairness import Fairness
+import sys
+sys.path.append("C:\\Users\\charvi.mitish.somani\\OneDrive - Accenture\\MAS2\\innersource_repo\\veritas-toolkit")
+#from veritastool.model.model_container import ModelContainer
+#from veritastool.usecases.credit_scoring import CreditScoring
+#from veritastool.metrics.performance_metrics import PerformanceMetrics
+#from veritastool.metrics.fairness_metrics import FairnessMetrics
+#from veritastool.principles.fairness import Fairness
 from veritastool.model.modelwrapper import ModelWrapper
 import numpy as np
 import pandas as pd
@@ -131,7 +133,7 @@ from veritastool.util.errors import *
 def test_model_wrapper():
     #Load Credit Scoring Test Data
     #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritastool/resources/data/credit_score_dict.pickle"
+    file = "C:/Users/charvi.mitish.somani/OneDrive - Accenture/MAS2/innersource_repo/veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 

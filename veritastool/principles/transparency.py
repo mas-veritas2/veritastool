@@ -105,7 +105,7 @@ class Transparency:
         if(type(self.tran_max_sample) not in [int,float]):
             self.err.push('type_error', var_name="tran_max_sample", given=type(self.tran_max_sample), expected='int or float', function_name="_tran_check_input")
         elif((type(self.tran_max_sample)==float) and not(0<self.tran_max_sample<1)):
-            self.err.push('value_error', var_name="tran_max_sample", given=self.tran_max_sample, expected='Value between 0 and 1', function_name="_tran_check_input")
+            self.err.push('value_error', var_name="tran_max_sample", given=self.tran_max_sample, expected='Float value between 0 and 1', function_name="_tran_check_input")
         elif((type(self.tran_max_sample)==int) and not(1<=self.tran_max_sample<=self.model_params[0].x_train.shape[0])):
             self.err.push('value_error', var_name="tran_max_sample", given=self.tran_max_sample, expected='Value between range 1 - ' + str(self.model_params[0].x_train.shape[0]), function_name="_tran_check_input")
 
@@ -113,16 +113,17 @@ class Transparency:
         if(type(self.tran_pdp_feature)!=list):
             self.err.push('type_error', var_name="tran_pdp_feature", given=type(self.tran_pdp_feature), expected='list', function_name="_tran_check_input")
         else:
-            for i in self.tran_pdp_feature:
+            for i in self.tran_pdp_feature[:2]:
                 if(i not in self.model_params[0].x_train.columns):
                     self.err.push('value_error', var_name="tran_pdp_feature", given=i, expected='Feature value within available feature list', function_name="_tran_check_input")
 
     def _check_tran_pdp_target(self):
-        if(self.tran_pdp_target is not None):
-            if(type(self.tran_pdp_target) not in [str,int]): 
-                self.err.push('type_error', var_name="tran_pdp_target", given=type(self.tran_pdp_target), expected='str', function_name="_tran_check_input")
-            elif(self.tran_pdp_target not in self.model_params[0].model_object.classes_):
-                self.err.push('value_error', var_name="tran_pdp_target", given=self.tran_pdp_target, expected='Target value from model class labels - ' + str(self.model_params[0].model_object.classes_), function_name="_tran_check_input")
+        if(self.model_params[0].model_type!='regression'):
+            if(self.tran_pdp_target is not None) and len(self.model_params[0].model_object.classes_)>2:
+                if(type(self.tran_pdp_target) not in [str,int]): 
+                    self.err.push('type_error', var_name="tran_pdp_target", given=type(self.tran_pdp_target), expected='str/int', function_name="_tran_check_input")
+                elif(self.tran_pdp_target not in self.model_params[0].model_object.classes_):
+                    self.err.push('value_error', var_name="tran_pdp_target", given=self.tran_pdp_target, expected='Target value from model class labels - ' + str(self.model_params[0].model_object.classes_), function_name="_tran_check_input")
 
     def _check_tran_max_display(self):    
         if(type(self.tran_max_display)!=int):
@@ -278,12 +279,7 @@ class Transparency:
         class_index = "NA"
         if(n not in self.tran_results[model_num]['local_interpretability'].keys()):
             #creating class index and explanation scenarios based on the model type
-            if(self.model_params[model_num].model_type)!='regression':
-
-                if(len(self.model_params[model_num].model_object.classes_) == 0):
-                    self.err.push('value_error', var_name = self.model_params[model_num].model_object, given = "Estimator.classes_ is not available.", expected = "Please add classes from the wrapper.", function_name = "_local")
-                    self.err.pop()
-                    
+            if(self.model_params[model_num].model_type)!='regression':                
                 if(len(self.model_params[model_num].model_object.classes_)>2):  
                     class_index = list(self.model_params[model_num].model_object.classes_).index(np.array(self.model_params[model_num].y_train)[n-1])   
                     exp = Explanation(self.tran_shap_values[model_num][class_index], 
@@ -350,10 +346,7 @@ class Transparency:
         
         self.tran_pdp_feature_list[model_num]=final_pdp[:2]
         
-        if(self.model_params[model_num].model_type!='regression'): 
-            if(len(self.model_params[model_num].model_object.classes_) == 0):
-                self.err.push('value_error', var_name = self.model_params[model_num].model_object, given = "Estimator.classes_ is not available.", expected = "Please add classes from the wrapper.", function_name = "_compute_partial_dependence")
-                self.err.pop()        
+        if(self.model_params[model_num].model_type!='regression'):
             if(self.tran_pdp_target == None) and len(self.model_params[model_num].model_object.classes_)>2:
                 self.tran_pdp_target = self.model_params[model_num].pos_label[0]
                 
@@ -424,6 +417,7 @@ class Transparency:
         for feature in new_list:
             original = self.model_params[0].x_test[feature]
             transformed = np.array(original).copy()
+            np.random.seed(0)
             np.random.shuffle(transformed)
             self.model_params[0].x_test[feature] = transformed
             if (self.model_params[0].model_type == 'regression'):
@@ -459,7 +453,7 @@ class Transparency:
         
         self.permutation_importance = pd.concat([self.permutation_importance, pd.DataFrame({'features': new_list,'score': diff})])
         self.permutation_importance = self.permutation_importance.sort_values(by='score', ascending = False) 
-        perm_imp = self.permutation_importance 
+        perm_imp = self.permutation_importance.copy()
         perm_imp['score_relative'] = perm_imp['score']/perm_imp['score'].max()*100
         perm_imp = perm_imp[:self.tran_max_display]
         self.tran_results['permutation_score'] = perm_imp[['features','score_relative']].values.tolist()
@@ -474,7 +468,6 @@ class Transparency:
         eval_pbar.set_description('Permutation Importance Calculated')
         eval_pbar.update(100 - eval_pbar.n)
         eval_pbar.close()
-        self.tran_flag['perm_imp_flag']=True 
 
     def _plot(self,model_num=0):
         # creating grid for subplots
@@ -506,7 +499,7 @@ class Transparency:
             ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key), fontsize=12,fontweight='bold')
         ax3.imshow(pdp_plot1)
         ax4.imshow(pdp_plot2)   
-        if(self.model_params[0].model_type != 'base_regression') and (len(self.model_params[model_num].model_object.classes_)>2):
+        if(self.model_params[0].model_type != 'regression') and (len(self.model_params[model_num].model_object.classes_)>2):
             ax3.set_title("Partial Dependence Plot for " + str(self.tran_pdp_feature_list[model_num][0]) + "(class " + str(self.tran_pdp_target) + ")" ,fontsize=12,fontweight='bold')
             ax4.set_title("Partial Dependence Plot for " + str(self.tran_pdp_feature_list[model_num][1]) + "(class " + str(self.tran_pdp_target) + ")",fontsize=12,fontweight='bold')
         else: 
@@ -553,18 +546,25 @@ class Transparency:
         """
         if(model_num is None):
             model_num = len(self.model_params)-1
+        elif(type(model_num) != int):
+            self.err.push('type_error', var_name="model_num", given=type(model_num), expected='int', function_name="explain")
+            self.err.pop()
         elif(model_num not in range(1,len(self.model_params)+1)):
-            self.err.push('value_error', var_name = "model_num", given = model_num, expected = "one of the following: " + str(list(range(len(self.model_params)+1))[1:]), function_name = "explain")
+            self.err.push('value_error', var_name = "model_num", given = model_num, expected = "one of the following integers: " + str(list(range(len(self.model_params)+1))[1:]), function_name = "explain")
             self.err.pop()
         else:
             model_num = model_num-1
         
+        if(self.model_params[model_num].y_prob.any)==None:
+            print("Skipped: Transparency analysis skipped as y_prob is not defined")
+            return
+
         if type(local_index) == int:
             if local_index < 1 or local_index > self.model_params[0].x_train.shape[0]:
                 self.err.push('value_error', var_name = "local_index", given = local_index, expected = "An integer value within the index range 1-" + str(self.model_params[0].x_train.shape[0]), function_name = "explain")
                 self.err.pop()
         elif(local_index is not None):
-            self.err.push('value_error', var_name = "local_index", given = local_index, expected = "An integer value within the index range 1-" + str(self.model_params[0].x_train.shape[0]), function_name = "explain")
+            self.err.push('type_error', var_name = "local_index", given = type(local_index), expected = "An integer value within the index range 1-" + str(self.model_params[0].x_train.shape[0]), function_name = "explain")
             self.err.pop()
 
         if local_index is None:
@@ -662,7 +662,8 @@ class Transparency:
         for i in range(len(self.model_params)):
             if self.tran_flag[i]['total']==False:
                 self.explain(model_num=i+1,output= False)
-                print('{:40s}{:<10}'.format('Transparency analysis for model ' + str(i+1), 'done'))
+                if self.tran_flag[i]['total']==True:
+                    print('{:40s}{:<10}'.format('Transparency analysis for model ' + str(i+1), 'done'))
             else:
                 print('{:40s}{:<10}'.format('Transparency analysis for model ' + str(i+1), 'done'))
         tran_results = copy.deepcopy(self.tran_results)

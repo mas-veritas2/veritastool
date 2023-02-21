@@ -19,10 +19,10 @@ class CustomerMarketing(Fairness,Transparency):
 
     """
     _model_type_to_metric_lookup = {"uplift":("uplift", 4, 2),
-                                   "classification":("classification", 2, 1)}
+                                   "classification":("classification", 0, 1)}
     _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = True, perf_metric_name =  "expected_profit", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
+    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
         """
         Parameters
         ----------
@@ -117,10 +117,8 @@ class CustomerMarketing(Fairness,Transparency):
         # This captures the fair_metric input by the user
         self.fair_metric_input = fair_metric_name
         self.perf_metric_name = perf_metric_name
-       
         
         self.proportion_of_interpolation_fitting = proportion_of_interpolation_fitting
-
     
         self._input_validation_lookup["proportion_of_interpolation_fitting"] = [(float,), (Constants().proportion_of_interpolation_fitting_low), Constants().proportion_of_interpolation_fitting_high]
 
@@ -145,7 +143,11 @@ class CustomerMarketing(Fairness,Transparency):
         This function does not return any value. Instead, it raises an error when any of the checks from the Utility class fail.
         """
         #import error class
-        err = VeritasError()        
+        err = VeritasError()
+
+        #check fair_is_pos_label_fav specified correctly
+        if len(self.model_params) == 1 and self.fair_is_pos_label_fav is None:
+            err.push('value_error', var_name='fair_is_pos_label_fav', given=self.fair_is_pos_label_fav, expected='True/False', function_name='_check_input')       
 
         #check label values in model_params against the usecase's specified model_type info.
         self.check_label_data_for_model_type()
@@ -424,7 +426,10 @@ class CustomerMarketing(Fairness,Transparency):
         err_= []
         model_type = obj_in.model_type
 
-        if neg_label is not None and model_type == 'uplift':
+        if model_type != 'uplift':
+            return super()._check_label(y, pos_label, neg_label, obj_in, y_pred_flag)
+        
+        elif neg_label is not None and model_type == 'uplift':
             y_bin = y
             n=0
 
@@ -459,7 +464,7 @@ class CustomerMarketing(Fairness,Transparency):
                     err.push(err_[i][0], var_name_a=err_[i][1], some_string=err_[i][2], value=err_[i][3],
                             function_name="_check_label")
             pos_label2 = [['TR'],['CR']]
-            
+
         if y_bin.dtype.kind in ['i']:
             y_bin  = y_bin.astype(np.int8)
 

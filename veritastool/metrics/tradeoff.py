@@ -680,7 +680,7 @@ class TradeoffRate(object):
         """
         mask = self.feature_mask[self.curr_p_var]        
         maskFilterNeg = mask==-1
-        mask = np.ma.array(mask, mask = maskFilterNeg)
+        mask = np.ma.array(mask, mask = maskFilterNeg).astype(bool)
         y_true_a = self.y_true[1][mask]
         tr_p = np.array([sum(y_true_a[self.e_lift[mask]> th] =='TR') for th in self.th_a.ravel()])
         tn_p = np.array([sum(y_true_a[self.e_lift[mask]> th] =='TN') for th in self.th_a.ravel()])

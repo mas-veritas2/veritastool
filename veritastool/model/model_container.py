@@ -182,7 +182,7 @@ class ModelContainer(object):
             "sample_weight":   [(NoneType, list, np.ndarray), (0, np.inf)], 
             "model_name":      [(str,), None],
             "model_type":      [(str,), check_model_type],
-            "pos_label":       [(list,), check_y_label],
+            "pos_label":       [(NoneType,list,), check_y_label],
             "neg_label":       [(NoneType, list), check_y_label],
             "up_grp":  [(dict, NoneType,), check_p_grp],
             "predict_proba_op_name": [(str,), None],

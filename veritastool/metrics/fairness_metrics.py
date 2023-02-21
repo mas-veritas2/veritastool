@@ -10,6 +10,7 @@ from itertools import product
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import LabelBinarizer
 
 class FairnessMetrics:
     """
@@ -190,7 +191,7 @@ class FairnessMetrics:
         self._use_case_metrics  = None
         self.use_case_object = use_case_object
 
-    def execute_all_fair(self, n_threads, seed, eval_pbar):
+    def execute_all_fair(self, n_threads, seed, eval_pbar, disable=[]):
         """
         Computes every fairness metric named inside the include_metrics list together with its associated confidence interval (dictionary), the privileged group metric value & the neutral position.
 
@@ -222,7 +223,7 @@ class FairnessMetrics:
         self.feature_mask = self.use_case_object.feature_mask
         self.curr_p_var = None
         self.result = {}
-
+        map_fair_metric_keys = set(list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()))
         #initialize result structure
         for i in self.p_var[0]:
             self.result[i] = {}
@@ -232,7 +233,7 @@ class FairnessMetrics:
             self.result[i]["feature_distribution"] = feature_dist
             self.result[i]["fair_metric_values"] = {}
             for j in self._use_case_metrics['fair']:
-                if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                if j in map_fair_metric_keys:
                     self.result[i]["fair_metric_values"][j] = [] 
         
         self.result["indiv_fair"] = {}
@@ -276,7 +277,7 @@ class FairnessMetrics:
                     mp_result = thread.result()
                     for i in self.p_var[0]:
                         for j in self._use_case_metrics['fair']:
-                            if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                            if j in map_fair_metric_keys:
                                 self.result[i]["fair_metric_values"][j] += mp_result[i]["fair_metric_values"][j]
         else:   
             #if multithreading is not triggered, directly update the progress bar by 36
@@ -288,13 +289,16 @@ class FairnessMetrics:
         #generate the final fairness metrics values and their CI based on k times of computation
         for i in self.p_var[0]:
             for j in self._use_case_metrics['fair']:
-                if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                if j in map_fair_metric_keys:
                     if self.result[i]["fair_metric_values"][j][-1][0] is None :
                         self.result[i]["fair_metric_values"][j] = (None, None, None)
                     else:
                         self.result[i]["fair_metric_values"][j] = self.result[i]['fair_metric_values'][j][-1] + (2*np.nanstd([a_tuple[0] for a_tuple in self.result[i]["fair_metric_values"][j]]),)
         
-        FairnessMetrics._execute_all_indiv_fair_map(self)
+        if 'individual_fair' not in disable:
+            FairnessMetrics._execute_all_indiv_fair_map(self)
+        else:
+            self.result["indiv_fair"] = None
         eval_pbar.update(6)
 
         
@@ -372,13 +376,63 @@ class FairnessMetrics:
                 metric_obj.feature_masks[i].append((np.array(feature_mask[i])*1).reshape(1,1,-1)) #convert bool to int and reshape
             metric_obj.feature_masks[i] = np.concatenate(metric_obj.feature_masks[i])
             
-            metric_obj.tp_ps, metric_obj.fp_ps, metric_obj.tn_ps, metric_obj.fn_ps, metric_obj.tp_us, metric_obj.fp_us, metric_obj.tn_us, metric_obj.fn_us = \
-                metric_obj.use_case_object._get_confusion_matrix_optimized(
-                        metric_obj.y_trues,
-                        metric_obj.y_preds, 
+            if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+
+                y_onehot_true = []
+                y_onehot_pred = []
+                for y_true_sample,y_pred_sample in zip(metric_obj.y_trues,metric_obj.y_preds):
+
+                        label_binarizer = LabelBinarizer().fit(y_true_sample[0])
+                        y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
+                        y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
+                                
+                y_onehot_true = np.array(y_onehot_true)
+                y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_true = y_onehot_true
+                y_onehot_pred = np.array(y_onehot_pred)        
+                y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_pred = y_onehot_pred
+                
+                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_ #label_binarizer.classes_
+                metric_obj.tp_ps = 0 
+                metric_obj.fp_ps = 0 
+                metric_obj.tn_ps = 0
+                metric_obj.fn_ps = 0
+                metric_obj.tp_us = 0 
+                metric_obj.fp_us = 0 
+                metric_obj.tn_us = 0
+                metric_obj.fn_us = 0
+
+                for idx,_ in enumerate(metric_obj.ohe_classes_):
+                    y_trues = y_onehot_true[:,:,:,idx]
+                    y_preds = y_onehot_pred[:,:,:,idx]
+                
+                    tp_ps, fp_ps, tn_ps, fn_ps, tp_us, fp_us, tn_us, fn_us  =  metric_obj.use_case_object._get_confusion_matrix_optimized(
+                        y_trues,
+                        y_preds, 
                         metric_obj.sample_weights,
                         i, 
                         metric_obj.feature_masks
+                    ) 
+
+                    metric_obj.tp_ps += tp_ps
+                    metric_obj.fp_ps += fp_ps
+                    metric_obj.tn_ps += tn_ps
+                    metric_obj.fn_ps += fn_ps
+                    metric_obj.tp_us += tp_us
+                    metric_obj.fp_us += fp_us
+                    metric_obj.tn_us += tn_us
+                    metric_obj.tp_us += tp_us
+
+            else:
+                
+                metric_obj.tp_ps, metric_obj.fp_ps, metric_obj.tn_ps, metric_obj.fn_ps, metric_obj.tp_us, metric_obj.fp_us, metric_obj.tn_us, metric_obj.fn_us = \
+                    metric_obj.use_case_object._get_confusion_matrix_optimized(
+                            metric_obj.y_trues,
+                            metric_obj.y_preds, 
+                            metric_obj.sample_weights,
+                            i, 
+                            metric_obj.feature_masks
                     ) 
 
             for j in metric_obj._use_case_metrics['fair']:
@@ -394,13 +448,16 @@ class FairnessMetrics:
         ----------
         metric_obj : FairnessMetrics object
         """
+        
+        if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+            metric_obj.result["indiv_fair"]=None
 
-        if len(metric_obj._use_case_metrics["indiv_fair"]) > 0:   
+        elif len(metric_obj._use_case_metrics["indiv_fair"]) > 0:   
             for j in metric_obj._use_case_metrics['indiv_fair']:
                 if j in metric_obj.map_indiv_fair_metric_to_method.keys():
                     metric_obj.result["indiv_fair"][j] = metric_obj.map_indiv_fair_metric_to_method[j](obj=metric_obj)
         else:            
-            metric_obj.result["indiv_fair"]='NA'
+            metric_obj.result["indiv_fair"]=None
                     
         return metric_obj.result
 
@@ -1198,13 +1255,36 @@ class FairnessMetrics:
             mask = self.feature_masks[self.curr_p_var]
             maskFilterNeg = mask==-1
 
-            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                    
+                    y_probs = self.y_probs[:,:,:,index]                    
+                    y_trues = self.y_onehot_true[:,:,:,index]
+                                        
+                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
+                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
+                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
-            log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-            log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+                    log_loss_score_class = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+
+                    if index == 0:                        
+                        log_loss_score = log_loss_score_class
+                    else:
+                        log_loss_score += log_loss_score_class 
+                                        
+                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+
+            else:
+                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+                log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+
             return list(map(tuple, np.stack((log_loss_p - log_loss_u, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_log_loss_ratio(self, **kwargs):
@@ -1236,13 +1316,38 @@ class FairnessMetrics:
             mask = self.feature_masks[self.curr_p_var]
             maskFilterNeg = mask==-1
 
-            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                    
+                    y_probs = self.y_probs[:,:,:,index]                    
+                    y_trues = self.y_onehot_true[:,:,:,index]
+                                        
+                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
+                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
+                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
-            log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-            log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+                    log_loss_score_class = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+
+                    if index == 0:                        
+                        log_loss_score = log_loss_score_class
+                    else:
+                        log_loss_score += log_loss_score_class 
+                        
+                
+                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+
+            else:
+
+                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+                log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+
             return list(map(tuple, np.stack((log_loss_u/log_loss_p, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_auc_parity(self, **kwargs):
@@ -1273,26 +1378,71 @@ class FairnessMetrics:
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
             mask = self.feature_masks[self.curr_p_var]
             maskFilterNeg = mask==-1
-            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                                        
+                    y_probs = self.y_probs[:,:,:,index]                    
+                    y_trues = self.y_onehot_true[:,:,:,index]
+                    
+                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
+                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
+                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-            #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
-            mask = np.take_along_axis(mask_ma, idx, axis=2)
+                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                    
+                    y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+                    #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+                    mask = np.take_along_axis(mask_ma, idx, axis=2)
 
-            TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
-            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
-            TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
-            FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
-            auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-            TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-            FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-            TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-            FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
-            auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+                    tpr_class_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
+                    fpr_class_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
+                    
+                    
+                    tpr_class_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                    fpr_class_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                                        
+                    TPR_p = tpr_class_p if index == 0 else np.append(TPR_p,tpr_class_p,axis=2)
+                    FPR_p = fpr_class_p if index == 0 else np.append(FPR_p,fpr_class_p,axis=2)
+                    TPR_u = tpr_class_u if index == 0 else np.append(TPR_u,tpr_class_u,axis=2)
+                    FPR_u = fpr_class_u if index == 0 else np.append(FPR_u,fpr_class_u,axis=2)
+
+                TPR_p = np.sort(TPR_p)
+                FPR_p = np.sort(FPR_p)
+                TPR_u = np.sort(TPR_u)
+                FPR_u = np.sort(FPR_u)
+
+                TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
+                FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
+                TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+                FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
+            else: 
+                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+                y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+                #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+                mask = np.take_along_axis(mask_ma, idx, axis=2)
+
+                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
+                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+                TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
+                FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
+                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+                FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
             return list(map(tuple, np.stack((auc_p - auc_u, auc_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_auc_ratio(self, **kwargs):
@@ -1323,26 +1473,71 @@ class FairnessMetrics:
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
             mask = self.feature_masks[self.curr_p_var]
             maskFilterNeg = mask==-1
-            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-            y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                                        
+                    y_probs = self.y_probs[:,:,:,index]                    
+                    y_trues = self.y_onehot_true[:,:,:,index]
+                    
+                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
+                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
+                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-            y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-            #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
-            mask = np.take_along_axis(mask_ma, idx, axis=2)
+                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                    
+                    y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+                    #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+                    mask = np.take_along_axis(mask_ma, idx, axis=2)
 
-            TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
-            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
-            TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
-            FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
-            auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-            TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-            FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-            TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-            FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
-            auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+                    tpr_class_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
+                    fpr_class_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
+                    
+                    
+                    tpr_class_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                    fpr_class_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                    
+                    TPR_p = tpr_class_p if index == 0 else np.append(TPR_p,tpr_class_p,axis=2)
+                    FPR_p = fpr_class_p if index == 0 else np.append(FPR_p,fpr_class_p,axis=2)
+                    TPR_u = tpr_class_u if index == 0 else np.append(TPR_u,tpr_class_u,axis=2)
+                    FPR_u = fpr_class_u if index == 0 else np.append(FPR_u,fpr_class_u,axis=2)
+
+                TPR_p = np.sort(TPR_p)
+                FPR_p = np.sort(FPR_p)
+                TPR_u = np.sort(TPR_u)
+                FPR_u = np.sort(FPR_u)
+
+                TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
+                FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
+                TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+                FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
+            else: 
+                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+                y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
+                #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+                mask = np.take_along_axis(mask_ma, idx, axis=2)
+
+                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
+                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+                TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
+                FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
+                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+                FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
             return list(map(tuple, np.stack((auc_u/auc_p, auc_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_equal_opportunity(self, **kwargs):
@@ -1476,7 +1671,9 @@ class FairnessMetrics:
             mi_independence = (e_y_pred + e_curr_p_var - e_joint)/e_curr_p_var
             return (mi_independence, None)
     
-        else:            
+        else:   
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()       
             mask = self.feature_masks[self.curr_p_var]            
             maskFilter = mask!=-1
             
@@ -1545,6 +1742,8 @@ class FairnessMetrics:
             return (mi_separation, None)   
         
         else:            
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()    
             mask = self.feature_masks[self.curr_p_var]
             maskFilter = mask!=-1
             maskFilterNeg = mask==-1
@@ -1636,6 +1835,8 @@ class FairnessMetrics:
             return (mi_sufficiency, None)
         
         else:
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()    
             mask = self.feature_masks[self.curr_p_var]
             maskFilter = mask!=-1
             maskFilterNeg = mask==-1

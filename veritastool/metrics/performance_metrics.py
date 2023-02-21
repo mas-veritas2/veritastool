@@ -6,6 +6,7 @@ from numpy import ma
 from .newmetric import *
 from ..config.constants import Constants
 import concurrent.futures
+from sklearn.preprocessing import LabelBinarizer
 
 class PerformanceMetrics:
     """
@@ -134,7 +135,7 @@ class PerformanceMetrics:
         self.label_size = None
         self.use_case_object = use_case_object
 
-    def execute_all_perf(self, n_threads, seed, eval_pbar):
+    def execute_all_perf(self, n_threads, seed, eval_pbar, disable=[]):
         """
         Computes the following:
                 - every performance metric named inside the include_metrics list together with its associated confidence interval (dictionary)
@@ -220,8 +221,8 @@ class PerformanceMetrics:
         self.label_size = self.use_case_object._model_type_to_metric_lookup[self.use_case_object.model_params[0].model_type][1]
         self.result["class_distribution"] = self._get_class_distribution(self.y_true[-1], self.use_case_object.model_params[-1].pos_label2)
         self.result['weighted_confusion_matrix'] = { "tp":self.tp_s[0][0], "fp": self.fp_s[0][0], "tn": self.tn_s[0][0], "fn": self.fn_s[0][0] }
-        self.result["calibration_curve"] = self._calibration_func(self.y_true[0], self.y_prob[0], n_bins=10)
-        self.result["perf_dynamic"] = self._performance_dynamics()
+        self.result["calibration_curve"] = self._calibration_func(self.y_true[0], self.y_prob[0], n_bins=10) if 'calibration_curve' not in disable else None
+        self.result["perf_dynamic"] = self._performance_dynamics() if 'perf_dynamic' not in disable else None
         eval_pbar.update(6)
 
     def _execute_all_perf_map(metric_obj, index, eval_pbar, worker_progress):
@@ -271,12 +272,54 @@ class PerformanceMetrics:
         else:
             metric_obj.sample_weights = np.array(metric_obj.sample_weights)
         
-        metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = \
-            metric_obj.use_case_object._get_confusion_matrix_optimized(
-                    metric_obj.y_trues,
-                    metric_obj.y_preds, 
-                    metric_obj.sample_weights
-                ) 
+        if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+
+                y_onehot_true = []
+                y_onehot_pred = []
+                for y_true_sample,y_pred_sample in zip(metric_obj.y_trues,metric_obj.y_preds):
+
+                        label_binarizer = LabelBinarizer().fit(y_true_sample[0])
+                        y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
+                        y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
+                                                
+                y_onehot_true = np.array(y_onehot_true)
+                y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_true = y_onehot_true
+                y_onehot_pred = np.array(y_onehot_pred)        
+                y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_pred = y_onehot_pred
+                
+                metric_obj.tp_s = 0 
+                metric_obj.fp_s = 0 
+                metric_obj.tn_s = 0
+                metric_obj.fn_s = 0
+                
+                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_
+                
+                for idx,_ in enumerate(metric_obj.ohe_classes_):
+                    y_trues = y_onehot_true[:,:,:,idx]
+                    y_preds = y_onehot_pred[:,:,:,idx]
+
+                    
+
+                    tp_s, fp_s, tn_s, fn_s =  metric_obj.use_case_object._get_confusion_matrix_optimized(
+                        y_trues,
+                        y_preds, 
+                        metric_obj.sample_weights
+                    ) 
+
+                    metric_obj.tp_s += tp_s
+                    metric_obj.fp_s += fp_s
+                    metric_obj.tn_s += tn_s
+                    metric_obj.fn_s += fn_s
+        else:
+
+            metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = \
+                metric_obj.use_case_object._get_confusion_matrix_optimized(
+                        metric_obj.y_trues,
+                        metric_obj.y_preds, 
+                        metric_obj.sample_weights
+                    ) 
 
         for j in metric_obj._use_case_metrics['perf']:
             if j in metric_obj.map_perf_metric_to_method_optimized.keys():
@@ -821,13 +864,39 @@ class PerformanceMetrics:
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
-            idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-            y_probs = np.take_along_axis(self.y_probs, idx, axis=2)
-            y_trues = np.take_along_axis(self.y_trues, idx, axis=2)
-            TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)
-            FPR = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
-            TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
-            FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+            
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                    
+                    y_probs = self.y_probs[:,:,:,index]                    
+                    y_trues = self.y_onehot_true[:,:,:,index]                    
+                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+                    y_probs = np.take_along_axis(y_probs, idx, axis=2)
+                    y_trues = np.take_along_axis(y_trues, idx, axis=2)
+
+                    tpr_class = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)                    
+                    fpr_class = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
+
+                    TPR = tpr_class if index == 0 else np.append(TPR,tpr_class,axis=2)
+                    FPR = fpr_class if index == 0 else np.append(FPR,fpr_class,axis=2)
+                                        
+                TPR = np.sort(TPR)                
+                FPR = np.sort(FPR)                
+                TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
+                FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+
+            else:
+                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                y_probs = np.take_along_axis(self.y_probs, idx, axis=2)
+                
+                y_trues = np.take_along_axis(self.y_trues, idx, axis=2)
+                TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)
+                FPR = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
+                TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
+                FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+
             roc_auc = np.trapz(TPR, FPR, axis=2)
             return roc_auc.reshape(-1).tolist()
 
@@ -857,8 +926,18 @@ class PerformanceMetrics:
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
-            log_loss_score = -(self.y_trues*ma.log(self.y_probs) + (1-self.y_trues)*ma.log(1-self.y_probs))
-            log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
+
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                
+                for index,_ in enumerate(self.ohe_classes_):
+                    y_probs = self.y_probs[:,:,:,index]
+                    y_trues = self.y_onehot_true[:,:,:,index]
+                    log_loss_score_class = -(y_trues*ma.log(y_probs) + (1-y_trues)*ma.log(1-y_probs))                    
+                    log_loss_score = log_loss_score_class if index == 0 else np.append(log_loss_score, log_loss_score_class, axis=2) 
+                log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
+            else:
+                log_loss_score = -(self.y_trues*ma.log(self.y_probs) + (1-self.y_trues)*ma.log(1-self.y_probs))
+                log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
             return log_loss_score.reshape(-1).tolist()
 
     def _performance_dynamics(self):
@@ -874,6 +953,8 @@ class PerformanceMetrics:
         if self.y_prob[0] is None or metric_group == 'regression':
             return None
         else:
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:                
+                return None
             d = {}
             d['perf_metric_name'] = []
             d['threshold'] = []
@@ -951,6 +1032,11 @@ class PerformanceMetrics:
         if y_prob is None or self.label_size > 2 or metric_group == 'regression':
             calibration_curve_bin = None
         else:
+
+            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                calibration_curve_bin = None
+                return calibration_curve_bin
+
             prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins = n_bins)
             score = brier_score_loss(y_true=y_true, y_prob=y_prob)
 

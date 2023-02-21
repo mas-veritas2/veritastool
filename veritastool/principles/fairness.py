@@ -130,6 +130,9 @@ class Fairness:
 
         corr_df : pandas.DataFrame
                 The correlation matrix computed using Phi_K correlation coefficient.
+
+        corr_top_3_features : list, default = []
+                Contains the unique top 3 features with the highest correlation coefficients for each protected variable, excluding surrogate features.
         
         surrogate_features : dict
                 Contains surrogate features above correlation threshold for each protected variable.
@@ -156,6 +159,9 @@ class Fairness:
         tran_artifact : dict, default = None
                 A dictionary containing the output results from the `_tran_compile` method, which includes the artifact from transparency `explain` method.
 
+        evaluate_disable : list, default = []
+                A list of functions (as string) that user wants to disable during evaluate. By default, no function is disabled.
+        
         compile_disable : list, default = []
                 A list of functions (as string) that user wants to disable during the compilation process. By default, no function is disabled.
 
@@ -194,6 +200,7 @@ class Fairness:
         self.rootcause_sample_size = None
         self.sigma = None
         self.corr_df = None
+        self.corr_top_3_features = []
         self.surrogate_features = {}
         self.mitigate_result = {}
         self.mitigate_p_var = []
@@ -202,6 +209,7 @@ class Fairness:
         self.rw_is_transform = False
         self.cr_is_transform = False
         self.tran_artifact = None
+        self.evaluate_disable = []
         self.compile_disable = []
         self.err = VeritasError()
         #For adding user defined new metrics 
@@ -216,15 +224,22 @@ class Fairness:
         self.is_upgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
         
         self._model_type_input()
+        auto_fair_metric_name = True if self.fair_metric_name == 'auto' else False
         self._select_fairness_metric_name()
         self.check_perf_metric_name()
         self.check_fair_metric_name()
 
         self._use_case_metrics = {}
         use_case_fair_metrics = []
+        check_fair_metrics = []
         for i,j in FairnessMetrics.map_fair_metric_to_group.items():
-            if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0] and (j[2] == self.fair_metric_type or j[2] == 'information'):
-                use_case_fair_metrics.append(i)
+            check_fair_metrics.append(i)
+            if self.fair_metric_name != "auto":
+                if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0] and (j[2] == FairnessMetrics.map_fair_metric_to_group.get(self.fair_metric_name)[2] or j[2] == 'information'):
+                    use_case_fair_metrics.append(i)
+            else:
+                if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0] and (j[2] == self.fair_metric_type or j[2] == 'information'):
+                    use_case_fair_metrics.append(i)
         self._use_case_metrics["fair"] = use_case_fair_metrics
 
         use_case_perf_metrics = []
@@ -245,11 +260,15 @@ class Fairness:
             "fair_concern": [(str,), ["eligible", "inclusive", "both"]],
             "fair_priority": [(str,), ["benefit", "harm"]],
             "fair_impact": [(str,), ["normal", "significant", "selective"]],
-            "fair_metric_type": [(str,), ["difference", "ratio"]],
             "perf_metric_name": [(str,), self._use_case_metrics["perf"]],
-            "fair_metric_name": [(str,), self._use_case_metrics["fair"]],
+            "fair_metric_name": [(str,), check_fair_metrics],
             "model_params":[(list,), None],
             "fairness_metric_value_input":[(dict,), None]}
+        
+        if auto_fair_metric_name:
+            self._input_validation_lookup["fair_metric_type"] = [(str,), ["difference", "ratio"]]
+        else:
+            self.fair_metric_type = None
 
         self.k = Constants().k
         self.array_size = Constants().perf_dynamics_array_size
@@ -515,7 +534,7 @@ class Fairness:
                 else:
                     self.is_pgrp_abv_min_size[p_var_key] = False
     
-    def evaluate(self, visualize=False, output=True, n_threads=1, seed=None):
+    def evaluate(self, visualize=False, output=True, n_threads=1, seed=None, disable=[]):
         """
         Computes the percentage count of subgroups, performance, and fairness metrics together with their confidence intervals, calibration score & fairness metric self.fair_conclusion for all protected variables.
         If visualize = True, output will be overwritten to False (will not be shown) and run fairness_widget() from Fairness.
@@ -538,6 +557,25 @@ class Fairness:
         ----------
         _fairness_widget() or _print_evaluate()
         """
+        exp_disable = ['perf_dynamic', 'calibration_curve', 'individual_fair']
+        self.evaluate_disable = [] if disable is None else disable
+
+        _input_parameter_lookup = {
+            "disable": [disable, (list,), exp_disable]
+        }
+
+        # Filter the input parameters to only include valid values
+        filtered_params = input_parameter_filtering(_input_parameter_lookup)
+
+        # Update the variables with the values in the filtered_params dictionary
+        disable = filtered_params.get('disable')
+
+        # Update the _input_parameter_lookup dictionary with the updated values
+        _input_parameter_lookup["disable"][0] = self.compile_disable
+
+        # Validate the data types and values of the input parameters
+        input_parameter_validation(_input_parameter_lookup)
+
         #check if evaluate hasn't run, only run if haven't
         if self.evaluate_status == 0:
             #to show progress bar
@@ -679,7 +717,7 @@ class Fairness:
         #to initialize PerformanceMetrics and exceute all the perf metrics at one go
         if self.perf_metric_obj is None:
             self.perf_metric_obj = PerformanceMetrics(self)
-        self.perf_metric_obj.execute_all_perf(n_threads=n_threads, seed = seed, eval_pbar=eval_pbar)
+        self.perf_metric_obj.execute_all_perf(n_threads=n_threads, seed = seed, eval_pbar=eval_pbar, disable=self.evaluate_disable)
         #bring status bar to full after all perf metrics have been ran
         eval_pbar.update(1)
         #if calibration_curve function has been run, then set status to True        
@@ -715,13 +753,13 @@ class Fairness:
         """
         #to initialize FairnessMetrics and exceute all the fair metrics at one go
         self.fair_metric_obj = FairnessMetrics(self)
-        self.fair_metric_obj.execute_all_fair(n_threads=n_threads, seed = seed, eval_pbar=eval_pbar)
+        self.fair_metric_obj.execute_all_fair(n_threads=n_threads, seed = seed, eval_pbar=eval_pbar, disable=self.evaluate_disable)
         #bring status bar to full after all fair metrics have been ran
         eval_pbar.update(1)
         for i in self.model_params[0].p_var:
             for j in self._use_case_metrics['fair']:
                 #if user provides fair metric value input value for each protected variable
-                if self.fairness_metric_value_input is not None :
+                if self.fairness_metric_value_input:
                     if i in self.fairness_metric_value_input.keys(): 
                         if j in self.fairness_metric_value_input[i].keys(): 
                             self.fair_metric_obj.result[i]["fair_metric_values"][j]= (self.fairness_metric_value_input[i][j], self.fair_metric_obj.result[i]["fair_metric_values"][j][1], self.fair_metric_obj.result[i]["fair_metric_values"][j][2] )
@@ -907,7 +945,7 @@ class Fairness:
         if output and self.tradeoff_status == 1:
             self._print_tradeoff()
 
-    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7):
+    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7, disable=[]):
         """
         Trains models using the leave-one-variable-out method for each protected variable and computes the performance and fairness metrics each time to assess the impact of those variables.
         If output = True, run the _print_feature_importance() function.
@@ -935,11 +973,23 @@ class Fairness:
 
         self._print_feature_importance()
         """
+        if self.correlation_threshold is not None and self.correlation_threshold != correlation_threshold:
+            self.feature_imp_status_corr = False
         self.correlation_threshold = correlation_threshold
 
         _input_parameter_lookup = {
             "correlation_threshold": [self.correlation_threshold, (float, int), (Constants().correlation_threshold_low, Constants().correlation_threshold_high)],
+            "disable": [disable, (list,), ['correlation']]
         }
+
+        # Filter the input parameters to only include valid values
+        filtered_params = input_parameter_filtering(_input_parameter_lookup)
+
+        # Update the variables with the values in the filtered_params dictionary
+        disable = filtered_params.get('disable')
+
+        # Update the _input_parameter_lookup dictionary with the updated values
+        _input_parameter_lookup["disable"][0] = self.compile_disable
 
         # Validate the data types and values of the input parameters
         input_parameter_validation(_input_parameter_lookup)
@@ -1020,16 +1070,7 @@ class Fairness:
                             for removed_pvar, values in thread.result().items():
                                 for pvar, v in values.items():
                                     self.feature_imp_values[pvar][removed_pvar] = v
-
-            #if data_prep_flag is False, run transparency _data_prep() first
-            if not self.tran_flag[0]['data_prep_flag']:  
-                self._data_prep(model_num=0)
-                fimp_pbar.update(1)
-            #if feature_imp_status_corr for corr_model_num hasn't run
-            if self.feature_imp_status_corr == False:
-                self._compute_correlation()
-                fimp_pbar.update(1)
-                                    
+            
             #change flag after feature_importance has finished running
             self.feature_imp_status_loo = True
             self.feature_imp_status = 1
@@ -1042,6 +1083,26 @@ class Fairness:
         if output == True:
             self._print_feature_importance()
 
+        # check if correlation analysis hasn't run or correlation threshold changed, only run if haven't
+        if self.feature_imp_status_corr == False and 'correlation' not in disable:
+            with tqdm(total=100, desc='Correlation analysis ', bar_format='{l_bar}{bar}') as corr_pbar:
+                corr_pbar.update(30)
+                #if data_prep_flag is False, run transparency _data_prep() first
+                if not self.tran_flag[0]['data_prep_flag']:  
+                    corr_pbar.set_description('Running data preparation')
+                    self._data_prep(model_num=0)
+                    corr_pbar.update(30)
+
+                #run correlation analysis
+                corr_pbar.set_description('Correlation analysis')
+                corr_pbar.update(30)
+                self._compute_correlation()
+                corr_pbar.update(100 - corr_pbar.n)
+                corr_pbar.close()
+
+        #if feature_importance has already ran once, just print result
+        if output == True:
+            self._print_correlation_analysis()
 
     def _feature_imp_loo(p_variable, use_case_object, fimp_pbar, worker_progress, model_object):
         """
@@ -1214,32 +1275,49 @@ class Fairness:
                 self.feature_imp_status_corr = False
                 return
                 
-            #extract n_features from transparency if x_test features > 20 else extract all features
+            # Extract n_features from transparency if x_test features > 20 else extract all features
             feature_cols = np.array(self.tran_top_features[0][:20]) if self.model_params[0].x_test.shape[1] > 20 else np.array(self.model_params[0].x_test.columns)
             p_var_cols = np.array(self.model_params[0].non_intersect_pvars)
             feature_cols = [col for col in feature_cols if col not in p_var_cols]
-            #feature_columns value from x_test
+            # Feature_columns value from x_test
             feature_columns = self.model_params[0].x_test[feature_cols]
-            #p_var_columns value from protected_features_cols
+            # p_var_columns value from protected_features_cols
             p_var_columns = self.model_params[0].x_test[p_var_cols]
-            #create final columns and apply corr()
+            # Create final columns and apply corr()
             df = pd.concat([feature_columns, p_var_columns], axis=1)
             interval_cols = df.select_dtypes(include=[np.number]).columns.tolist()
             self.corr_df = df.phik_matrix(interval_cols=interval_cols, bins=self.correlation_bins)
             self.correlation_output = {"feature_names":self.corr_df.columns.values, "corr_values":self.corr_df.values}
             self.feature_imp_status_corr = True
 
-            #set result structure for surrogate_features
+            # Initialise result structure for surrogate_features
             for i in p_var_columns:
                 self.surrogate_features[i] = {}
 
-            #identify any surrogate feature for each p_var if above specified correlation threshold
+            # Identify any surrogate feature for each p_var if above specified correlation threshold
             for i in p_var_columns:
                 self.surrogate_features[i] = {
                     corr_index: (cor_val,)
                     for corr_index, cor_val in self.corr_df[i].iteritems()
                     if corr_index not in p_var_columns and cor_val > self.correlation_threshold
                 }
+
+            # Create set of surrogate features
+            surrogate_set = set()
+            for p_var, i in self.surrogate_features.items():
+                surrogate_set |= set(i.keys())
+
+            # Identify top 3 features with highest correlation coefficient below threshold
+            corr_df_filtered = self.corr_df.abs()
+            top_3_features = {p_var: [] for p_var in p_var_columns}
+            for i in p_var_columns:
+                corr_row = corr_df_filtered.loc[:, i]
+                corr_row = corr_row.drop(labels=surrogate_set, axis=0)
+                top_3 = corr_row.sort_values(ascending=False).iloc[:3]
+                top_3_features[i] = list(top_3.index)
+
+            # Concatenate for all protected variables and get unique features
+            self.corr_top_3_features = list(set(sum(top_3_features.values(), [])))
 
         except:
             self.feature_imp_status_corr = False
@@ -1297,11 +1375,20 @@ class Fairness:
         if PerformanceMetrics.map_perf_metric_to_group.get(self.perf_metric_name)[1] != "regression":
             print("Class Distribution")
     
-            if self.model_params[0].model_type != "uplift":
-                print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "pos_label",
-                                                                self.perf_metric_obj.result.get("class_distribution").get("pos_label") * 100, decimal_pts=self.decimals))
-                print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "neg_label",
-                                                                self.perf_metric_obj.result.get("class_distribution").get("neg_label") * 100, decimal_pts=self.decimals))
+            if self.model_params[0].model_type != "uplift": 
+
+                if self.perf_metric_obj.result.get("class_distribution").get("pos_label") is not None:
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "pos_label",
+                                                                    self.perf_metric_obj.result.get("class_distribution").get("pos_label") * 100, decimal_pts=self.decimals))
+                else: 
+                    print("{0:<45s}{1:>29}".format("\t" + "pos_label",str(self.perf_metric_obj.result.get("class_distribution").get("pos_label")) ))
+
+                if self.perf_metric_obj.result.get("class_distribution").get("neg_label") is not None:
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "neg_label",
+                                                                    self.perf_metric_obj.result.get("class_distribution").get("neg_label") * 100, decimal_pts=self.decimals))
+                else: 
+                    print("{0:<45s}{1:>29}".format("\t" + "neg_label",str(self.perf_metric_obj.result.get("class_distribution").get("neg_label")) ))
+                
             else: 
                 print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "CN",
                                                                 self.perf_metric_obj.result.get("class_distribution").get("CN") * 100, decimal_pts=self.decimals))
@@ -1368,7 +1455,7 @@ class Fairness:
 
             print("{0:<45s}{1:>30s}".format(m, v))
 
-        if self.fair_metric_obj.result.get("indiv_fair") == 'NA':
+        if self.fair_metric_obj.result.get("indiv_fair") is None:
             pass
         else:
             print("\n")
@@ -1519,18 +1606,33 @@ class Fairness:
                 print("-" * 124)
             print()
 
-        if self.feature_imp_status_corr == False:
-            print("Correlation matrix skipped")
-        else:
-            for i in self.surrogate_features.keys():
-                if self.surrogate_features[i] != {}:
-                    surrogate_list = [key for key in self.surrogate_features[i].keys()]
-                    print()
-                    print("Correlation matrix for {}: ".format(i))
-                    display(self.corr_df.loc[[i] + surrogate_list, [i] + surrogate_list])
-                    print("*Surrogate detected for {}: {}".format(i, ', '.join(str(x) for x in surrogate_list)))
-                    print()
+        sys.stdout.flush()
 
+    def _print_correlation_analysis(self):
+        """
+        Formats the results of correlation analysis in feature_importance() method before printing to console.
+        """
+        if not self.feature_imp_status_corr:
+            print("Correlation matrix skipped")
+            return
+        
+        surrogate_list = []
+        for p_var, surrogates in self.surrogate_features.items():
+            if surrogates:
+                surrogate_list.extend(surrogates.keys())
+        
+        display_cols = list(self.surrogate_features.keys()) + surrogate_list + self.corr_top_3_features
+        display_df = self.corr_df.loc[display_cols, display_cols]
+        
+        print("\nPartial correlation matrix (Most correlated features for {}):".format(", ".join(self.surrogate_features.keys())))
+        display(display_df)
+        if surrogate_list:
+            for p_var, surrogates in self.surrogate_features.items():
+                if surrogates:
+                    print("* Surrogate detected for {}: {}".format(p_var, ', '.join(str(x) for x in surrogates.keys())))
+        else:
+            print("* No surrogate detected based on correlation analysis.")
+            
         sys.stdout.flush()
 
     def mitigate(self, p_var=[], method=['reweigh'], cr_alpha=1, cr_beta=None, rw_weights=None, transform_x=None, transform_y=None, model_num=0):
@@ -1609,11 +1711,7 @@ class Fairness:
         mitigate_result = {}
         # Initialize tqdm progress bar
         with tqdm(total=100, desc='Bias mitigation ', bar_format='{l_bar}{bar}') as mi_pbar:
-            # check tradeoff_status, if False, run self.tradeoff()
-            if self.tradeoff_status == 0:
-                self.tradeoff(output=False)
-                mi_pbar.update(10)
-
+            
             # If p_var is not specified, use all protected variables
             self.mitigate_p_var = self.model_params[model_num].non_intersect_pvars if not p_var else p_var
 
@@ -1637,6 +1735,11 @@ class Fairness:
                     mitigate_result[i] = self.map_mitigate_to_method[i](self.mitigate_p_var, rw_weights, transform_x, transform_y, model_num)
                     mi_pbar.update(10)
                 else:
+                    if i =='threshold':
+                        # check tradeoff_status, if False, run self.tradeoff()
+                        if self.tradeoff_status == 0:
+                            self.tradeoff(output=False)
+                            mi_pbar.update(10)
                     mitigate_result[i]= self.map_mitigate_to_method[i](self.mitigate_p_var)
                     mi_pbar.update(10)
 
@@ -2119,8 +2222,19 @@ class Fairness:
             for pvar in p_var:
                 dic_h = {}
                 dic_h["fair_threshold"] = self.fair_conclusion.get(pvar).get("threshold") 
-                dic_h["privileged"] = self.model_params[0].p_grp[pvar]
-                dic_h["unprivileged"] = self.model_params[0].up_grp[pvar]
+
+                p_grp_val = self.model_params[0].p_grp[pvar]
+                up_grp_val = self.model_params[0].up_grp[pvar]
+
+                def process_pgrp_upgrp_value(val):
+                    if isinstance(val[0], list) and isinstance(val[0][0], str):
+                        return [[int(v) if v.isdigit() else v for v in item.split("_")] for item in val[0]]
+                    else:
+                        return val
+                    
+                dic_h["privileged"] = process_pgrp_upgrp_value(p_grp_val)
+                dic_h["unprivileged"] = process_pgrp_upgrp_value(up_grp_val)
+                
                 dic_t = {}
                 dic_t["fairness_conclusion"] = self.fair_conclusion.get(pvar).get("fairness_conclusion")
                 dic_t["tradeoff"] = None
@@ -2502,7 +2616,7 @@ class Fairness:
                 plot_tab = widgets.HBox([plot_output, tab])
                 dashboard = widgets.VBox([top_display, plot_tab])
                 display(dashboard)
-                if self.fair_metric_type == 'ratio': 
+                if FairnessMetrics.map_fair_metric_to_group.get(self.fair_metric_name)[2] == 'ratio': 
                     print("Note: The threshold and the values of ratio-based metrics are shifted down by 1.")
             else:
                 print("The widget is only available on Jupyter notebook")
@@ -2519,13 +2633,11 @@ class Fairness:
         feature_mask : dict of list
                 Stores the mask array for every protected variable applied on the x_test dataset.
         """
-        all_unique_labels = self.model_params[0].check_p_grp
         feature_mask = {}
         for i in self.model_params[0].p_var:
             prot_var_df = self.model_params[0].protected_features_cols[i]            
             privileged_grp = self.model_params[0].p_grp.get(i)[0] #as p_grp is a list containing a list            
-            unprivileged_grp = self.model_params[0].up_grp.get(i)[0]
-            leftout_labels = list(set(all_unique_labels[i]) - set(privileged_grp+unprivileged_grp))            
+            unprivileged_grp = self.model_params[0].up_grp.get(i)[0]           
             feature_mask[i] = np.empty(len(prot_var_df))
             feature_mask[i]= -1
             feature_mask[i] = np.where(prot_var_df.isin(privileged_grp), True, -1)
@@ -2934,7 +3046,7 @@ class Fairness:
         """ 
         nan_array = np.array([np.nan]*y_true.shape[0]).reshape(-1,1)
         
-        if sample_weight is None:
+        if sample_weight is None or None in sample_weight:
             sample_weight = np.ones(y_true.shape)        
         if self._model_type_to_metric_lookup[self.model_params[0].model_type][0] == "classification" :
 
@@ -3020,7 +3132,7 @@ class Fairness:
             label_size = self._model_type_to_metric_lookup.get(mdl.model_type)[1]
             
             #If neg_label not specified deduce from pos_label
-            if mdl.neg_label is None:                
+            if mdl.pos_label is not None and mdl.neg_label is None:                
                 neg_labels = list(mdl.y_true_labels - set(mdl.pos_label)) 
             else:
                 neg_labels = mdl.neg_label                                                                  
@@ -3234,9 +3346,6 @@ class Fairness:
         
         pos_label2 = [[1]]
         y_bin = y_bin.astype(np.int8)
-            
-        if y_bin.dtype.kind in ['i']:
-            y_bin  = y_bin.astype(np.int8)
 
         err.pop()
 

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 from ..principles import Fairness, Transparency
 from ..metrics.fairness_metrics import FairnessMetrics
@@ -101,15 +102,24 @@ class BaseClassification(Fairness, Transparency):
      
         self.e_lift = None
         self.pred_outcome = None
+        self.multiclass_flag = False
 
-        if not BaseClassification._model_data_processing_flag:
-            self._model_data_processing()
-            BaseClassification._model_data_processing_flag = True
+        if not BaseClassification._model_data_processing_flag:            
+            if self.model_params[0].model_object.classes_ is not None and len(self.model_params[0].model_object.classes_)>2 and self.model_params[0].pos_label is None and self.model_params[0].neg_label is None:
+                self.classes_ = self.model_params[0].model_object.classes_
+                self.multiclass_flag = True                
+            else:
+                self._model_data_processing()
+                BaseClassification._model_data_processing_flag = True
+        
         self._check_input()        
         self._check_non_policy_p_var_min_samples()
         self._auto_assign_p_up_groups()
         self.feature_mask = self._set_feature_mask()
         self._tran_check_input()
+
+        if self.multiclass_flag:
+                self.mitigate_methods = ['reweigh','correlate']
 
     def _check_input(self):
         """
@@ -219,3 +229,38 @@ class BaseClassification(Fairness, Transparency):
                 return [None] * 4  
             else :
                 return [None] * 8
+    
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', model_type=None, is_mas_bias=True):
+                        
+        pos_class_count = 0
+        neg_class_count = 0
+        if is_mas_bias:
+                metric_val =  self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
+        else:
+                metric_val = None
+        
+        return pd.Series([pos_class_count,neg_class_count,metric_val]) 
+
+
+    def tradeoff(self, output=True, n_threads=1, sigma = 0):
+                        
+        if self.multiclass_flag:
+                print("Tradeoff analysis is not supported for multiclass classification.")
+        else:
+                
+                super(BaseClassification, self).tradeoff( output,n_threads,sigma)
+
+    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7):
+                        
+        if self.multiclass_flag:
+                print("Tradeoff analysis is not supported for multiclass classification.")
+        else:
+                super(BaseClassification, self).feature_importance(output,n_threads,correlation_threshold)
+
+    def explain(self, local_index = None, output = True, model_num = None):
+                        
+        if self.multiclass_flag:
+                print("Transparency analysis is not supported for multiclass classification.")
+        else:
+                super(BaseClassification, self).explain(local_index,output,model_num)
+

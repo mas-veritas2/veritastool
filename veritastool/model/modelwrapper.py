@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 class ModelWrapper(object):
     """
     Abstract Base class to provide an interface that supports non-pythonic models.
@@ -88,3 +91,48 @@ class ModelWrapper(object):
                 Prediction probabilities of model_obj on x_test    
         """
         pass
+
+    def _sampling(self, x_train, y_train, x_test, y_test, mode='per_label', size=100):
+
+        if mode == "first":
+            x_train_sample = x_train[:size]
+            y_train_sample = y_train[:size]
+            x_test_sample = x_test[:size]
+            return x_train_sample, y_train_sample, x_test_sample
+
+        elif mode == "per_label":            
+            x_train_sample = x_train.groupby(y_train).head(size)
+            y_train_sample = np.array(pd.DataFrame(y_train).groupby(y_train).head(size)[0])
+            x_test_sample = x_test.groupby(y_test).head(size)
+            return x_train_sample, y_train_sample, x_test_sample
+        else:
+            pass
+
+    def check_fit_predict(self, x_train, y_train, x_test, y_test, mode='per_label', size=100):
+        
+        x_train_sample, y_train_sample, x_test_sample = self._sampling(x_train, y_train, x_test, y_test, mode, size)
+        model = self.model_obj
+
+        try:
+            model.fit(x_train_sample,y_train_sample)
+            print("Fit Success")
+        except Exception as error:
+            print("Error during fit ", error)
+            return 0
+
+        try:
+            model.predict(x_test_sample)
+            print("Predict success")                
+        except Exception as error:
+            print("Error during predict ", error)
+            return 0
+
+        try:
+            model.predict_proba(x_test_sample)
+            print("Predict proba success")
+            return 1
+        except Exception as error:
+            print("Error during predict ", error)
+            return 0                
+
+
