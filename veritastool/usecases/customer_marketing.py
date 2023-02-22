@@ -1,13 +1,13 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
-from .fairness import Fairness
+from ..principles import Fairness, Transparency
 from ..util.utility import check_datatype, check_value
 from ..metrics.performance_metrics import PerformanceMetrics
 from ..metrics.fairness_metrics import FairnessMetrics
 from ..config.constants import Constants
 from ..util.errors import *
 
-class CustomerMarketing(Fairness):
+class CustomerMarketing(Fairness,Transparency):
     """
     A class to evaluate and analyse fairness in customer marketing related applications.
 
@@ -19,10 +19,10 @@ class CustomerMarketing(Fairness):
 
     """
     _model_type_to_metric_lookup = {"uplift":("uplift", 4, 2),
-                                   "rejection": ("classification", 2, 1),
-                                   "propensity":("classification", 2, 1)}
+                                   "classification":("classification", 0, 1)}
+    _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, perf_metric_name =  "balanced_acc", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0):
+    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
         """
         Parameters
         ----------
@@ -36,6 +36,9 @@ class CustomerMarketing(Fairness):
         fair_threshold: int or float
                 Value between 0 and 100. If a float between 0 and 1 (inclusive) is provided, it is used to benchmark against the primary fairness metric value to determine the fairness_conclusion.
                 If an integer between 1 and 100 is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.
+
+        fair_is_pos_label_fav: boolean, default=True
+                Used to indicate if positive label specified is favourable for the classification use case. If True, 1 is specified to be favourable and 0 as unfavourable.
 
         Instance Attributes
         ------------------
@@ -53,6 +56,9 @@ class CustomerMarketing(Fairness):
 
         fair_impact: string, default = "normal"
                 Used to pick the fairness metric according to the Fairness Tree methodology. Could be "normal" or "significant" or "selective"
+
+        fair_metric_type: str, default='difference'
+                Used to pick the fairness metric according to the Fairness Tree methodology. Could be "difference" or "ratio"
 
         treatment_cost: int or float, default=None
                 Cost of the marketing treatment per customer
@@ -104,65 +110,32 @@ class CustomerMarketing(Fairness):
         pred_outcome: dict
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
         """
-        super().__init__(model_params)
+        #Positive label is favourable for customer marketing use case
+        Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
+        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display)
 
-        self.fair_metric_name = fair_metric_name
+        # This captures the fair_metric input by the user
         self.fair_metric_input = fair_metric_name
         self.perf_metric_name = perf_metric_name
-        self.fair_threshold = fair_threshold
-        self.fair_threshold_input = fair_threshold
-        self.fair_neutral_tolerance = Constants().fair_neutral_tolerance 
-        self.fair_concern = fair_concern
-        self.fair_priority = fair_priority
-        self.fair_impact = fair_impact
-        self.fairness_metric_value_input = fairness_metric_value_input
-        self.proportion_of_interpolation_fitting = proportion_of_interpolation_fitting
-
-        self._model_type_input()
-
-        self._select_fairness_metric_name()
-        self.check_perf_metric_name()
-        self.check_fair_metric_name()
-
-        self._use_case_metrics = {}
-
-        use_case_fair_metrics = []
-        for i,j in FairnessMetrics.map_fair_metric_to_group.items():
-            if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0]:
-                use_case_fair_metrics.append(i)
-        self._use_case_metrics["fair"] = use_case_fair_metrics
-
-        use_case_perf_metrics = []
-        for i, j in PerformanceMetrics.map_perf_metric_to_group.items():
-            if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0]:
-                use_case_perf_metrics.append(i)
-        self._use_case_metrics["perf"] = use_case_perf_metrics
-         # Append new performance metrics from custom class to the above list (if it is relevant)
         
-        self._input_validation_lookup = {
-            "fair_threshold": [(float, int), (Constants().fair_threshold_low), Constants().fair_threshold_high],
-            "fair_neutral_tolerance": [(float,),(Constants().fair_neutral_threshold_low), Constants().fair_neutral_threshold_high],
-            "proportion_of_interpolation_fitting": [(float,), (Constants().proportion_of_interpolation_fitting_low), Constants().proportion_of_interpolation_fitting_high],
-            "fair_concern": [(str,), ["eligible", "inclusive", "both"]],
-            "fair_priority": [(str,), ["benefit", "harm"]],
-            "fair_impact": [(str,), ["normal", "significant", "selective"]],
-            "perf_metric_name": [(str,), self._use_case_metrics["perf"]],
-            "fair_metric_name": [(str,), self._use_case_metrics["fair"]],
-            "model_params":[(list,), None],
-            "fairness_metric_value_input":[(dict,), None]}
+        self.proportion_of_interpolation_fitting = proportion_of_interpolation_fitting
+    
+        self._input_validation_lookup["proportion_of_interpolation_fitting"] = [(float,), (Constants().proportion_of_interpolation_fitting_low), Constants().proportion_of_interpolation_fitting_high]
 
-        self.k = Constants().k
-        self.array_size = Constants().perf_dynamics_array_size
-        self.decimals = Constants().decimals
-
-        if self.model_params[0].model_type == "uplift":
-            self.spl_params = {'revenue': revenue, 'treatment_cost': treatment_cost}
+        self.spl_params = {'revenue': revenue, 'treatment_cost': treatment_cost}
         self.selection_threshold = Constants().selection_threshold
 
-        self._check_input()
-
+        if not CustomerMarketing._model_data_processing_flag:
+            self._model_data_processing()
+            CustomerMarketing._model_data_processing_flag = True
+        self._check_input()        
         self.e_lift = self._get_e_lift()
+        self._check_non_policy_p_var_min_samples()
+        self._auto_assign_p_up_groups()
+        self.feature_mask = self._set_feature_mask()
+
         self.pred_outcome = self._compute_pred_outcome()
+        self._tran_check_input()
 
     def _check_input(self):
         """
@@ -171,6 +144,14 @@ class CustomerMarketing(Fairness):
         """
         #import error class
         err = VeritasError()
+
+        #check fair_is_pos_label_fav specified correctly
+        if len(self.model_params) == 1 and self.fair_is_pos_label_fav is None:
+            err.push('value_error', var_name='fair_is_pos_label_fav', given=self.fair_is_pos_label_fav, expected='True/False', function_name='_check_input')       
+
+        #check label values in model_params against the usecase's specified model_type info.
+        self.check_label_data_for_model_type()
+        
         #check datatype of input variables to ensure they are of the correct datatype
         check_datatype(self)
 
@@ -182,6 +163,11 @@ class CustomerMarketing(Fairness):
         mp_e = self._model_type_to_metric_lookup[self.model_params[0].model_type][2]
         if mp_g != mp_e:
             err.push('length_error', var_name="model_params", given=str(mp_g), expected= str(mp_e), function_name="_check_input")
+
+        #check binary restriction for this use case
+        if mp_g > 1:
+            for i in range(len(self.model_params)):
+                self._check_binary_restriction(model_num=i)
 
         #check for conflicting input values
         self._base_input_check()
@@ -299,86 +285,18 @@ class CustomerMarketing(Fairness):
     
             else:
                 return [None] * 8
-
-    def _get_confusion_matrix_optimized(self, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):
-        """
-        Compute confusion matrix
-
-        Parameters
-        ----------
-        y_true : numpy.ndarray
-                Ground truth target values.
-
-        y_pred : numpy.ndarray
-                Copy of predicted targets as returned by classifier.
-                
-        sample_weight : numpy.ndarray
-                Used to normalize y_true & y_pred.
-                
-        curr_p_var : string, default=None
-                Current protected variable
-
-        feature_mask : dict of list, default = None
-                Stores the mask array for every protected variable applied on the x_test dataset.
-
-        Returns
-        -------
-        Confusion matrix metrics based on privileged and unprivileged groups or for the entire dataset
-        """ 
-        nan_array = np.array([np.nan]*y_true.shape[0]).reshape(-1,1)
-        
-        if self._model_type_to_metric_lookup[self.model_params[0].model_type][0] == "classification" :
-
-            correct = (y_true==y_pred)*1
-            incorrect = 1-correct
-
-            if curr_p_var is None:
-                if y_pred is None:
-                    return nan_array, nan_array, nan_array, nan_array
-                else:
-                    tp = np.sum(correct*y_true, 2)
-                    fp = np.sum(incorrect*(1-y_true), 2)
-                    tn = np.sum(correct*(1-y_true), 2)
-                    fn = np.sum(incorrect*y_true, 2)
-                    return tp, fp, tn, fn
-
-            else:
-                if y_pred is None:
-                    return nan_array, nan_array, nan_array, nan_array, nan_array, nan_array, nan_array, nan_array
-                else:
-                    mask = feature_mask[curr_p_var] # 1=priviledged, 0=otherwise
-                    # priviledged group
-                    tp_p = np.sum(correct*y_true*mask, 2)
-                    fp_p = np.sum(incorrect*(1-y_true)*mask, 2)
-                    tn_p = np.sum(correct*(1-y_true)*mask, 2)
-                    fn_p = np.sum(incorrect*y_true*mask, 2)
-                    # unpriviledged group
-                    tp_u = np.sum(correct*y_true*(1-mask), 2)
-                    fp_u = np.sum(incorrect*(1-y_true)*(1-mask), 2)
-                    tn_u = np.sum(correct*(1-y_true)*(1-mask), 2)
-                    fn_u = np.sum(incorrect*y_true*(1-mask), 2)
-                    return tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u
-        else:
-            if curr_p_var is None:
-                return nan_array, nan_array, nan_array, nan_array
-            else:
-                return nan_array, nan_array, nan_array, nan_array, nan_array, nan_array, nan_array, nan_array
             
     def _select_fairness_metric_name(self):
         """
-        Retrieves the fairness metric name based on the values of model_type, fair_concern, fair_impact and fair_priority.
+        Retrieves the fairness metric name based on the values of model_type, fair_concern, fair_impact, fair_priority and fair_metric_type.
         Name of the primary fairness metric to be used for computations in the evaluate() and/or compile() functions                
         """
         #if model type is uplift, will not use fairness_tree
         if self.fair_metric_name == 'auto':
             if self.model_params[0].model_type == 'uplift':
                 self.fair_metric_name = 'rejected_harm'
-            elif self.model_params[0].model_type == 'propensity':
-                is_pos_label_favourable = True
-                self._fairness_tree(is_pos_label_favourable)
-            else:
-                is_pos_label_favourable = False
-                self._fairness_tree(is_pos_label_favourable)
+            elif self.model_params[0].model_type == 'classification':
+                self.fair_metric_name = self._fairness_tree(self.fair_is_pos_label_fav)
         else :
             self.fair_metric_name
 
@@ -399,15 +317,16 @@ class CustomerMarketing(Fairness):
         #e_lift will only run for uplift models
         if self.model_params[0].model_type == 'uplift':
             
-            y_train = self.model_params[1].y_train
-            y_prob = self.model_params[1].y_prob
-            
-            if y_train is None :
-                y_train = self.model_params[1].y_true
-                
             if 'y_pred_new' in kwargs:
                 y_prob = kwargs['y_pred_new']
 
+            else:                
+                y_prob = self.model_params[1].y_prob
+
+            y_train = self.model_params[1].y_train
+
+            if y_train is None :
+                y_train = self.model_params[1].y_true
                 
             classes = np.array(['TR', 'TN', 'CR', 'CN'])
             p_base = np.array([np.mean(y_train == lab) for lab in classes])
@@ -465,4 +384,90 @@ class CustomerMarketing(Fairness):
         else :
             return None
 
-            
+    def _check_label(self, y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
+        """
+        Creates copy of y_true as y_true_bin and convert favourable labels to 1 and unfavourable to 0 for non-uplift models.
+        Overwrites y_pred with the conversion, if `y_pred_flag` is set to True.
+        Checks if pos_labels are inside y
+
+        Parameters
+        -----------
+        y : numpy.ndarray
+                Ground truth target values.
+
+        pos_label : list
+                Label values which are considered favorable.
+                For all model types except uplift, converts the favourable labels to 1 and others to 0.
+                For uplift, user is to provide 2 label names e.g. [["a"], ["b"]] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
+
+        neg_label : list, default=None
+                Label values which are considered unfavorable.
+                neg_label will only be used in uplift models.
+                For uplift, user is to provide 2 label names e.g. [["c"], ["d"]] in unfav label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
+
+        obj_in : object, default=None
+                The object of the model_container class.
+
+        y_pred_flag : boolean, default=False
+                Flag to indicate if the function is to process y_pred.
+
+        Returns
+        -----------------
+        y_bin : list
+                Encoded labels.
+
+        pos_label2 : list
+                Label values which are considered favorable.
+        """
+        # uplift model
+        # 0, 1 => control (others, rejected/responded)
+        # 2, 3 => treatment (others, rejected/responded)
+        err = VeritasError()
+        err_= []
+        model_type = obj_in.model_type
+
+        if model_type != 'uplift':
+            return super()._check_label(y, pos_label, neg_label, obj_in, y_pred_flag)
+        
+        elif neg_label is not None and model_type == 'uplift':
+            y_bin = y
+            n=0
+
+            row = y_bin == pos_label[0]  
+            indices_pos_0 = [i for i, x in enumerate(y_bin) if x == pos_label[0]]
+            n += np.sum(row)
+
+            row = y_bin == pos_label[1]  
+            indices_pos_1 = [i for i, x in enumerate(y_bin) if x == pos_label[1]]
+            n += np.sum(row)
+
+            row = y_bin == neg_label[0]  
+            indices_neg_0 = [i for i, x in enumerate(y_bin) if x == neg_label[0]]
+            n += np.sum(row)
+
+            row = y_bin == neg_label[1]  
+            indices_neg_1 = [i for i, x in enumerate(y_bin) if x == neg_label[1]]
+            n += np.sum(row)     
+
+            for i in indices_pos_0:
+                y_bin[i] = "TR"
+            for i in indices_pos_1:
+                y_bin[i] = "CR"
+            for i in indices_neg_0:
+                y_bin[i] = "TN"
+            for i in indices_neg_1:
+                y_bin[i] = "CN"
+
+            if n != len(y_bin):
+                err_.append(['conflict_error', "pos_label, neg_label", "inconsistent values", pos_label + neg_label])
+                for i in range(len(err_)):
+                    err.push(err_[i][0], var_name_a=err_[i][1], some_string=err_[i][2], value=err_[i][3],
+                            function_name="_check_label")
+            pos_label2 = [['TR'],['CR']]
+
+        if y_bin.dtype.kind in ['i']:
+            y_bin  = y_bin.astype(np.int8)
+
+        err.pop()
+
+        return y_bin, pos_label2

@@ -52,12 +52,25 @@ def check_datatype(obj_in):
         if cur_type not in exp_type:
             err_.append(['type_error', str(var_name), str(cur_type), str(exp_type)])
 
-        if var_name == "p_grp":
+        if var_name in ["p_grp","up_grp"]:
             if cur_type in exp_type :
-                for i in getattr(obj_in, var_name).values():
-                    if type(i) != list:
-                        err_.append(['type_error', "p_grp values", str(type(i)), "list"])
+                if getattr(obj_in, var_name) is not None:
+                    for i in getattr(obj_in, var_name).values():
+                        if var_name == "p_grp":
+                            if type(i) not in [list,str]:
+                                err_.append(['type_error', "p_grp values", str(type(i)), "list or str"])
+                        else: # For up_grp allow None to be set as value
+                            if type(i) not in [list, type(None)]:
+                                err_.append(['type_error', var_name+" values", str(type(i)), "list"])
+                          
+                        if (type(i) == list) and (len(i)>0) and not (type(i[0]) == list):
+                            err_.append(['type_error', var_name+" value item", str(type(i[0])), "list"])
 
+        if var_name in ["pos_label", "neg_label"]:
+            if cur_type in exp_type and var is not None:
+                if any(isinstance(i, list) for i in var):
+                    err_.append(['type_error', str(var_name), str(type(i)), "no nested list"])
+                                        
     if err_ == []:
         return successMsg
     else:
@@ -90,6 +103,7 @@ def check_value(obj_in):
     range_types = [list,]
     str_type = [str,]
     collection_types = [list, set, np.ndarray]
+    skip_check_upgrp = []
 
     for var_name in var_names:
         var_value = getattr(obj_in, var_name)
@@ -153,16 +167,38 @@ def check_value(obj_in):
                     if tp != var_range[i]:
                         err_.append(['column_value_error', var_name, str(tp), str(var_range[i])])
         
-        # eg check p_grp
+        # eg check p_grp, up_grp
         elif var_value_type == dict and var_range_type == dict:
             keyset1 = set(var_value.keys())
             keyset2 = set(var_range.keys())
+            check_policy_pgrp = keyset1.copy()
+
+            # check for policy in p_grp
+            for key in check_policy_pgrp: 
+                if type(var_value[key]) == str:
+                    skip_check_upgrp.append(key)
+
+            # remove policy-based p_var in var_range
+            if var_name == 'up_grp' and skip_check_upgrp:
+                for i in skip_check_upgrp:
+                    if i in keyset1:
+                        keyset1.remove(i)
+                    keyset2.remove(i)
+
             if keyset1 != keyset2:
                 err_.append(['value_error', var_name, str(sorted(list(keyset1))), str(sorted(list(keyset2)))])
             else:
-                for key in keyset1:
+                for key in keyset1:                    
                     i_var = convert_to_set(var_value.get(key))
-                    i_range = convert_to_set(var_range.get(key))
+                    #If a policy is specified, the compare against supported policies                    
+                    if (var_name in ['p_grp','up_grp']) and (isinstance(var_value.get(key),str)):
+                        i_range = convert_to_set(obj_in.policies)
+                    elif (var_name == 'up_grp') and (var_value.get(key) is None):
+                        #When up_grp value is set as None, skip checking value as it's later deduced
+                        i_var = set()
+                        i_range= set()
+                    else:    
+                        i_range = convert_to_set(var_range.get(key))                    
                     if not i_var.issubset(i_range):
                         err_.append(['value_error', var_name + " " + key, str(sorted(list(i_var))), str(sorted(list(i_range)))])
         
@@ -193,13 +229,15 @@ def convert_to_set(var):
         result = {var,}
     elif type(var) == set:
         result = var
+    elif (type(var) in [list, tuple]) and (len(var)==1) and (type(var[0]) in [list, tuple]):
+        result = set(var[0])
     elif type(var) in [list, tuple]:
         result = set(var)
     else:
         result = var
     return result
 
-def check_label(y, pos_label, neg_label=None):
+def check_label(y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
     """
     Creates copy of y_true as y_true_bin and convert favourable labels to 1 and unfavourable to 0 for non-uplift models.
     Overwrite y_pred with the conversion.
@@ -233,25 +271,26 @@ def check_label(y, pos_label, neg_label=None):
     # 2, 3 => treatment (others, rejected/responded)
     err = VeritasError()
     err_= []
+    model_type = obj_in.model_type
 
-    if neg_label is not None and len(neg_label) == 2:
+    if neg_label is not None and model_type == 'uplift':
         y_bin = y
         n=0
 
         row = y_bin == pos_label[0]  
-        indices_pos_0 = [i for i, x in enumerate(y_bin) if x == pos_label[0][0]]
+        indices_pos_0 = [i for i, x in enumerate(y_bin) if x == pos_label[0]]
         n += np.sum(row)
 
         row = y_bin == pos_label[1]  
-        indices_pos_1 = [i for i, x in enumerate(y_bin) if x == pos_label[1][0]]
+        indices_pos_1 = [i for i, x in enumerate(y_bin) if x == pos_label[1]]
         n += np.sum(row)
 
         row = y_bin == neg_label[0]  
-        indices_neg_0 = [i for i, x in enumerate(y_bin) if x == neg_label[0][0]]
+        indices_neg_0 = [i for i, x in enumerate(y_bin) if x == neg_label[0]]
         n += np.sum(row)
 
         row = y_bin == neg_label[1]  
-        indices_neg_1 = [i for i, x in enumerate(y_bin) if x == neg_label[1][0]]
+        indices_neg_1 = [i for i, x in enumerate(y_bin) if x == neg_label[1]]
         n += np.sum(row)     
 
         for i in indices_pos_0:
@@ -272,25 +311,215 @@ def check_label(y, pos_label, neg_label=None):
     
     else:
         y_bin = y
-        row = np.isin(y_bin, pos_label[0])
-        if sum(row) == len(y_bin) :
-            err_.append(['value_error', "pos_label", pos_label[0], "not all y_true labels"])
-        elif sum(row) == 0 :
-            err_.append(['value_error', "pos_label", pos_label[0], set(y_bin)])            
-        for i in range(len(err_)):
-            err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                    function_name="check_label")
 
-        y_bin[row] = 1 
-        y_bin[~row] = 0
+        if y_pred_flag == True and obj_in.unassigned_y_label[0]:
+            y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
+            
+        else:
+            row = np.isin(y_bin, pos_label)
+            if sum(row) == len(y_bin) :
+                err_.append(['value_error', "pos_label", pos_label, "not all y_true labels"])
+            elif sum(row) == 0 :
+                err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
+            for i in range(len(err_)):
+                err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
+                        function_name="check_label")
+            y_bin[row] = 1 
+            y_bin[~row] = 0
+        
         pos_label2 = [[1]]
-    
+        y_bin = y_bin.astype(np.int8)
+        
     if y_bin.dtype.kind in ['i']:
         y_bin  = y_bin.astype(np.int8)
 
     err.pop()
 
     return y_bin, pos_label2
+
+def check_data_unassigned(obj_in, y=None, y_pred_negation_flag=False):
+    """
+    Deletes y_true, y_pred, y_prob, x_test, protected_feature_cols rows if there are unassigned labels based on y_true index for multi-class classification models.
+    If y_pred_negation_flag is True, checks if there remain unassigned labels in the predicted values and perform negation of labels based on y_true.
+
+    Parameters
+    -----------
+    obj_in : object
+            Object that needs to be checked
+
+    y : numpy.ndarray, default=None
+            Predicted targets as returned by classifier.
+
+    y_pred_negation_flag : boolean, default=False
+            Whether predicted targets in y_pred to be checked for unassigned labels, and perform negation of labels based on y_true.
+
+    Returns
+    -----------------
+    y_bin : numpy.ndarray
+            Encoded y_pred labels.
+
+    y_true : numpy.ndarray
+            Encoded ground truth target values.
+
+    y_pred : numpy.ndarray
+            Predicted targets as returned by classifier.
+
+    y_prob : numpy.ndarray
+            Predicted probabilities as returned by classifier.
+
+    x_test : pandas.DataFrame
+            Testing dataset.
+
+    protected_features_cols: pandas.DataFrame
+            Encoded variable used for masking.
+    """
+    y_true = obj_in.y_true
+    y_pred = obj_in.y_pred
+    y_prob = obj_in.y_prob
+    x_test = obj_in.x_test
+    pos_label = obj_in.pos_label
+    protected_features_cols = obj_in.protected_features_cols
+    unassigned_y_label = obj_in.unassigned_y_label
+
+    # if y_pred_flag is true, check for assigned labels in y_pred predicted values and negate labels based on y_true for multi-class classification models
+    if y_pred_negation_flag:
+        y_pred_index = []
+        y_bin = y
+        # append y_pred index with unassigned label
+        for i in unassigned_y_label[0]: 
+            idx = np.where(y_bin == i)
+            y_pred_index += idx[0].tolist()
+
+        # perform binary encoding for y_pred
+        row = np.isin(y_bin, pos_label)
+        y_bin[row] = 1 
+        y_bin[~row] = 0
+        
+        # negate y_pred unassigned value based on y_true index
+        for i in y_pred_index:
+            if y_true[i] == 0:
+                y_bin[i] = 1
+            elif y_true[i] == 1:
+                y_bin[i] = 0
+
+        y_bin = y_bin.astype(np.int8)
+        
+        return y_bin
+
+    # remove rows with unassigned label based on pos_label and neg_label
+    else:
+        if len(y_true.shape) == 1 and y_true.dtype.kind in ['i','O','U']:
+            y_true = np.delete(y_true, unassigned_y_label[1])
+        if y_pred is not None and len(y_pred.shape) == 1 and y_pred.dtype.kind in ['i','O','U']:
+            y_pred = np.delete(y_pred, unassigned_y_label[1])
+        if y_prob is not None and y_prob.dtype.kind == 'f':
+            y_prob = np.delete(y_prob, unassigned_y_label[1], axis=0)
+        if x_test is not None and isinstance(x_test, pd.DataFrame):
+            x_test = x_test.drop(unassigned_y_label[1]).reset_index(drop=True)          
+        if protected_features_cols is not None and isinstance(protected_features_cols, pd.DataFrame):
+            protected_features_cols = protected_features_cols.drop(unassigned_y_label[1]).reset_index(drop=True)
+
+        return y_true, y_pred, y_prob, x_test, protected_features_cols
+
+def input_parameter_validation(_input_parameter_lookup):
+    """
+    Checks whether the values and data types of the input parameters are valid.
+
+    Parameters
+    ----------------
+    _input_parameter_lookup : dict
+            Dictionary that maps input parameter names to their expected data types and values
+
+    Returns:
+    ---------------
+    successMsg : str
+            If there are no errors, a success message will be returned
+    """
+    err = VeritasError()
+    err_ = []
+    success_msg = "input parameter validation completed without issue"
+    NoneType = type(None)
+
+    # loop through each input parameter specified in _input_parameter_lookup
+    for param_name, param_info in _input_parameter_lookup.items():
+        param_value, exp_type, param_range = param_info
+        
+        # Skip validation if param_name is an empty list or is None
+        if (isinstance(param_value, list) and param_value == []) or param_value is None:
+            continue
+
+        # check data type
+        if not isinstance(param_value, exp_type):
+            err_.append(['type_error', param_name, str(type(param_value)), str(exp_type)])
+
+        # check value
+        if isinstance(param_range, (list, set, np.ndarray)):
+            if isinstance(param_value, (list, set, np.ndarray)):
+                if not set(param_value).issubset(set(param_range)):
+                    err_.append(['value_error', param_name, str(param_value), str(param_range)])
+            # transform_x for mitigate
+            elif param_name == "transform_x":
+                if param_value.columns.tolist() != param_range:
+                    err_.append(['value_error', param_name, str(param_value.columns.tolist()), str(param_range)])
+            else:
+                if param_value not in param_range:
+                    err_.append(['value_error', param_name, str(param_value), str(param_range)])
+
+        # cr_beta for mitigate
+        elif param_name == "cr_beta":
+            if param_value.shape[0] != param_range[0] or param_value.shape[1] != param_range[1]:
+                err_.append(['value_error', param_name, str(param_value.shape), str(param_range)])
+
+        elif isinstance(param_range, (tuple)):
+            if param_value < param_range[0] or param_value > param_range[1]:
+                err_.append(['value_error', param_name, str(param_value), str(param_range)])
+
+    if err_ == []:
+        return success_msg
+    else:
+        for i in range(len(err_)):
+            err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3], function_name="input_parameter_validation")
+        err.pop()
+
+def input_parameter_filtering(_input_parameter_lookup):
+    """
+    Filters the input parameters to only include valid values.
+
+    Parameters
+    ----------------
+    _input_parameter_lookup : dict
+            Dictionary that maps input parameter names to their expected values
+
+    Returns:
+    ---------------
+    filtered_params : dict
+            Dictionary of filtered input parameters
+    """
+    filtered_params = {}
+
+    # Loop through each input parameter specified in _input_parameter_lookup
+    for param_name, param_info in _input_parameter_lookup.items():
+        param_value, exp_type, param_range = param_info
+
+        # Filter the value if it is not None and is of the expected data type
+        if param_value is None or not isinstance(param_value, exp_type):
+            filtered_params[param_name] = param_value
+            continue
+        # If param_value is iterable and param_range is a list, set, or numpy array, check if param_value is in the range
+        if hasattr(param_value, "__iter__") and isinstance(param_range, (list, set, np.ndarray)):
+            filtered_value = [val for val in param_value if val in param_range]
+            filtered_params[param_name] = filtered_value
+        # If param_range is None, include the value in the filtered_params dictionary
+        elif param_range is None:
+            filtered_params[param_name] = param_value
+
+    return filtered_params
+
+def process_y_prob(classes, y_prob, pos_label, y_label):
+    
+    pos_idxs = np.argwhere(np.isin(classes, pos_label)).ravel()    
+    return y_prob[:,pos_idxs].sum(axis=1)
+
 
 
 def get_cpu_count():

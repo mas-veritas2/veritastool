@@ -1,15 +1,16 @@
-from ..util.utility import check_datatype, check_value, check_label
+from ..util.utility import check_datatype, check_value
 import numpy as np
 import pandas as pd
-from ..fairness.fairness import Fairness
+from ..principles.fairness import Fairness
 from ..util.errors import *
+from ..model.modelwrapper import ModelWrapper
 from collections.abc import Iterable
 
 class ModelContainer(object):
 
     """Helper class that holds the model parameters required for computations in all use cases."""
-    def __init__(self, y_true, p_var, p_grp, model_type, model_name = 'auto', y_pred=None, y_prob=None, y_train=None, protected_features_cols=None, train_op_name="fit",
-                 predict_op_name ="predict", feature_imp=None, sample_weight=None, pos_label=[[1]], neg_label=None, x_train=None, x_test=None, model_object=None):
+    def __init__(self, y_true, p_grp, model_type, model_name = 'auto', y_pred=None, y_prob=None, y_train=None, protected_features_cols=None, train_op_name="fit",
+                 predict_op_name ="predict", sample_weight=None, pos_label=[1], neg_label=None, x_train=None, x_test=None, model_object=None, up_grp=None, predict_proba_op_name='predict_proba'):
         """
         Parameters
         ----------
@@ -27,6 +28,9 @@ class ModelContainer(object):
 
                 Customer Marketing: "uplift" or "propensity" or "reject"
                 Credit Scoring: "credit"
+                Predictive Underwriting: "underwriting"
+                Base Classification: "base_classification"
+                Base Regression: "base_regression"
 
         Instance Attributes
         --------------------
@@ -55,13 +59,8 @@ class ModelContainer(object):
                 The method used by the model_object to predict the labels or probabilities. By default a sklearn model is assumed.
                 For uplift models, this method should predict the probabilities and for non-uplift models it should predict the labels.
 
-        feature_imp : pandas.DataFrame or None, default=None
-                The feature importance computed on the model object fitted to x_train. 
-                Index:
-                    RangeIndex
-                Columns:
-                    Name: Feature, dtype: str      
-                    Name: Importance, dtype: float   
+        predict_proba_op_name : str, default = "predict_proba"
+                The method used by the model_object to predict the probabilities. By default a sklearn model is assumed.
                 
         sample_weight : list, numpy.ndarray or None, default=None
                 Used to normalize y_true & y_pred.
@@ -93,20 +92,24 @@ class ModelContainer(object):
 
         pos_label2 : list, default=None
                 Encoded pos_label value
+
+        unassigned_y_label : tuple, default=None
+                Contains the unassigned labels and the index of unassigned label values in y_true. This supports multi-class classification labels where user may provide incomplete labels in pos_label and neg_label.
         """
         self.x_train = x_train
         self.x_test = x_test
-        self.y_true = y_true
-        self.y_pred = y_pred
-        self.y_prob = y_prob
+        self.y_true = y_true                                  
+        self.y_pred = y_pred              
+        self.y_prob = y_prob        
         self.y_train = y_train
-        self.p_var = p_var
+        self.p_var = list(p_grp.keys())
         self.p_grp = p_grp
+        self.up_grp = up_grp
         self.protected_features_cols = protected_features_cols
         self.model_object = model_object
         self.train_op_name = train_op_name
         self.predict_op_name = predict_op_name
-        self.feature_imp = feature_imp
+        self.predict_proba_op_name = predict_proba_op_name
         self.sample_weight = sample_weight
         self.model_name = model_name
         self.model_type = model_type
@@ -115,11 +118,11 @@ class ModelContainer(object):
         self.pos_label = pos_label
         self.neg_label = neg_label
         self.pos_label2 = None
-
+        self.policies = ['maj_min','maj_rest','max_bias']
+        self.unassigned_y_label = (None, None)
+        self.label_count = len(set(self.y_true))
         self.err = VeritasError()
 
-        self.check_label_length()
-        
         check_y_label = None
 
         check_p_grp = None
@@ -136,26 +139,34 @@ class ModelContainer(object):
 
         if y_true is not None and metric_group in ["uplift", "classification"]:
             check_y_label = list(set(y_true))
-        if p_var is not None :
-            check_p_grp=dict.fromkeys(p_var)
-
+        if self.p_var is not None :
+            check_p_grp=dict.fromkeys(self.p_var)
+        
+        # Find intersectional columns 
+        self._find_intersect_vars_in_p_grp_input()
+        self._process_intersect_p_vars()
+        
         # Dictionary for input data
         if protected_features_cols is None:
-            if type(self.x_test) == pd.DataFrame:
-                self.protected_features_cols = self.x_test[p_var]
+            if type(self.x_test) == pd.DataFrame:                                                
+                p_var_no_intersect = [col for col in self.p_var if '-' not in col]
+                self.protected_features_cols = self.x_test.loc[:, p_var_no_intersect]                
             else:
                 self.err.push('type_error', var_name='x_test', given=str(type(str)), expected=str(pd.DataFrame),
                             function_name='ModelContainer')
                 self.err.pop()
 
+        self._intersectional_fairness()                
         for var in check_p_grp.keys():
-            check_p_grp[var] = self.protected_features_cols[var].unique()
-            
+            check_p_grp[var] = self.protected_features_cols[var].unique()        
+        self.check_p_grp = check_p_grp
         NoneType = type(None)
 
         # Dictionary for expected data type
         # if value range is a tuple, will be considered as a numerical range
         # if value range is a list/set of str, will be considered as a collection of available values
+        # First item of value is for check_datatype
+        # Second item of value is for check_value
         self._input_validation_lookup = {
             "y_true": [(list, np.ndarray, pd.Series), ],
             "y_train": [(NoneType, list, np.ndarray, pd.Series), ], 
@@ -168,15 +179,20 @@ class ModelContainer(object):
             "x_test":  [(NoneType, pd.DataFrame, str), None],
             "train_op_name": [(str,), None],
             "predict_op_name": [(str,), None],
-            "feature_imp":     [(NoneType, pd.DataFrame), (np.dtype('O'), np.dtype('float64'))], 
             "sample_weight":   [(NoneType, list, np.ndarray), (0, np.inf)], 
             "model_name":      [(str,), None],
             "model_type":      [(str,), check_model_type],
-            "pos_label":       [(list,), check_y_label],
-            "neg_label":       [(NoneType, list), check_y_label]
+            "pos_label":       [(NoneType,list,), check_y_label],
+            "neg_label":       [(NoneType, list), check_y_label],
+            "up_grp":  [(dict, NoneType,), check_p_grp],
+            "predict_proba_op_name": [(str,), None],
         }
         
         check_datatype(self)
+        
+        if self.model_type != 'regression':
+            self.check_y_prob()
+            self.check_classes()
         
         #if model name is longer than 20 characters, will keep the first 20 only
         self.model_name = self.model_name[0:20]
@@ -195,16 +211,101 @@ class ModelContainer(object):
         check_value(self)
 
         self.check_data_consistency()
+        
+        if y_pred is not None:
+            self.y_pred_labels = set(y_pred)
+        else:
+            self.y_pred_labels = None 
+
+        if y_true is not None:
+            self.y_true_labels = set(y_true)
+        else:
+            self.y_true_labels = None
+
+        if y_train is not None:
+            self.y_train_labels = set(y_train)
+        else:
+            self.y_train_labels = None
+            
         if metric_group in ["uplift","classification"]:
             self.check_label_consistency()
+            
+            if metric_group == "classification":
+                self.check_unassigned_y_label()
+
+        # Deduce up_grp values if up_grp is None and p_grp not a policy 
+        self._process_up_grp_input()
+
     
-            if len(self.y_true.shape) == 1 and self.y_true.dtype.kind in ['i','O','U']:
-                self.y_true, self.pos_label2 = check_label(self.y_true, self.pos_label, self.neg_label)  
-            if self.y_pred is not None and len(self.y_pred.shape) == 1 and self.y_pred.dtype.kind in ['i','O','U']:
-                self.y_pred, self.pos_label2 = check_label(self.y_pred, self.pos_label, self.neg_label)
+    def _intersectional_fairness(self):
+        if len(self.intersect_p_grp.keys())>0:
+                        
+            for ix, cols in enumerate(self.intersect_p_var_sep):
                 
-            if self.y_train is not None and len(self.y_train.shape) == 1 and self.y_train.dtype.kind in ['i','O','U']:
-                self.y_train, self.pos_label2 = check_label(self.y_train, self.pos_label, self.neg_label)
+                intersect_col = self.x_test[list(cols)].copy()
+                self.protected_features_cols.loc[:,self.intersect_p_var_names[ix]] = intersect_col.apply(lambda row: '_'.join([str(col) for col in row]),axis = 1)        
+
+    def _process_intersect_p_vars(self):
+        if len(self.intersect_p_grp.keys())>0:
+            removed_cols = []
+            for ix, cols in enumerate(self.intersect_p_var_sep.copy()):
+                for col in cols:
+                    if (col not in self.p_var) and (col not in self.x_test.columns):
+                        removed_cols.append(col)                        
+                        self.intersect_p_grp.pop(self.intersect_p_var_names[ix])
+                        self.intersect_p_var_names.pop(ix)
+                        break
+            if len(removed_cols)>0:
+                print("Warning: All intersectional columns containing",','.join(removed_cols), 'will be ommited as the column cannot be found.')
+
+    def _find_intersect_vars_in_p_grp_input(self):
+        intersect_p_var_sep = []
+        intersect_p_var_names = []        
+        intersect_p_grp = {}
+        for key in self.p_var:
+            if not '-' in key:
+                pass
+            else:                                                              
+                
+                intersect_cols = key.split('-')
+                intersect_p_var_names.append(key) 
+                intersect_p_var_sep.append(tuple(intersect_cols))                            
+                intersect_p_grp[key]= self.p_grp[key]
+
+        self.intersect_p_grp = intersect_p_grp
+        self.intersect_p_var_names = intersect_p_var_names
+        self.intersect_p_var_sep = intersect_p_var_sep
+        self.non_intersect_pvars = list(set(self.p_grp.keys()) - set(self.intersect_p_grp.keys())) 
+        
+    def _process_up_grp_input(self):
+        """
+        Check if up_grp is not provided and initiaize the up_grp.
+        If corresponding p_grp contain labels then assign the rest of labels using set difference.
+        If corresponding p_grp contains policy assign an empty list
+
+        Returns:
+        ---------------
+        None : None
+        """
+
+        #If None then initialise
+        if self.up_grp is None:
+            self.up_grp = dict.fromkeys(self.p_grp)    
+       
+        # Value assignment        
+        for key in self.p_grp.keys():
+            # If key not in up_grp and policy, create a new key and assign empty list
+            if (key not in self.up_grp) and (isinstance(self.p_grp[key][0],str)):
+                self.up_grp[key] = []
+            # None and not policy
+            elif (self.up_grp[key] is None) and (not isinstance(self.p_grp[key][0],str)):
+                self.up_grp[key] = [list(set(self.check_p_grp[key])-set(self.p_grp[key][0]))]
+            # Not None and not policy
+            elif (self.up_grp[key] is not None) and (not isinstance(self.p_grp[key][0],str)):
+                pass
+            # Overwrite if p_grp contains policy
+            else:
+                self.up_grp[key] = []
 
     def check_protected_columns(self):     
         """
@@ -227,9 +328,10 @@ class ModelContainer(object):
         elif self.protected_features_cols is not None :
             if sum([x in self.p_var for x in self.protected_features_cols.columns]) != len(self.p_var): 
                 err_.append(['value_error', "p_var", str(self.p_var), str(list(self.protected_features_cols.columns))])
-        elif self.protected_features_cols is None and self.x_test is not None :           
-            if sum([x in self.p_var for x in self.x_test.columns]) != len(self.p_var) : 
-                err_.append(['value_error', "p_var", str(self.p_var), str(list(self.x_test.columns))])
+        # Commented to include intersectional columns
+        # elif self.protected_features_cols is None and self.x_test is not None :           
+        #     if sum([x in self.p_var for x in self.x_test.columns]) != len(self.p_var) : 
+        #         err_.append(['value_error', "p_var", str(self.p_var), str(list(self.x_test.columns))])
           
         if err_ == []:
             return successMsg
@@ -248,8 +350,7 @@ class ModelContainer(object):
         successMsg : string
             If there are no errors, a success message will be returned       
         """
-        err_ = []
-
+        err_ = []        
         successMsg = "data consistency check completed without issue"
 
         test_row_count = self.y_true.shape[0] 
@@ -282,25 +383,22 @@ class ModelContainer(object):
             x_test_cols = len(self.x_test.columns)
             if x_train_cols != x_test_cols:
                 err_.append(['length_error', "x_train column", str(x_train_cols), str(x_test_cols)])
-
-        #check pos_label size and neg_label size
-        for usecase in Fairness.__subclasses__():
-            model_type_to_metric_lookup = (getattr(usecase, "_model_type_to_metric_lookup"))
-            if self.model_type in model_type_to_metric_lookup.keys():
-                    #assumption: model_type is unique across all use cases
-                label_size = model_type_to_metric_lookup.get(self.model_type)[2]
+      
                 
-        # if label size requirement is -1/2, no need to check
-        if label_size > 0:
-            if self.neg_label is None and self.model_type == "uplift":
-                err_.append(['value_error', "neg_label", "None", "not None"])
-            if self.neg_label is not None:
-                neg_label_size = len(self.neg_label)
-                if neg_label_size != label_size:
-                    err_.append(['length_error', "neg_label", str(neg_label_size), str(label_size)])
-            pos_label_size = len(self.pos_label)
-            if pos_label_size != label_size:
-                err_.append(['length_error', "pos_label", str(pos_label_size), str(label_size)])
+        # neg_label cannot be None for uplift model type
+        if self.neg_label is None and self.model_type == "uplift":
+            err_.append(['value_error', "neg_label", "None", "not None"])
+
+        #check pos_label and neg_label for overlap labels
+        if self.neg_label is not None and not set(self.pos_label).isdisjoint(set(self.neg_label)):
+            err_.append(['value_error', "pos_label and neg_label", "pos_label {} and neg_label {}".format(self.pos_label, self.neg_label), "no label overlap"])
+
+        #check p_grp and up_grp for overlap values
+        if self.up_grp is not None:
+            for key in self.p_grp.keys():
+                if not isinstance(self.p_grp[key], str) and key in self.up_grp.keys():
+                    if not set(self.p_grp[key][0]).isdisjoint(set(self.up_grp[key][0])):
+                        err_.append(['value_error', "p_grp and up_grp", "p_grp {} and up_grp {}".format(self.p_grp[key], self.up_grp[key]), "no value overlap"])
 
         #y_pred and y_prob should not be both none
         if self.y_pred is None and self.y_prob is None:
@@ -314,10 +412,11 @@ class ModelContainer(object):
         if len(y_true_shape) == 1:
             y_true_shape = (y_true_shape[0], 1)
         
-        check_list = ["y_pred","y_prob", "sample_weight"]
-        check_order = ["row","column"]
+        check_list = ["y_pred", "y_prob", "sample_weight"]  
+        check_order = ["row", "column"]
         check_dict = {}
         for var_name in check_list:
+            
             var_value = getattr(self, var_name)
             if var_value is not None:
                 if type(var_value) == list:
@@ -328,15 +427,24 @@ class ModelContainer(object):
                         given_size = var_shape[i]
                     except IndexError:
                         given_size = 1
-                    expected_size = y_true_shape[i]
-                    
+                    expected_size = y_true_shape[i]                                
                     #Based on the length of pos_label, if 1, the y_prob will be nx1
-                    #Based on the length of pos_label, if 2, the y_prob will be nx4
-                    if var_name =="y_prob" and check_order[i] == "column" and label_size == 2:
-                        expected_size = 4
-                        
-                    if given_size != expected_size:
-                        err_.append(['length_error', var_name + " " + check_order[i], str(given_size), str(expected_size)])
+                    #Based on the length of pos_label, if 2, the y_prob will be nx4                    
+                    if var_name =="y_prob" and check_order[i] == "column":
+                        if self.model_type =='uplift': 
+                            expected_size = 4                                        
+                        else:
+                        #if var_name =="y_prob" and check_order[i] == "column" :#and label_count == 0 :
+                            expected_size = self.label_count                                                  
+
+                    # When labels are binary, y_prob shape can be n,1 or n,2
+                    if var_name =="y_prob" and check_order[i] == "column" and self.label_count == 2:
+                                            
+                        if given_size > expected_size:
+                            err_.append(['length_error', var_name + " " + check_order[i]+" length", str(given_size)+'>', str(expected_size)])
+                    else:
+                        if given_size != expected_size:
+                            err_.append(['length_error', var_name + " " + check_order[i]+" length", str(given_size), str(expected_size)])
 
         if err_ == []:
             return successMsg
@@ -373,46 +481,91 @@ class ModelContainer(object):
                             function_name="check_label_consistency")            
             self.err.pop()
 
-    def check_label_length(self):
+    def check_unassigned_y_label(self):
         """
-        Checks if the length of labels is correct according to the model_type
-        
+        Check for unassigned label when both pos_label and neg_label is provided by user for multi-class classification models.
+        Store all unassigned label and index based on y_true in tuple as unassigned_y_label.
+
         Returns:
         ---------------
         successMsg : string
-            If there are no errors, a success message will be returned   
+            If there are no errors, a success message will be returned       
+        """
+        successMsg = "unassigned label check completed without issue"
+        label = []
+        index = []
+        if self.neg_label is not None:
+            check_y_label = set(self.y_true)
+            pos_label_input = self.pos_label
+            neg_label_input = self.neg_label if self.neg_label is not None else []
+            input_label = pos_label_input + neg_label_input
+            label = list(check_y_label.difference(set(input_label)))
+
+            #append index of y_true unassigned label 
+            for i in label:
+                idx = np.where(self.y_true == i)
+                index += idx[0].tolist()
+        
+        self.unassigned_y_label = (label, index)
+        return successMsg
+
+    def check_y_prob(self):
+        """
+        Check y_prob and process y_prob in the correct format.
         """
         err_ = []
-        successMsg = "label length check completed without issue"
-        for usecase in Fairness.__subclasses__():
-            model_type_to_metric_lookup = (getattr(usecase, "_model_type_to_metric_lookup"))
-            if self.model_type in model_type_to_metric_lookup.keys():
-                min_label_size = model_type_to_metric_lookup.get(self.model_type)[1]
-                pos_label_size = model_type_to_metric_lookup.get(self.model_type)[2]
-                if min_label_size != -1 :
-                    if self.pos_label is not None :
-                        if len(self.pos_label) != pos_label_size :
-                            err_.append(["length_error", "pos_label length", len(self.pos_label), str(pos_label_size)])
-                    if self.y_true is not None :
-                        if len(set(self.y_true))<min_label_size :
-                            err_.append(["length_error", "y_true label length", len(set(self.y_true)), '>='+str(min_label_size)])
-                    if self.y_train is not None :
-                        if len(set(self.y_train))<min_label_size :
-                            err_.append(["length_error", "y_train label length", len(set(self.y_train)), '>='+str(min_label_size)])
-                    if self.y_pred is not None :
-                        if len(set(self.y_pred))<min_label_size :
-                            err_.append(["length_error", "y_pred label length", len(set(self.y_pred)), '>='+str(min_label_size)])
+        successMsg = "y_prob check completed without issue"
+
+        if isinstance(self.y_prob, list):
+            self.y_prob = np.array(self.y_prob)
+
+        if self.y_prob is not None and self.y_prob.ndim == 2 and self.y_prob.shape[1] > 2 and not isinstance(self.y_prob, pd.DataFrame):
+            err_.append(['type_error', 'y_prob', str(type(self.y_prob)), str(pd.DataFrame) + " with labels as column names"])
 
         if err_ == []:
             return successMsg
         else:
             for i in range(len(err_)):
                 self.err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                            function_name="check_label_length")            
+                            function_name="check_y_prob")            
+            self.err.pop()
+
+    def check_classes(self):
+        """
+        Check the classes_ attribute of the model and assign attribute if it does not exist.
+        """
+        err_ = []
+        successMsg = "classes check completed without issue"
+        if not issubclass(self.model_object.__class__, ModelWrapper) and not hasattr(self.model_object, 'classes_'):
+            if isinstance(self.y_prob, pd.DataFrame) and self.y_prob.shape[1] > 2:
+                self.model_object.classes_ = np.array(self.y_prob.columns.tolist())
+            else:
+                if self.y_train is not None:
+                    self.model_object.classes_ = np.unique(self.y_train)
+                else:
+                    self.model_object.classes_ = np.unique(self.y_true)
+        
+        # Check consistency for classes
+        if self.y_prob is not None and self.y_prob.ndim == 2 and self.y_prob.shape[1] > 2:
+            if not np.array_equal(self.model_object.classes_, self.y_prob.columns):
+                err_.append(['value_error', "classes_", str(self.model_object.classes_), "labels in classes_ to be consistent with y_prob dataframe column names"])
+
+        if self.y_true is not None and set(self.model_object.classes_) != set(self.y_true):
+            err_.append(['value_error', "classes_", str(self.model_object.classes_), "labels in classes_ to be consistent with y_true"])
+
+        if self.y_pred is not None and set(self.model_object.classes_) != set(self.y_pred):
+            err_.append(['value_error', "classes_", str(self.model_object.classes_), "labels in classes_ to be consistent with y_pred"])
+
+        if err_ == []:
+            return successMsg
+        else:
+            for i in range(len(err_)):
+                self.err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
+                            function_name="check_classes")            
             self.err.pop()
                     
     def clone(self, y_true, model_object, y_pred=None, y_prob=None, y_train=None, train_op_name="fit",
-                 predict_op_name ="predict", feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None):
+                 predict_op_name ="predict", sample_weight=None,  pos_label=[[1]], neg_label=None, predict_proba_op_name='predict_proba'):
 
         """
         Clone ModelContainer object
@@ -444,13 +597,8 @@ class ModelContainer(object):
                 The method used by the model_object to predict the labels or probabilities. By default a sklearn model is assumed.
                 For uplift models, this method should predict the probabilities and for non-uplift models it should predict the labels.
 
-        feature_imp : pandas.DataFrame or None, default=None
-                The feature importance computed on the model object fitted to x_train. 
-                Index:
-                    RangeIndex
-                Columns:
-                    Name: Feature, dtype: str      
-                    Name: Importance, dtype: float   
+        predict_proba_op_name : str, default = "predict_proba"
+                The method used by the model_object to predict the probabilities. By default a sklearn model is assumed.
 
         sample_weight : list, numpy.ndarray or None, default=None
                 Used to normalize y_true & y_pred.
@@ -469,7 +617,7 @@ class ModelContainer(object):
         ----------------
         clone_obj : object
         """
-        clone_obj = ModelContainer(y_true = y_true, p_var = self.p_var, p_grp = self.p_grp, x_train= self.x_train,  x_test = self.x_test, model_object = model_object, model_type = self.model_type, model_name = "clone", y_pred=y_pred, y_prob=y_prob, y_train = y_train, protected_features_cols=self.protected_features_cols, train_op_name=train_op_name,
-                 predict_op_name = predict_op_name, feature_imp=self.feature_imp, sample_weight=self.sample_weight, pos_label=pos_label, neg_label=neg_label)
+        clone_obj = ModelContainer(y_true = y_true, p_grp = self.p_grp, up_grp = self.up_grp, x_train= self.x_train,  x_test = self.x_test, model_object = model_object, model_type = self.model_type, model_name = "clone", y_pred=y_pred, y_prob=y_prob, y_train = y_train, protected_features_cols=self.protected_features_cols, train_op_name=train_op_name,
+                 predict_op_name = predict_op_name, sample_weight=self.sample_weight, pos_label=pos_label, neg_label=neg_label, predict_proba_op_name=predict_proba_op_name)
         
         return clone_obj
