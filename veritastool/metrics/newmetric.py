@@ -16,20 +16,24 @@ class NewMetric: # discuss the case when more than 1 new metric is defined, new 
     metric_definition: str
         Full name of metric
 
-    metric_parity_ratio: str
-        "parity" or "ratio"
+    metric_short_name: str
+        Short-form name of metric
+
+    metric_difference_ratio: str
+        "difference" or "ratio"
 
     enable_flag: boolean
         Whether the new metric can be a primary metric
     """
     metric_type = "fair"
     metric_group = "classification"
-    metric_name = "custom base"
-    metric_definition = "custom_new_metric base"
-    metric_parity_ratio = "parity"
+    metric_name = "custom_base"
+    metric_definition = "custom new metric base"
+    metric_short_name = "custom"
+    metric_difference_ratio = "difference"
     enable_flag = True
 
-    def compute(self):
+    def compute(self, **kwargs):
         """
         Returns tuple of metric value and privileged group value
 
