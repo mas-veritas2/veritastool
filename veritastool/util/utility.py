@@ -562,7 +562,7 @@ def check_multiprocessing(n_threads):
 
     return n_threads
 
-def test_function_cs():
+def check_install():
     from ..fairness import CreditScoring
     from ..model import ModelContainer
     import pickle
