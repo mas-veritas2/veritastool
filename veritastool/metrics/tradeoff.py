@@ -408,7 +408,7 @@ class TradeoffRate(object):
         _compute_equal_opportunity_ratio_tr : float
                 tradeoff value
         """
-        return self.tpr_a / self.tpr_b
+        return self.tpr_b/self.tpr_a 
 
     def _compute_disparate_impact_tr(self):
         """
@@ -419,7 +419,7 @@ class TradeoffRate(object):
         _compute_disparate_impact_tr : float
                 tradeoff value
         """
-        return self.selection_rate_a / self.selection_rate_b
+        return self.selection_rate_b/ self.selection_rate_a 
 
     def _compute_demographic_parity_tr(self):
         """
@@ -452,7 +452,7 @@ class TradeoffRate(object):
         _compute_false_omission_rate_ratio_tr : float
                 tradeoff value
         """
-        return self.forr_a / self.forr_b
+        return self.forr_b/ self.forr_a  
 
     def _compute_false_discovery_rate_parity_tr(self):
         """
@@ -496,7 +496,7 @@ class TradeoffRate(object):
         _compute_positive_predictive_ratio_tr : float
                 tradeoff value
         """
-        return self.ppv_a / self.ppv_b
+        return self.ppv_b/self.ppv_a
 
     def _compute_negative_predictive_parity_tr(self):
         """
@@ -584,7 +584,7 @@ class TradeoffRate(object):
         _compute_fpr_ratio_tr : float
                 tradeoff value
         """
-        return self.fpr_a / self.fpr_b
+        return self.fpr_b/ self.fpr_a 
 
     def _compute_equalized_odds_tr(self):
         """
@@ -595,7 +595,7 @@ class TradeoffRate(object):
         _compute_equalized_odds_tr : float
                 tradeoff value
         """
-        return ((self.tpr_a - self.tpr_b) + (self.fpr_a - self.fpr_b))/2
+        return ((self.tpr_a + self.fpr_a) - (self.tpr_b + self.fpr_b))/2
 
     def _compute_equalized_odds_ratio_tr(self):
         """
@@ -606,7 +606,8 @@ class TradeoffRate(object):
         _compute_equalized_odds_ratio_tr : float
                 tradeoff value
         """
-        return ((self.tpr_a / self.tpr_b) + (self.fpr_a / self.fpr_b))/2
+        return ((self.tpr_b + self.fpr_b) / (self.tpr_a + self.fpr_a))/2
+
 
     def _compute_negative_equalized_odds_tr(self):
         """
@@ -617,7 +618,7 @@ class TradeoffRate(object):
         _compute_negative_equalized_odds_tr : float
                 tradeoff value
         """
-        return ((self.fpr_b - self.fpr_a) + (self.tpr_b - self.tpr_a))/2
+        return ((self.fpr_b + self.tpr_b ) - ( self.fpr_a + self.tpr_a))/2
 
     def _compute_negative_equalized_odds_ratio_tr(self):
         """
@@ -628,7 +629,8 @@ class TradeoffRate(object):
         _compute_negative_equalized_odds_ratio_tr : float
                 tradeoff value
         """
-        return ((self.fpr_b / self.fpr_a) + (self.tpr_b / self.tpr_a))/2
+        return ((self.fpr_b + self.tpr_b - 2) / ( self.fpr_a + self.tpr_a - 2))/2
+
 
     def _compute_calibration_by_group_tr(self):
         """
@@ -639,7 +641,7 @@ class TradeoffRate(object):
         _compute_calibration_by_group_tr : float
                 tradeoff value
         """
-        return ((self.ppv_a - self.ppv_b) + (self.forr_a - self.forr_b)) / 2
+        return ((self.ppv_a + self.forr_a) - (self.ppv_b + self.forr_b)) / 2
 
     def _compute_calibration_by_group_ratio_tr(self):
         """
@@ -650,7 +652,7 @@ class TradeoffRate(object):
         _compute_calibration_by_group_ratio_tr : float
                 tradeoff value
         """
-        return ((self.ppv_a / self.ppv_b) + (self.forr_a / self.forr_b)) / 2
+        return ((self.ppv_b + self.forr_b) / (self.ppv_a + self.forr_a)) / 2
 
     def _compute_rejected_harm_tr(self):
         """

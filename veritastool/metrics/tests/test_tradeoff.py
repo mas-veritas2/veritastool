@@ -5,8 +5,10 @@ import pickle
 from copy import deepcopy
 from tqdm.auto import tqdm
 from sklearn.linear_model import LogisticRegression
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.principles.fairness import Fairness
 from veritastool.usecases.credit_scoring import CreditScoring
@@ -16,16 +18,16 @@ from veritastool.metrics.tradeoff import TradeoffRate
 from veritastool.metrics.performance_metrics import PerformanceMetrics
 from veritastool.util.utility import check_datatype, check_value, check_label
 from veritastool.config.constants import Constants
-#import selection, uplift, util
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 bins = Constants().tradeoff_threshold_bins
 
 #sample feature_imp
 #feature_imp = pd.DataFrame(data = {'features': ['EDUCATION', 'SEX', 'MARRIAGE', 'AGE'], 'values': [0.04, 0.08, 0.03, 0.02]})
 
 #Load Credit Scoring Test Data
-# file = r"C:\Users\brian.zheng\OneDrive - Accenture\General\05 Deliverables\T2\credit_score_dict.pickle"
-file = "veritas-toolkit/veritastool/examples/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 
@@ -215,10 +217,8 @@ def test_compute_negative_equalized_odds_tr():
     assert np.unravel_index(negative_equalized_odds_tr.argmax(), negative_equalized_odds_tr.shape) == (0, 499)
 
 #Load Phase 1-Customer Marketing Uplift Model Data, Results and Related Functions
-# file_prop = r"C:\Users\brian.zheng\OneDrive - Accenture\Desktop\Veritas\Development\veritas_v1\pickle_files\test_mktg_uplift_acq_dict.pickle"
-# file_rej = r"C:\Users\brian.zheng\OneDrive - Accenture\Desktop\Veritas\Development\veritas_v1\pickle_files\test_mktg_uplift_rej_dict.pickle"
-file_prop = "veritas-toolkit/veritastool/resources/data/mktg_uplift_acq_dict.pickle"
-file_rej = "veritas-toolkit/veritastool/resources/data/mktg_uplift_rej_dict.pickle"
+file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)

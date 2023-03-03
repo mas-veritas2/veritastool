@@ -23,7 +23,7 @@ class PredictiveUnderwriting(Fairness, Transparency):
     _model_type_to_metric_lookup = {"classification": ("classification", 2, 1)}
     _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
+    def __init__(self, model_params, fair_threshold, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
         """
         Parameters
         ----------
@@ -95,7 +95,7 @@ class PredictiveUnderwriting(Fairness, Transparency):
         #Positive label is favourable for predictive underwriting use case
         fair_is_pos_label_fav = True
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)               
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display)
+        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features)
         
         self.perf_metric_name = perf_metric_name
        

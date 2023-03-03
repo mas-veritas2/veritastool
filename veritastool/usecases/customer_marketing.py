@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 from ..principles import Fairness, Transparency
 from ..util.utility import check_datatype, check_value
@@ -22,7 +23,7 @@ class CustomerMarketing(Fairness,Transparency):
                                    "classification":("classification", 0, 1)}
     _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
+    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
         """
         Parameters
         ----------
@@ -112,7 +113,7 @@ class CustomerMarketing(Fairness,Transparency):
         """
         #Positive label is favourable for customer marketing use case
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display)
+        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features)
 
         # This captures the fair_metric input by the user
         self.fair_metric_input = fair_metric_name
@@ -285,6 +286,55 @@ class CustomerMarketing(Fairness,Transparency):
     
             else:
                 return [None] * 8
+            
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
+                            
+        pos_class_count = np.isin(grp['y_true'],['CR','TR']).sum()
+        neg_class_count = np.isin(grp['y_true'],['CN','TN']).sum()          
+        if is_max_bias:      
+            metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_e_lift=grp['e_lift'].values)
+        else:
+            metric_val = pos_class_count + neg_class_count
+
+        return pd.Series([pos_class_count, neg_class_count, metric_val])
+
+    def _auto_assign_p_up_groups(self):
+
+        self.perf_metric_obj = PerformanceMetrics(self)
+        mdl = self.model_params[1]
+        for p_var_key in mdl.p_grp.keys():
+            if isinstance(mdl.p_grp[p_var_key],str):
+                if mdl.p_grp[p_var_key] =='max_bias':
+                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, self.model_params)
+                else:
+                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, self.model_params[1])
+                mdl.p_grp[p_var_key]  = p_grp
+                mdl.up_grp[p_var_key] = up_grp
+
+    def _max_bias(self, p_var, mdls):
+        perf_metric, direction = self.translate_fair_to_perf_metric()
+        
+        if self.fair_metric_name == 'rejected_harm':
+            mdl = mdls[0]
+        elif self.fair_metric_name == 'acquire_benefit':
+            mdl = mdls[1]
+
+        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(self.e_lift),pd.Series(mdl.y_true)],axis=1) 
+        max_bias_df.columns=[p_var,'e_lift','y_true']
+        
+        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric))            
+        
+        max_bias_df.columns = ["pos_labels","neg_labels",perf_metric]
+                
+        best_ix, worst_ix, bestgrp_abv_min_size, worstgrp_abv_min_size = self._get_max_min_group(max_bias_df,perf_metric)
+        self.is_pgrp_abv_min_size[p_var] = bestgrp_abv_min_size
+        self.is_upgrp_abv_min_size[p_var] = worstgrp_abv_min_size
+        best = [[best_ix]]
+        worst = [[worst_ix]]
+        if direction == 'lower':
+            best, worst = worst, best
+
+        return best, worst
             
     def _select_fairness_metric_name(self):
         """

@@ -24,7 +24,7 @@ class BaseClassification(Fairness, Transparency):
     _model_type_to_metric_lookup = {"classification": ("classification", 0, 1)}
     _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = True, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
+    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = True, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
         """
         Parameters
         ----------
@@ -97,7 +97,7 @@ class BaseClassification(Fairness, Transparency):
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
         """
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display)
+        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display, tran_features)
         self.perf_metric_name = perf_metric_name
      
         self.e_lift = None
@@ -230,16 +230,16 @@ class BaseClassification(Fairness, Transparency):
             else :
                 return [None] * 8
     
-    def _get_sub_group_data(self, grp, perf_metric='sample_count', model_type=None, is_mas_bias=True):
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
                         
         pos_class_count = 0
         neg_class_count = 0
-        if is_mas_bias:
-                metric_val =  self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
+        if is_max_bias:
+                metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
         else:
                 metric_val = None
         
-        return pd.Series([pos_class_count,neg_class_count,metric_val]) 
+        return pd.Series([pos_class_count, neg_class_count, metric_val]) 
 
 
     def tradeoff(self, output=True, n_threads=1, sigma = 0):
@@ -257,10 +257,10 @@ class BaseClassification(Fairness, Transparency):
         else:
                 super(BaseClassification, self).feature_importance(output,n_threads,correlation_threshold)
 
-    def explain(self, local_index = None, output = True, model_num = None):
+    def explain(self, disable = None, local_index = None, output = True, model_num = None):
                         
         if self.multiclass_flag:
                 print("Transparency analysis is not supported for multiclass classification.")
         else:
-                super(BaseClassification, self).explain(local_index,output,model_num)
+                super(BaseClassification, self).explain(disable,local_index,output,model_num)
 

@@ -1,28 +1,30 @@
 import pickle
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
 from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
-# from veritastool.custom.LRwrapper import LRwrapper
+from veritastool.principles.transparency import Transparency
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 import pandas as pd
 import pytest
 from veritastool.util.errors import *
+import shap
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__))
-file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 
 #Reduce into two classes
 cs["X_train"]['MARRIAGE'] = cs["X_train"]['MARRIAGE'].replace([0, 3],1)
 cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
-#Model Contariner Parameters
+#Model Container Parameters
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
@@ -33,7 +35,6 @@ x_test = cs["X_test"]
 model_name = "credit_scoring"
 model_type = "classification"
 y_prob = cs["y_prob"]
-#model_obj = LogisticRegression(C=0.1)
 model_obj = cs["model"]
 model_obj.fit(x_train, y_train)
 
@@ -374,3 +375,79 @@ def test_check_label():
     # # print('====== test_check_label() expected msg =======\n')
     # # print(msg)
     assert toolkit_exit.value.message == msg
+
+def test_rootcause_group_difference():
+    SEED=123
+    x_train_sample = x_train.sample(n=1000, random_state=SEED)
+    explainer_shap = shap.Explainer(cre_sco_obj.model_params[0].model_object.predict_proba,x_train_sample) 
+    explanation = explainer_shap(x_train_sample)
+    shap_values = np.moveaxis(explanation.values, -1, 0)
+    idx = list(cre_sco_obj.model_params[0].model_object.classes_).index(cre_sco_obj.model_params[0].pos_label[0])
+    shap_values = shap_values[idx]
+    
+    # Test case without feature_mask
+    group_mask = np.where(x_train_sample.SEX == 1, True, False)
+    result = cre_sco_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
+    expected = ['BILL_AMT1', 'LIMIT_BAL', 'BILL_AMT3', 'BILL_AMT2', 'PAY_AMT1', 'BILL_AMT4', 'BILL_AMT6', 'PAY_AMT3', 'PAY_AMT2', 'PAY_AMT4']
+    assert list(result.keys()) == expected
+    
+    # Test case with feature_mask
+    prot_var_df = x_train_sample['MARRIAGE']
+    privileged_grp = cre_sco_obj.model_params[0].p_grp.get('MARRIAGE')[0]
+    unprivileged_grp = cre_sco_obj.model_params[0].up_grp.get('MARRIAGE')[0]
+    feature_mask = np.where(prot_var_df.isin(privileged_grp), True, -1)
+    feature_mask = np.where(prot_var_df.isin(unprivileged_grp), False, feature_mask)
+    indices = np.where(np.isin(feature_mask, [0, 1]))
+    shap_values = shap_values[indices]
+    group_mask = feature_mask[np.where(feature_mask != -1)].astype(bool)
+    result = cre_sco_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
+    expected = ['LIMIT_BAL', 'PAY_AMT2', 'BILL_AMT4', 'PAY_AMT1', 'BILL_AMT1', 'BILL_AMT2', 'PAY_AMT5', 'BILL_AMT5', 'BILL_AMT3', 'PAY_AMT4']
+    assert list(result.keys()) == expected
+
+def test_rootcause():
+    # Check p_var parameter: default all p_var
+    cre_sco_obj.rootcause(p_var=[])
+    assert bool(cre_sco_obj.rootcause_values) == True
+    assert len(cre_sco_obj.rootcause_values.keys()) == 2
+    assert len(cre_sco_obj.rootcause_values['SEX'].values()) == 10
+    
+    # Check p_var parameter for 1 p_var, input_parameter_filtering to remove 'other_pvar'
+    cre_sco_obj.rootcause(p_var=['SEX', 'other_pvar'])
+    assert bool(cre_sco_obj.rootcause_values) == True
+    assert len(cre_sco_obj.rootcause_values.keys()) == 1
+    assert len(cre_sco_obj.rootcause_values['SEX'].values()) == 10
+    
+    # Check invalid p_var input
+    with pytest.raises(MyError) as toolkit_exit:
+        cre_sco_obj.rootcause(p_var=123)
+    assert toolkit_exit.type == MyError
+    
+    # Check multi_class_label parameter: 
+    cre_sco_obj.rootcause(multi_class_target=0)
+    assert cre_sco_obj.rootcause_label_index == -1
+
+def test_feature_imp_corr(capfd):
+    cre_sco_obj.feature_imp_status_corr = False
+    cre_sco_obj.feature_importance()
+
+    # Check _print_correlation_analysis
+    captured = capfd.readouterr()
+    assert "* No surrogate detected based on correlation analysis." in captured.out
+
+    # Check correlation_threshold
+    cre_sco_obj.feature_imp_status_corr = False
+    cre_sco_obj.feature_importance(correlation_threshold=0.6)
+    assert cre_sco_obj.feature_imp_status_corr == True
+    assert cre_sco_obj.correlation_threshold == 0.6
+
+    # Disable correlation analysis
+    cre_sco_obj.feature_imp_status_corr = False
+    cre_sco_obj.feature_importance(disable=['correlation'])
+    captured = capfd.readouterr()
+    assert "Correlation matrix skipped" in captured.out
+
+def test_compute_correlation():
+    # Check top 3 features
+    assert len(cre_sco_obj.corr_top_3_features) <= 6
+    # Check surrogate features
+    assert bool(cre_sco_obj.surrogate_features['SEX']) == False

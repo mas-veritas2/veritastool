@@ -192,7 +192,7 @@ class Fairness:
         self.fair_is_pos_label_fav = fair_is_pos_label_fav
         self.fair_metric_type = fair_metric_type
         self.fairness_metric_value_input = fairness_metric_value_input
-        self.correlation_threshold = None
+        self.correlation_threshold = 0.7
         self.min_samples_per_label = Constants().min_samples_per_label
         self.fair_metric_obj = None
         self.perf_metric_obj = None
@@ -296,9 +296,7 @@ class Fairness:
         self.map_policy_to_method = {
         'maj_min':  self._majority_vs_minority,
         'maj_rest' : self._majority_vs_rest,
-        'max_bias': self._max_bias,
-        'max_bias_uplift': self._max_bias_uplift,
-        'max_bias_reg': self._max_bias_reg
+        'max_bias': self._max_bias
         }
 
         self.map_mitigate_to_method = {
@@ -311,7 +309,7 @@ class Fairness:
     
     def _majority_vs_minority(self, p_var, mdl):
         
-        if mdl.model_type =='base_regression':
+        if mdl.model_type =='regression':
             maj = [mdl.protected_features_cols[p_var].value_counts().nlargest(1).index.values.tolist()]
             min = [mdl.protected_features_cols[p_var].value_counts().nsmallest(1).index.values.tolist()]
         else:
@@ -319,7 +317,7 @@ class Fairness:
             maj_min_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true)],axis=1)
             maj_min_df.columns=[p_var,'y_true']
             maj_min_df = maj_min_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: \
-                    self._get_sub_group_data(grp, None, self.model_params[0].model_type, False)) 
+                    self._get_sub_group_data(grp, None, False)) 
             maj_min_df.columns = ["pos_labels","neg_labels",'sample_count']            
             maj_ix,min_ix,majgrp_abv_min_size,mingrp_abv_min_size = self._get_max_min_group(maj_min_df)
             self.is_pgrp_abv_min_size[p_var] = majgrp_abv_min_size
@@ -340,7 +338,7 @@ class Fairness:
             maj_rest_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true)],axis=1)
             maj_rest_df.columns=[p_var,'y_true']
             maj_rest_df = maj_rest_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: \
-                    self._get_sub_group_data(grp, None, self.model_params[0].model_type, False)) 
+                    self._get_sub_group_data(grp, None, False)) 
             maj_rest_df.columns = ["pos_labels","neg_labels",'sample_count']
             
         
@@ -362,36 +360,19 @@ class Fairness:
         return maj, rest
 
     def translate_fair_to_perf_metric(self):
+        perf_metric = FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][6]
+        direction = FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][7]
+        return perf_metric, direction
 
-        return FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][6]
-
-    def _get_sub_group_data(self, grp, perf_metric='sample_count', model_type=None, is_mas_bias=True):
-                            
-        if model_type == 'uplift':
-            pos_class_count = np.isin(grp['y_true'],['CR','TR']).sum()
-            neg_class_count = np.isin(grp['y_true'],['CN','TN']).sum()          
-            if is_mas_bias:      
-                metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_e_lift=grp['e_lift'].values)
-            else:
-                metric_val = pos_class_count+ neg_class_count
-
-        elif model_type=='base_regression':
-            pos_class_count = None
-            neg_class_count = None
-            if is_mas_bias:
-                metric_val =  self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
-            else:
-                metric_val = None
-        else:                
-            pos_class_count = grp['y_true'].values.sum()
-            neg_class_count = (1-grp['y_true'].values).sum()
-            if is_mas_bias:
-                metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values)                
-            else:
-                metric_val = pos_class_count+ neg_class_count
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):            
+        pos_class_count = grp['y_true'].values.sum()
+        neg_class_count = (1-grp['y_true'].values).sum()
+        if is_max_bias:
+            metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values, subgrp_y_prob=grp['y_prob'].values)                
+        else:
+            metric_val = pos_class_count+ neg_class_count
 
         return pd.Series([pos_class_count,neg_class_count,metric_val]) 
-         
 
     def _get_max_min_group(self, subGrpDf, perf_metric='sample_count'):
         max_group_found = False
@@ -414,38 +395,13 @@ class Fairness:
                 break
         return best_ix, worst_ix, max_group_found, min_group_found
 
-    def _max_bias_uplift(self, p_var, mdls):
-        perf_metric = self.translate_fair_to_perf_metric()
-        
-        if self.fair_metric_name == 'rejected_harm':
-            mdl = mdls[0]
-        elif self.fair_metric_name == 'acquire_benefit':
-            mdl = mdls[1]
-
-        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(self.e_lift),pd.Series(mdl.y_true)],axis=1) 
-        max_bias_df.columns=[p_var,'e_lift','y_true']
-        
-        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric,self.model_params[0].model_type))            
-        
-        max_bias_df.columns = ["pos_labels","neg_labels",perf_metric]
-                
-        best_ix, worst_ix, bestgrp_abv_min_size, worstgrp_abv_min_size = self._get_max_min_group(max_bias_df,perf_metric)
-        self.is_pgrp_abv_min_size[p_var] = bestgrp_abv_min_size
-        self.is_upgrp_abv_min_size[p_var] = worstgrp_abv_min_size
-        best = [[best_ix]]
-        worst = [[worst_ix]]
-
-        return best, worst
-
     def _max_bias(self, p_var, mdl):
-
-        perf_metric = self.translate_fair_to_perf_metric()
+        perf_metric, direction = self.translate_fair_to_perf_metric()
         
-        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred)],axis=1)
-
-        max_bias_df.columns=[p_var,'y_true','y_pred']
+        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred),pd.Series(mdl.y_prob)],axis=1)
+        max_bias_df.columns=[p_var,'y_true','y_pred','y_prob']
         
-        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric,self.model_params[0].model_type))            
+        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric))            
         
         max_bias_df.columns = ["pos_labels","neg_labels",perf_metric]
                 
@@ -454,72 +410,19 @@ class Fairness:
         self.is_upgrp_abv_min_size[p_var] = worstgrp_abv_min_size
         best = [[best_ix]]
         worst = [[worst_ix]]
-
-        return best, worst
-
-    def _max_bias_reg(self, p_var, mdl):
-
-        perf_metric = self.translate_fair_to_perf_metric()
-        
-        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred)],axis=1)
-
-        max_bias_df.columns=[p_var,'y_true','y_pred']
-        
-        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric, self.model_params[0].model_type))            
-        
-        max_bias_df.columns = ["pos_labels","neg_labels",perf_metric]
-        
-        best_ix, worst_ix, bestgrp_abv_min_size, worstgrp_abv_min_size = self._get_max_min_group(max_bias_df,perf_metric)
-        self.is_pgrp_abv_min_size[p_var] = bestgrp_abv_min_size
-        self.is_upgrp_abv_min_size[p_var] = worstgrp_abv_min_size
-        best = [[best_ix]]
-        worst = [[worst_ix]]
-
-        best = [[max_bias_df[perf_metric].idxmax()]]
-        worst = [[max_bias_df[perf_metric].idxmin()]]
+        if direction == 'lower':
+            best, worst = worst, best
 
         return best, worst
 
     def _auto_assign_p_up_groups(self):
-
         self.perf_metric_obj = PerformanceMetrics(self)
-
-        if self.model_params[0].model_type=='uplift':
-            
-            _suffix = '_uplift'
-            mdl = self.model_params[1]
-            for p_var_key in mdl.p_grp.keys():
-                if isinstance(mdl.p_grp[p_var_key],str):
-                    if mdl.p_grp[p_var_key] =='max_bias':
-                        p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]+_suffix](p_var_key, self.model_params)
-                    else:
-                        p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, self.model_params[1])
-                    mdl.p_grp[p_var_key]  = p_grp
-                    mdl.up_grp[p_var_key] = up_grp
-                        
-        elif self.model_params[0].model_type=='base_regression':
-            
-            _suffix = '_reg'
-            mdl = self.model_params[0]
-            for p_var_key in mdl.p_grp.keys():
-                if isinstance(mdl.p_grp[p_var_key],str):
-                    if mdl.p_grp[p_var_key] =='max_bias':
-                        p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]+_suffix](p_var_key, mdl)
-                    else:
-                        p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
-                    mdl.p_grp[p_var_key]  = p_grp
-                    mdl.up_grp[p_var_key] = up_grp
-
-        else :
-            
-            mdl = self.model_params[0]
-            for p_var_key in mdl.p_grp.keys():
-                if isinstance(mdl.p_grp[p_var_key],str):                    
-                    
-                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
-                    
-                    mdl.p_grp[p_var_key]  = p_grp
-                    mdl.up_grp[p_var_key] = up_grp
+        mdl = self.model_params[0]
+        for p_var_key in mdl.p_grp.keys():
+            if isinstance(mdl.p_grp[p_var_key],str):                    
+                p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
+                mdl.p_grp[p_var_key]  = p_grp
+                mdl.up_grp[p_var_key] = up_grp
 
     def _check_non_policy_p_var_min_samples(self):
         
@@ -532,7 +435,7 @@ class Fairness:
                 p_up_df = pd.concat([self.model_params[0].protected_features_cols[p_var_key],pd.Series(self.model_params[0].y_true)],axis=1)
                 p_up_df.columns=[p_var_key,'y_true']
                 p_up_df = p_up_df.groupby(self.model_params[0].protected_features_cols[p_var_key]).apply(lambda grp: \
-                        self._get_sub_group_data(grp, None, self.model_params[0].model_type, False)) 
+                        self._get_sub_group_data(grp, None, False)) 
                 p_up_df.columns = ["pos_labels","neg_labels",'sample_count']
                         
                 maj_pos_lbls  = p_up_df.loc[p_grp_vals]['pos_labels'].values.sum()                
@@ -816,12 +719,12 @@ class Fairness:
         # Extract the list of API functions to be skipped
         self.compile_disable = list(self.compile_disable_map.keys()) if self.compile_disable_map else (exp_disable if self.compile_disable_map is None else [])
 
-        # Check that `evaluate` and `feature_importance` keys are present in `compile_disable_map` dict
-        self.compile_disable_map.update([(key, []) for key in ['evaluate', 'feature_importance'] if key not in self.compile_disable_map])
+        # Check that `evaluate`,`feature_importance` and `explain` keys are present in `compile_disable_map` dict
+        self.compile_disable_map.update([(key, []) for key in ['evaluate', 'feature_importance', 'explain'] if key not in self.compile_disable_map])
 
-        # Check that `evaluate` and `feature_importance` keys are present in `compile_disable_map` dict if nothing is disabled
+        # Check that `evaluate`,`feature_importance` and `explain` keys are present in `compile_disable_map` dict if nothing is disabled
         if not self.compile_disable:
-            self.compile_disable_map = {'evaluate': [], 'feature_importance': []}
+            self.compile_disable_map = {'evaluate': [], 'feature_importance': [], 'explain': []}
 
         _input_parameter_lookup = {
             "disable": [self.compile_disable, (list,), exp_disable]
@@ -923,9 +826,9 @@ class Fairness:
             print('{:5s}{:35s}{:<10}'.format('','correlation analysis','skipped'))
 
         #check explain section in transparency if explain is not in disable
-        if 'explain' not in self.compile_disable:
-            self.tran_artifact = self._tran_compile()
-        elif 'explain' in self.compile_disable:
+        if('explain' not in self.compile_disable or self.compile_disable_map['explain']):
+            self.tran_artifact = self._tran_compile(disable=list(self.compile_disable_map['explain']))
+        else:
             self.tran_artifact = None
             print('{:40s}{:<10}'.format('Running transparency','skipped'))
 
@@ -1049,16 +952,18 @@ class Fairness:
                 y_train = k.y_train
                 model_object = k.model_object
                 x_test = k.x_test
+                model_type = k.model_type
                 train_op_name = k.train_op_name
                 predict_op_name = k.predict_op_name
                 predict_proba_op_name = k.predict_proba_op_name
+                op_name = [train_op_name, predict_op_name] + [predict_proba_op_name] if model_type != 'regression' else []
                 # if model_object is not provided, skip feature_importance
                 if model_object is None:
                     self.feature_imp_status = -1
                     print("Skipped: Feature importance is skipped as model_object is not passed")
                     return
                 else :
-                    for var_name in [train_op_name, predict_op_name, predict_proba_op_name]:
+                    for var_name in op_name:
                         #to check callable functions
                         try:
                             callable(getattr(model_object, var_name)) 
@@ -1187,11 +1092,11 @@ class Fairness:
             x_test = use_case_object.model_params[k].x_test
             pos_label = use_case_object.model_params[k].pos_label
             neg_label = use_case_object.model_params[k].neg_label
+            model_type = use_case_object.model_params[k].model_type
             train_op = getattr(model_obj, use_case_object.model_params[k].train_op_name)
             predict_op = getattr(model_obj, use_case_object.model_params[k].predict_op_name)
-            predict_proba_op = getattr(model_obj, use_case_object.model_params[k].predict_proba_op_name)
+            predict_proba_op = getattr(model_obj, use_case_object.model_params[k].predict_proba_op_name) if model_type != 'regression' else None
             obj_in = use_case_object.model_params[k]
-            model_type = use_case_object.model_params[k].model_type
             #show progress bar
             fimp_pbar.update(round(worker_progress*0.9/len(use_case_object.model_params), 2))
 
@@ -1214,10 +1119,10 @@ class Fairness:
                 if isinstance(x_test, pd.DataFrame):
                     #drop protected variable and predict  
                     pre_y_pred_new = np.array(predict_op(x_test.drop(columns=[p_variable])))
-                    pre_y_prob_new = np.array(predict_proba_op(x_test.drop(columns=[p_variable])))
+                    pre_y_prob_new = np.array(predict_proba_op(x_test.drop(columns=[p_variable]))) if model_type != 'regression' else None
                 else :
                     pre_y_pred_new = predict_op(x_train, y_train, p_variable) # train_op to handle drop column i inside train_op
-                    pre_y_prob_new = predict_proba_op(x_train, y_train, p_variable) # train_op to handle drop column i inside train_op
+                    pre_y_prob_new = predict_proba_op(x_train, y_train, p_variable) if model_type != 'regression' else None # train_op to handle drop column i inside train_op
             except:
                 #else print skipped and return None
                 print("Skipped: LOCO analysis is skipped for [", p_variable, "] due to x_test/y_test error")
@@ -1319,7 +1224,7 @@ class Fairness:
                 return
                 
             # Extract n_features from transparency if x_test features > 20 else extract all features
-            feature_cols = np.array(self.tran_top_features[0][:20]) if self.model_params[0].x_test.shape[1] > 20 else np.array(self.model_params[0].x_test.columns)
+            feature_cols = np.array(self.tran_top_features[0]['Feature_name'][:20]) if self.model_params[0].x_test.shape[1] > 20 else np.array(self.model_params[0].x_test.columns)
             p_var_cols = np.array(self.model_params[0].non_intersect_pvars)
             feature_cols = [col for col in feature_cols if col not in p_var_cols]
             # Feature_columns value from x_test
@@ -1353,11 +1258,11 @@ class Fairness:
             # Identify top 3 features with highest correlation coefficient below threshold
             corr_df_filtered = self.corr_df.abs()
             top_3_features = {p_var: [] for p_var in p_var_columns}
-            for i in p_var_columns:
-                corr_row = corr_df_filtered.loc[:, i]
+            for p_var in p_var_columns:
+                corr_row = corr_df_filtered.loc[:, p_var]
                 corr_row = corr_row.drop(labels=surrogate_set, axis=0)
-                top_3 = corr_row.sort_values(ascending=False).iloc[:3]
-                top_3_features[i] = list(top_3.index)
+                top_3 = corr_row[corr_row.index != p_var].nlargest(3)
+                top_3_features[p_var] = list(top_3.index)
 
             # Concatenate for all protected variables and get unique features
             self.corr_top_3_features = list(set(sum(top_3_features.values(), [])))
@@ -1664,7 +1569,7 @@ class Fairness:
             if surrogates:
                 surrogate_list.extend(surrogates.keys())
         
-        display_cols = list(self.surrogate_features.keys()) + surrogate_list + self.corr_top_3_features
+        display_cols = set(list(self.surrogate_features.keys()) + surrogate_list + self.corr_top_3_features)
         display_df = self.corr_df.loc[display_cols, display_cols]
         
         print("\nPartial correlation matrix (Most correlated features for {}):".format(", ".join(self.surrogate_features.keys())))
@@ -1911,15 +1816,42 @@ class Fairness:
 
             return tuple(y_pred_copy)
 
-    def _reweigh(self, p_var, weights, transform_x, transform_y, model_num):      
+    def _reweigh(self, p_var, weights, transform_x, transform_y, model_num):
+        """
+        Return debiased weights for individual samples of training dataset.   
+        If empty, all protected variables are used. Only declared non-intersectional protected variables are supported.
 
+        Parameters
+        ----------
+        p_var : list of strings
+                Protected variables to be considered for reweighing.
+
+        weights : numpy.ndarray
+                An array of sample weights.
+
+        transform_x : pandas.DataFrame
+                The transformed feature data to use for computing the reweighing factors.
+
+        transform_y : pandas.Series, numpy.ndarray, list
+                The transformed target data to use for computing the reweighing factors.
+
+        model_num : int
+                The index of model_params to be used for reweighing.
+
+        Returns
+        -------
+        sample_weight_t : numpy.ndarray
+                The adjusted sample weights computed using the reweighing factors.
+
+        reweigh_factors_dict : dict
+                A dictionary of the reweighing factors for each p_var-label group.
+        """   
         #If one is None and others aren't then ignore
         if weights is not None and transform_x is not None and transform_y is not None:
             df = pd.concat([transform_x[p_var],pd.Series(transform_y)],axis=1).values
             sample_weight_t = np.array(list(map(lambda x: weights[tuple(x)], df )))
             self.rw_is_transform = True
             return sample_weight_t
-            
             
         else:
             if self.model_params[model_num].sample_weight is not None:
@@ -1935,11 +1867,8 @@ class Fairness:
             groups = df.set_index(p_var).index    
             groups = groups.to_flat_index()    
             
-            # TODO: maintain categorical ordering
             unique_groups = np.unique(groups)
-            #print("unique_groups: ",unique_groups)
             unique_classes = np.unique(self.model_params[model_num].y_train)
-            #print("unique_classes: ",unique_classes)
             n_groups = len(unique_groups)
             n_classes = len(unique_classes)
             reweigh_factors = np.full((n_groups, n_classes), np.nan)
@@ -1962,8 +1891,33 @@ class Fairness:
             self.rw_is_transform = False
             return sample_weight_t,reweigh_factors_dict
 
-
     def _correlate(self, p_var, alpha, beta, transform_df):
+        """
+        Applies a linear transformation to the non-sensitive feature columns in order to remove their correlation with 
+        the sensitive feature columns while retaining as much information as possible (as measured by the least-squares error).
+        
+        If empty, all protected variables are used. Only declared non-intersectional protected variables are supported.
+        
+        Parameters
+        ----------
+        p_var : list of strings
+                Protected variables to be considered for decorrelate.
+
+        alpha : int or float, optional
+                Weight of the decorrelated data.
+
+        beta : numpy.ndarray or None
+                A matrix of weights used to transform a given dataset. If provided, `transform_df` must also be provided.
+        
+        transform_df : pandas.DataFrame or None
+                The transformed feature data for decorrelate. If provided, `beta` must also be provided.
+            
+        Returns
+        -------
+        tuple or ndarray
+                Returns a tuple containing the transformed test data if `beta` and `transform_df` not None.
+                Otherwise, returns a tuple containing the transformed train and test data and the beta coefficients.
+        """
         # check if there are surrogates for at least one p_var
         for var in p_var:
             if self.surrogate_features.get(var):
@@ -2079,7 +2033,7 @@ class Fairness:
         if isinstance(tran_shap_values, list):
             # find index of multi_class_target in tran_shap_values
             if multi_class_target is not None:
-                self.rootcause_label_index = self.model_params[self.rootcause_model_num].model_object.classes_.index(multi_class_target)
+                self.rootcause_label_index = self.model_params[self.rootcause_model_num].model_object.classes_.tolist().index(multi_class_target)
             tran_shap_values = tran_shap_values[self.rootcause_label_index]
         self.rootcause_sample_size = tran_shap_values.shape[0]
         rca_pbar.update(10)
@@ -2124,9 +2078,9 @@ class Fairness:
 
         Parameters
         ----------
-        tran_shap_values : np.ndarray
+        tran_shap_values : numpy.ndarray
             Stores the shapley explanation values obtained based on the model and data passed.
-        group_mask : np.ndarray
+        group_mask : numpy.ndarray
             A boolean array indicating which data point belong to the privileged group (True) and which samples belong to the
             unprivileged group (False).
         feature_names : list of str, optional

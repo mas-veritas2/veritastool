@@ -19,49 +19,50 @@ class FairnessMetrics:
     Class Attributes
     ----------
     map_fair_metric_to_group : dict
-        Maps the fairness metrics to its name, metric_group (classification, uplift, or regression), type (difference or ratio), whether the metric is related to tradeoff, whether the metric can be a primary metric, and its short-form name.
-        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds')}
+        Maps the fairness metrics to its name, metric_group (classification, uplift, or regression), type (difference or ratio), whether the metric is related to tradeoff, whether the metric can be a primary metric, 
+        short-form name, equivalent performance metric, and direction of the perf metric i.e., whether a `higher` metric value indicates better model performance (higher, lower)
+        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds', 'balanced_acc', 'higher')}
     """
     map_fair_metric_to_group = {
-        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate'),
-        'demographic_parity': ('Demographic Parity', 'classification', 'difference', True, True, 'Demo Parity','selection_rate'),
-        'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo','recall'),
-        'fpr_parity': ('False Positive Rate Parity', 'classification', 'difference', True, True, 'FPR Parity','balanced_acc'),
-        'tnr_parity': ('True Negative Rate Parity', 'classification', 'difference', True, True, 'TNR Parity','tnr'),
-        'fnr_parity': ('False Negative Rate Parity', 'classification', 'difference', True, True, 'FNR Parity','fnr'),
-        'ppv_parity': ('Positive Predictive Parity', 'classification', 'difference', True, True, 'PPV Parity','precision'),
-        'npv_parity': ('Negative Predictive Parity', 'classification', 'difference', True, True, 'NPV Parity','npv'),
-        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'difference', True, True, 'FDR Parity','recall'), 
-        'for_parity': ('False Omission Rate Parity', 'classification', 'difference', True, True, 'FOR Parity','balanced_acc'),
-        'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds','balanced_acc'),
-        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'difference', True, True, 'Neg Equal Odds','balanced_acc'),
-        'calibration_by_group': ('Calibration by Group', 'classification', 'difference', True, True, 'Cali By Group','balanced_acc'),
-        'auc_parity': ('AUC Parity', 'classification', 'difference', False, True, 'AUC Parity','roc_auc'),
-        'log_loss_parity': ('Log-loss Parity', 'classification', 'difference', False, True, 'Log-loss Parity','log_loss'),
-        'equal_opportunity_ratio': ('Equal Opportunity Ratio', 'classification', 'ratio', True, True, 'Equal Opp Ratio','recall'),
-        'fpr_ratio': ('False Positive Rate Ratio', 'classification', 'ratio', True, True, 'FPR Ratio','balanced_acc'),
-        'tnr_ratio': ('True Negative Rate Ratio', 'classification', 'ratio', True, True, 'TNR Ratio','tnr'),
-        'fnr_ratio': ('False Negative Rate Ratio', 'classification', 'ratio', True, True, 'FNR Ratio','fnr'),
-        'ppv_ratio': ('Positive Predictive Ratio', 'classification', 'ratio', True, True, 'PPV Ratio','precision'),
-        'npv_ratio': ('Negative Predictive Ratio', 'classification', 'ratio', True, True, 'NPV Ratio','npv'),
-        'fdr_ratio': ('False Discovery Rate Ratio', 'classification', 'ratio', True, True, 'FDR Ratio','recall'),
-        'for_ratio': ('False Omission Rate Ratio', 'classification', 'ratio', True, True, 'FOR Ratio','balanced_acc'),
-        'equal_odds_ratio': ('Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Equalized OR','balanced_acc'),
-        'neg_equal_odds_ratio': ('Negative Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Neg Equalized OR','balanced_acc'),
-        'calibration_by_group_ratio': ('Calibration by Group Ratio', 'classification', 'ratio', True, True, 'Cali By Group Ratio','balanced_acc'),
-        'auc_ratio': ('AUC Ratio', 'classification', 'ratio', False, True, 'AUC Ratio','roc_auc'),
-        'log_loss_ratio': ('Log-loss Ratio', 'classification', 'ratio', False, True, 'Log-loss Ratio','log_loss'),
-        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False, 'MI Independence',None),
-        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False, 'MI Separation',None),
-        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False, 'MI Sufficiency',None),
-        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'difference', False, True, 'RMSE Parity','rmse'),
-        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'MAPE Parity','mape'),
-        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'WAPE Parity','wape'),
-        'rmse_ratio': ('Root Mean Squared Error Ratio', 'regression', 'ratio', False, True, 'RMSE Ratio','rmse'),
-        'mape_ratio': ('Mean Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'MAPE Ratio','mape'),
-        'wape_ratio': ('Weighted Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'WAPE Ratio','wape'),
-        'rejected_harm': ('Harm from Rejection', 'uplift', 'difference', True, True, 'Rejected Harm','emp_lift'),
-        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'difference', False, True, 'Acquire Benefit','emp_lift')
+        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate','higher'),
+        'demographic_parity': ('Demographic Parity', 'classification', 'difference', True, True, 'Demo Parity','selection_rate','higher'),
+        'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo','recall','higher'),
+        'fpr_parity': ('False Positive Rate Parity', 'classification', 'difference', True, True, 'FPR Parity','balanced_acc','higher'),
+        'tnr_parity': ('True Negative Rate Parity', 'classification', 'difference', True, True, 'TNR Parity','tnr','higher'),
+        'fnr_parity': ('False Negative Rate Parity', 'classification', 'difference', True, True, 'FNR Parity','fnr','higher'),
+        'ppv_parity': ('Positive Predictive Parity', 'classification', 'difference', True, True, 'PPV Parity','precision','higher'),
+        'npv_parity': ('Negative Predictive Parity', 'classification', 'difference', True, True, 'NPV Parity','npv','higher'),
+        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'difference', True, True, 'FDR Parity','recall','higher'), 
+        'for_parity': ('False Omission Rate Parity', 'classification', 'difference', True, True, 'FOR Parity','balanced_acc','higher'),
+        'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds','balanced_acc','higher'),
+        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'difference', True, True, 'Neg Equal Odds','balanced_acc','higher'),
+        'calibration_by_group': ('Calibration by Group', 'classification', 'difference', True, True, 'Cali By Group','balanced_acc','higher'),
+        'auc_parity': ('AUC Parity', 'classification', 'difference', False, True, 'AUC Parity','roc_auc','higher'),
+        'log_loss_parity': ('Log-loss Parity', 'classification', 'difference', False, True, 'Log-loss Parity','log_loss','lower'),
+        'equal_opportunity_ratio': ('Equal Opportunity Ratio', 'classification', 'ratio', True, True, 'Equal Opp Ratio','recall','higher'),
+        'fpr_ratio': ('False Positive Rate Ratio', 'classification', 'ratio', True, True, 'FPR Ratio','balanced_acc','higher'),
+        'tnr_ratio': ('True Negative Rate Ratio', 'classification', 'ratio', True, True, 'TNR Ratio','tnr','higher'),
+        'fnr_ratio': ('False Negative Rate Ratio', 'classification', 'ratio', True, True, 'FNR Ratio','fnr','higher'),
+        'ppv_ratio': ('Positive Predictive Ratio', 'classification', 'ratio', True, True, 'PPV Ratio','precision','higher'),
+        'npv_ratio': ('Negative Predictive Ratio', 'classification', 'ratio', True, True, 'NPV Ratio','npv','higher'),
+        'fdr_ratio': ('False Discovery Rate Ratio', 'classification', 'ratio', True, True, 'FDR Ratio','recall','higher'),
+        'for_ratio': ('False Omission Rate Ratio', 'classification', 'ratio', True, True, 'FOR Ratio','balanced_acc','higher'),
+        'equal_odds_ratio': ('Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Equalized OR','balanced_acc','higher'),
+        'neg_equal_odds_ratio': ('Negative Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Neg Equalized OR','balanced_acc','higher'),
+        'calibration_by_group_ratio': ('Calibration by Group Ratio', 'classification', 'ratio', True, True, 'Cali By Group Ratio','balanced_acc','higher'),
+        'auc_ratio': ('AUC Ratio', 'classification', 'ratio', False, True, 'AUC Ratio','roc_auc','higher'),
+        'log_loss_ratio': ('Log-loss Ratio', 'classification', 'ratio', False, True, 'Log-loss Ratio','log_loss','lower'),
+        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False, 'MI Independence',None,None),
+        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False, 'MI Separation',None,None),
+        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False, 'MI Sufficiency',None,None),
+        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'difference', False, True, 'RMSE Parity','rmse','lower'),
+        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'MAPE Parity','mape','lower'),
+        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'WAPE Parity','wape','lower'),
+        'rmse_ratio': ('Root Mean Squared Error Ratio', 'regression', 'ratio', False, True, 'RMSE Ratio','rmse','lower'),
+        'mape_ratio': ('Mean Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'MAPE Ratio','mape','lower'),
+        'wape_ratio': ('Weighted Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'WAPE Ratio','wape','lower'),
+        'rejected_harm': ('Harm from Rejection', 'uplift', 'difference', True, True, 'Rejected Harm','emp_lift','higher'),
+        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'difference', False, True, 'Acquire Benefit','emp_lift','higher')
     }
 
     map_indiv_fair_metric_to_group = {
@@ -73,7 +74,7 @@ class FairnessMetrics:
         #to get cutomized metrics inherited from NewMetric class 
         for metric in newmetric.NewMetric.__subclasses__() :
             if metric.enable_flag == True and metric.metric_type == "fair":
-                FairnessMetrics.map_fair_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name,'balanced_acc')    
+                FairnessMetrics.map_fair_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction)    
 
     def __init__(self, use_case_object):
         """
@@ -176,7 +177,7 @@ class FairnessMetrics:
         for metric in NewMetric.__subclasses__() :
             if metric.enable_flag ==True and metric.metric_type == "fair":
                 self.map_fair_metric_to_method[metric.metric_name] =  metric.compute
-                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name)
+                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction)
                 if metric.metric_name not in use_case_object._use_case_metrics["fair"]:
                     use_case_object._use_case_metrics["fair"].append(metric.metric_name)
                     
@@ -1043,11 +1044,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
         
         if self.sample_weight[0] is not None: 
             sample_weight_p = np.array(self.sample_weight[0])[mask]
@@ -1079,10 +1079,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
         
         if self.sample_weight[0] is not None: 
             sample_weight_p = np.array(self.sample_weight[0])[mask]
@@ -1114,10 +1114,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
             
         if self.sample_weight[0] is not None: 
             sample_weight_p = np.array(self.sample_weight[0])[mask]
@@ -1150,11 +1150,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
-
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
             
         if self.sample_weight[0] is not None: 
             sample_weight_p = np.array(self.sample_weight[0])[mask]
@@ -1187,10 +1186,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
     
         wape_p = np.sum(np.absolute(np.subtract(y_true[mask], y_pred[mask])))/ np.sum(y_true[mask])
         wape_u = np.sum(np.absolute(np.subtract(y_true[~mask], y_pred[~mask])))/ np.sum(y_true[~mask])
@@ -1216,10 +1215,10 @@ class FairnessMetrics:
         mask= mask[maskFilter].astype(bool)
         y_true = self.y_true[0]
         y_pred = self.y_pred[0]
-        y_true = y_true[maskFilter]
-        y_pred = y_pred[maskFilter]
         if 'y_pred_new' in kwargs:
             y_pred=kwargs['y_pred_new'][0]
+        y_true = y_true[maskFilter]
+        y_pred = y_pred[maskFilter]
     
         wape_p = np.sum(np.absolute(np.subtract(y_true[mask], y_pred[mask])))/ np.sum(y_true[mask])
         wape_u = np.sum(np.absolute(np.subtract(y_true[~mask], y_pred[~mask])))/ np.sum(y_true[~mask])
@@ -1257,24 +1256,20 @@ class FairnessMetrics:
 
             if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
                 
-                for index,_ in enumerate(self.ohe_classes_):
-                    
-                    y_probs = self.y_probs[:,:,:,index]                    
-                    y_trues = self.y_onehot_true[:,:,:,index]
-                                        
-                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
-                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
-                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+                y_trues = self.y_onehot_true                
+                y_probs = self.y_probs
 
-                    log_loss_score_class = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+                maskFilterNeg_rp = np.repeat(maskFilterNeg,self.y_onehot_true.shape[3],axis=2)
 
-                    if index == 0:                        
-                        log_loss_score = log_loss_score_class
-                    else:
-                        log_loss_score += log_loss_score_class 
-                                        
-                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+                y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg_rp)
+                y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg_rp)
+                mask = np.ma.array(mask, mask = maskFilterNeg)
+
+                loss_p = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+                log_loss_p = (loss_p*mask).sum(axis=2)/np.sum(mask,2, keepdims=True) 
+
+                loss_u = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+                log_loss_u = (loss_u*(1-mask)).sum(axis=2)/np.sum(1-mask,2, keepdims=True) 
 
             else:
                 y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
@@ -1318,25 +1313,20 @@ class FairnessMetrics:
 
             if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
                 
-                for index,_ in enumerate(self.ohe_classes_):
-                    
-                    y_probs = self.y_probs[:,:,:,index]                    
-                    y_trues = self.y_onehot_true[:,:,:,index]
-                                        
-                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
-                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
-                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+                y_trues = self.y_onehot_true                
+                y_probs = self.y_probs
 
-                    log_loss_score_class = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+                maskFilterNeg_rp = np.repeat(maskFilterNeg,self.y_onehot_true.shape[3],axis=2)
 
-                    if index == 0:                        
-                        log_loss_score = log_loss_score_class
-                    else:
-                        log_loss_score += log_loss_score_class 
-                        
-                
-                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+                y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg_rp)
+                y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg_rp)
+                mask = np.ma.array(mask, mask = maskFilterNeg)
+
+                loss_p = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+                log_loss_p = (loss_p*mask).sum(axis=2)/np.sum(mask,2, keepdims=True) 
+
+                loss_u = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+                log_loss_u = (loss_u*(1-mask)).sum(axis=2)/np.sum(1-mask,2, keepdims=True) 
 
             else:
 
@@ -1380,38 +1370,22 @@ class FairnessMetrics:
             maskFilterNeg = mask==-1
 
             if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
-                
-                for index,_ in enumerate(self.ohe_classes_):
-                                        
-                    y_probs = self.y_probs[:,:,:,index]                    
-                    y_trues = self.y_onehot_true[:,:,:,index]
-                    
-                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
-                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
-                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-                    
-                    y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-                    #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
-                    mask = np.take_along_axis(mask_ma, idx, axis=2)
+                y_trues = self.y_onehot_true.reshape(self.y_onehot_true.shape[0],self.y_onehot_true.shape[1],-1)
+                y_probs = self.y_probs.reshape(self.y_probs.shape[0],self.y_probs.shape[1],-1)
 
-                    tpr_class_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
-                    fpr_class_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
-                    
-                    
-                    tpr_class_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                    fpr_class_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-                                        
-                    TPR_p = tpr_class_p if index == 0 else np.append(TPR_p,tpr_class_p,axis=2)
-                    FPR_p = fpr_class_p if index == 0 else np.append(FPR_p,fpr_class_p,axis=2)
-                    TPR_u = tpr_class_u if index == 0 else np.append(TPR_u,tpr_class_u,axis=2)
-                    FPR_u = fpr_class_u if index == 0 else np.append(FPR_u,fpr_class_u,axis=2)
+                mask = np.repeat(mask,self.y_onehot_true.shape[3],axis=2)
 
-                TPR_p = np.sort(TPR_p)
-                FPR_p = np.sort(FPR_p)
-                TPR_u = np.sort(TPR_u)
-                FPR_u = np.sort(FPR_u)
+                idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+                y_trues = np.take_along_axis(y_trues, idx, axis=2)
+                mask = np.take_along_axis(mask, idx, axis=2)
+
+                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
+                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
+                    
+                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
 
                 TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
                 FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
@@ -1426,19 +1400,22 @@ class FairnessMetrics:
                 y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
                 mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                idx = self.y_probs.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
 
                 y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-                #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+                
                 mask = np.take_along_axis(mask_ma, idx, axis=2)
 
-                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
-                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+                grp_mask = np.take_along_axis(mask, idx, axis=2)
+            
+                TPR_p = np.cumsum(y_trues*mask, axis=2).data[grp_mask==1]/np.sum(y_trues*mask, axis=2, keepdims=True)
+                FPR_p = np.cumsum((1-y_trues)*mask, axis=2).data[grp_mask==1]/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
                 TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
                 FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                
+                TPR_u = np.cumsum(y_trues*(1-mask), axis=2).data[grp_mask==0]/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
                 TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
                 FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
@@ -1521,19 +1498,22 @@ class FairnessMetrics:
                 y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
                 mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                idx = self.y_probs.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
 
                 y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-                #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
+
                 mask = np.take_along_axis(mask_ma, idx, axis=2)
 
-                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)
-                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+                grp_mask = np.take_along_axis(mask, idx, axis=2)
+            
+                TPR_p = np.cumsum(y_trues*mask, axis=2).data[grp_mask==1]/np.sum(y_trues*mask, axis=2, keepdims=True)
+                FPR_p = np.cumsum((1-y_trues)*mask, axis=2).data[grp_mask==1]/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
                 TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
                 FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+                
+                TPR_u = np.cumsum(y_trues*(1-mask), axis=2).data[grp_mask==0]/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
                 TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
                 FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)

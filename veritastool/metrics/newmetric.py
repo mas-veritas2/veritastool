@@ -20,7 +20,14 @@ class NewMetric: # discuss the case when more than 1 new metric is defined, new 
         Short-form name of metric
 
     metric_difference_ratio: str
-        "difference" or "ratio"
+        "difference" or "ratio". For fairness metric_type only.
+
+    metric_equiv_perf_metric: str
+        Equivalent performance metric. For fairness metric_type only.
+
+    metric_direction: str
+        Direction of performance metric, i.e., whether a `higher` metric value indicates better model performance. For fairness metric_type only.
+        "higher" or "lower"
 
     enable_flag: boolean
         Whether the new metric can be a primary metric
@@ -31,6 +38,8 @@ class NewMetric: # discuss the case when more than 1 new metric is defined, new 
     metric_definition = "custom new metric base"
     metric_short_name = "custom"
     metric_difference_ratio = "difference"
+    metric_equiv_perf_metric = 'balanced_acc'
+    metric_direction = 'higher'
     enable_flag = True
 
     def compute(self, **kwargs):

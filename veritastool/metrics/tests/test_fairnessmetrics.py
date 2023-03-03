@@ -1,6 +1,8 @@
 import pickle
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -11,12 +13,12 @@ import numpy as np
 import pandas as pd
 import pytest
 from veritastool.util.errors import *
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
-#import selection, uplift, util
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__))
-file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 
@@ -39,9 +41,8 @@ model_obj = cs["model"]
 model_obj.fit(x_train, y_train)
 
 #rejection inference
-num_applicants = {'SEX': [3500.0, 5000.0], 'MARRIAGE':[3500.0, 5000.0]}
-base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
-
+num_applicants = {"SEX": [5841,5841], "MARRIAGE": [5841,5841]}
+base_default_rate = {"SEX": [0.5,0.5], "MARRIAGE": [0.5,0.5]}
 
 #Create Model Container and Use Case Object
 #Create Model Container 
@@ -54,12 +55,9 @@ cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fa
                            num_applicants =num_applicants,  base_default_rate=base_default_rate,
                            tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 
-
 import pickle
 import numpy as np
 import pandas as pd
-import sys
-sys.path.append('../../')
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.customer_marketing import CustomerMarketing
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -67,10 +65,10 @@ from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
 import pytest
 
-#Load Credit Scoring Test Data
+#Load Customer Marketing Test Data
 #PATH = os.path.abspath(os.path.dirname(__file__)))
-file_prop = "veritas-toolkit/veritastool/resources/data/mktg_uplift_acq_dict.pickle"
-file_rej = "veritas-toolkit/veritastool/resources/data/mktg_uplift_rej_dict.pickle"
+file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)
@@ -125,7 +123,6 @@ cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop]
                                   treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=1000, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
 # cm_uplift_obj.k = 1
-
 
 def test_execute_all_fair():
     # cre_sco_obj._compute_fairness(1)

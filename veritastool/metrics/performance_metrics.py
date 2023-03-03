@@ -602,11 +602,10 @@ class PerformanceMetrics:
         _compute_emp_lift : float
                 The performance metric value
         """
-        y_true = self.y_true[1]
-
         if 'y_prob_new' in kwargs:
             y_prob = kwargs['y_prob_new']
             e_lift = self.use_case_object._get_e_lift(y_pred_new=y_prob[1])
+            y_true = self.y_true[1]
         
         elif ('subgrp_e_lift' in kwargs) and ('subgrp_y_true' in kwargs):
             
@@ -859,6 +858,8 @@ class PerformanceMetrics:
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_prob' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_prob = kwargs['subgrp_y_prob']
+            if len(np.unique(y_true)) == 1 or np.all(np.isnan(y_prob)):
+                return None
             roc_auc = roc_auc_score(y_true=y_true, y_score=y_prob)
             return roc_auc
         else:
@@ -921,6 +922,8 @@ class PerformanceMetrics:
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_prob' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_prob = kwargs['subgrp_y_prob']
+            if len(np.unique(y_true)) == 1 or np.all(np.isnan(y_prob)):
+                return None
             log_loss_score = log_loss(y_true=y_true, y_pred=y_prob)
             return log_loss_score
         else:

@@ -1,6 +1,8 @@
 import pickle
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -10,13 +12,13 @@ import numpy as np
 import pandas as pd
 import pytest
 from veritastool.util.errors import *
-#import selection, uplift, util
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 from sklearn.linear_model import LogisticRegression
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__))
-file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 
@@ -55,8 +57,6 @@ cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair
 import pickle
 import numpy as np
 import pandas as pd
-import sys
-sys.path.append('../../')
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.customer_marketing import CustomerMarketing
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -66,9 +66,8 @@ import pytest
 import sys
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__)))
-file_prop = "veritas-toolkit/veritastool/resources/data/mktg_uplift_acq_dict.pickle"
-file_rej = "veritas-toolkit/veritastool/resources/data/mktg_uplift_rej_dict.pickle"
+file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)
