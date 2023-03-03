@@ -1,8 +1,7 @@
 import pickle
 import os
 import sys
-# project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-project_root = 'C:/LocalOnlyWork/diagnostic-tool/veritas-toolkit/'
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.base_classification import BaseClassification
@@ -18,8 +17,7 @@ import pandas as pd
 import pytest
 from veritastool.util.errors import *
 import shap
-# module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
-module_path = 'C:/LocalOnlyWork/diagnostic-tool/veritas-toolkit/veritastool/examples/customer_marketing_example'
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 sys.path.append(module_path)
 import selection, uplift, util
 
