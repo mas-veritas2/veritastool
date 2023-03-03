@@ -1,8 +1,10 @@
 import pickle
 import numpy as np
 import pandas as pd
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.customer_marketing import CustomerMarketing
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -10,13 +12,13 @@ from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
 import pytest
 from veritastool.util.errors import *
-#import selection, uplift, util
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__)))
-file_prop = "veritas-toolkit/veritastool/resources/data/mktg_uplift_acq_dict.pickle"
-file_rej = "veritas-toolkit/veritastool/resources/data/mktg_uplift_rej_dict.pickle"
+file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)
@@ -108,8 +110,7 @@ def test_get_confusion_matrix():
     assert result[0] == None
 
     #Load Credit Scoring Test Data
-    #file = r"C:\Users\m.bin.kamaluddin\Accenture\MAS veritastool Toolkit - Documents\General\05 Deliverables\T2\credit_score_dict.pickle"
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 
     input_file = open(file, "rb")
     cs = pickle.load(input_file)

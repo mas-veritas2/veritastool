@@ -1,21 +1,23 @@
 import pickle
 import pytest
-import sys
 import numpy as np
 import pandas as pd
 from copy import deepcopy
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from sklearn.linear_model import LogisticRegression
 from veritastool.model.model_container import ModelContainer
 from veritastool.util.errors import * #MyError
 from veritastool.util.utility import check_label
 from veritastool.usecases.credit_scoring import CreditScoring
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
-#import selection, uplift, util
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 
 #Load Credit Scoring Test Data
-file = "veritas-toolkit/veritastool/examples/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 #sample feature_imp

@@ -26,11 +26,9 @@ class ModelContainer(object):
         model_type : string
                 The type of model to be evaluated, model_type is unique.
 
-                Customer Marketing: "uplift" or "propensity" or "reject"
-                Credit Scoring: "credit"
-                Predictive Underwriting: "underwriting"
-                Base Classification: "base_classification"
-                Base Regression: "base_regression"
+                Customer Marketing: "uplift"
+                Credit Scoring, Predictive Underwriting, Base Classification: "classification"
+                Base Regression: "regression"
 
         Instance Attributes
         --------------------

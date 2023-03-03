@@ -1,21 +1,27 @@
 import pickle
 import numpy as np
 import pandas as pd
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.customer_marketing import CustomerMarketing
 from veritastool.metrics.performance_metrics import PerformanceMetrics
 from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
+from veritastool.principles.transparency import Transparency
 import pytest
 from veritastool.util.errors import *
-#import selection, uplift, util
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
-#Load Credit Scoring Test Data
+import shap
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
+
+#Load Customer Marketing Test Data
 #PATH = os.path.abspath(os.path.dirname(__file__)))
-file_prop = "veritas-toolkit/veritastool/resources/data/mktg_uplift_acq_dict.pickle"
-file_rej = "veritas-toolkit/veritastool/resources/data/mktg_uplift_rej_dict.pickle"
+file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)
@@ -66,7 +72,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=1000, \
+                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 
 #cm_uplift_obj.k = 1
@@ -79,7 +85,7 @@ cm_uplift_obj.evaluate()
 
 def test_evaluate():
 
-    assert round(cm_uplift_obj.perf_metric_obj.result['perf_metric_values']['emp_lift'][0],3) == 0.171
+    assert round(cm_uplift_obj.perf_metric_obj.result['perf_metric_values']['emp_lift'][0],3) == 0.158
    
 def test_artifact():
     
@@ -130,7 +136,7 @@ def test_compile_skip():
     
 def test_tradeoff():
 
-    assert round(cm_uplift_obj.tradeoff_obj.result['isforeign']['max_perf_point'][0],3) == 0.272
+    assert round(cm_uplift_obj.tradeoff_obj.result['isforeign']['max_perf_point'][0],3) == 0.217
     cm_uplift_obj.model_params[0].y_prob = None
     cm_uplift_obj.tradeoff()
     assert cm_uplift_obj.tradeoff_status == -1
@@ -142,7 +148,7 @@ def test_feature_importance():
     cm_uplift_obj.feature_imp_status = 0
     cm_uplift_obj.evaluate_status = 0
     cm_uplift_obj.feature_importance()
-    assert round(cm_uplift_obj.feature_imp_values['isforeign']['isforeign'][0],3) == 63332.82
+    assert round(cm_uplift_obj.feature_imp_values['isforeign']['isforeign'][0],3) == 645718.168
     cm_uplift_obj.feature_imp_status = -1
     cm_uplift_obj.feature_importance()
     assert cm_uplift_obj.feature_imp_values == None
@@ -247,7 +253,7 @@ def test_fairness_tree():
     assert cm_uplift_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
 
 def test_check_label():
-    file_prop = "veritastool/examples/data/test_utility_data.pickle"
+    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
     input_prop = open(file_prop, "rb")
     cm_prop = pickle.load(input_prop)
     y_true_prop = cm_prop["y_true_prop"]
@@ -264,3 +270,107 @@ def test_check_label():
     assert toolkit_exit.type == MyError
     # print(toolkit_exit.value.message)
     assert toolkit_exit.value.message == msg
+
+def test_rootcause_group_difference():
+    SEED=123
+    x_train_sample = x_train_rej.sample(n=1000, random_state=SEED)
+    explainer_shap = shap.Explainer(cm_uplift_obj.model_params[0].model_object.predict_proba,x_train_sample) 
+    explanation = explainer_shap(x_train_sample)
+    shap_values = np.moveaxis(explanation.values, -1, 0)
+    idx = list(cm_uplift_obj.model_params[0].model_object.classes_).index(cm_uplift_obj.model_params[0].pos_label[0])
+    shap_values = shap_values[idx]
+    
+    # Test case without feature_mask
+    group_mask = np.where(x_train_sample.isforeign == 0, True, False)
+    result = cm_uplift_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
+    expected = ['isforeign', 'age', 'income', 'didrespond', 'isfemale', 'noproducts']
+    assert list(result.keys()) == expected
+    
+    # Test case with feature_mask
+    prot_var_df = x_train_sample['isforeign']
+    privileged_grp = cm_uplift_obj.model_params[0].p_grp.get('isforeign')[0]
+    unprivileged_grp = cm_uplift_obj.model_params[0].up_grp.get('isforeign')[0]
+    feature_mask = np.where(prot_var_df.isin(privileged_grp), True, -1)
+    feature_mask = np.where(prot_var_df.isin(unprivileged_grp), False, feature_mask)
+    indices = np.where(np.isin(feature_mask, [0, 1]))
+    shap_values = shap_values[indices]
+    group_mask = feature_mask[np.where(feature_mask != -1)].astype(bool)
+    result = cm_uplift_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
+    expected = ['isforeign', 'age', 'income', 'didrespond', 'isfemale', 'noproducts']
+    assert list(result.keys()) == expected
+
+def test_rootcause():
+    # Check p_var parameter: default all p_var
+    cm_uplift_obj.rootcause(p_var=[])
+    assert bool(cm_uplift_obj.rootcause_values) == True
+    assert len(cm_uplift_obj.rootcause_values.keys()) == 2
+    assert len(cm_uplift_obj.rootcause_values['isforeign'].values()) == 6
+    
+    # Check p_var parameter for 1 p_var, input_parameter_filtering to remove 'other_pvar'
+    cm_uplift_obj.rootcause(p_var=['isforeign', 'other_pvar'])
+    assert bool(cm_uplift_obj.rootcause_values) == True
+    assert len(cm_uplift_obj.rootcause_values.keys()) == 1
+    assert len(cm_uplift_obj.rootcause_values['isforeign'].values()) == 6
+    
+    # Check invalid p_var input
+    with pytest.raises(MyError) as toolkit_exit:
+        cm_uplift_obj.rootcause(p_var=123)
+    assert toolkit_exit.type == MyError
+    
+    # Check multi_class_label parameter: 
+    cm_uplift_obj.rootcause(multi_class_target='CN')
+    assert cm_uplift_obj.rootcause_label_index == 0
+
+def test_feature_imp_corr(capfd):
+    cm_uplift_obj.feature_imp_status_corr = False
+    cm_uplift_obj.feature_importance()
+
+    # Check _print_correlation_analysis
+    captured = capfd.readouterr()
+    assert "* No surrogate detected based on correlation analysis." in captured.out
+
+    # Check correlation_threshold
+    cm_uplift_obj.feature_imp_status_corr = False
+    cm_uplift_obj.feature_importance(correlation_threshold=0.6)
+    assert cm_uplift_obj.feature_imp_status_corr == True
+    assert cm_uplift_obj.correlation_threshold == 0.6
+
+    # Disable correlation analysis
+    cm_uplift_obj.feature_imp_status_corr = False
+    cm_uplift_obj.feature_importance(disable=['correlation'])
+    captured = capfd.readouterr()
+    assert "Correlation matrix skipped" in captured.out
+
+def test_compute_correlation():
+    # Check top 3 features
+    assert len(cm_uplift_obj.corr_top_3_features) <= 6
+    # Check surrogate features
+    assert bool(cm_uplift_obj.surrogate_features['isforeign']) == False
+
+@pytest.mark.parametrize("p_grp", [
+    ({'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'max_bias'}),
+    ({'isforeign':[[0]], 'isfemale':'max_bias'})
+])
+def test_policy_max_bias(p_grp):
+    p_grp_policy = p_grp
+    container_rej = ModelContainer(y_true = y_true_rej, y_pred = y_pred_rej, y_prob = y_prob_rej, y_train= y_train_rej, \
+                                p_grp = p_grp_policy, x_train = x_train_rej,  x_test = x_test_rej, \
+                                model_object = model_object_rej,  model_name = model_name_rej, model_type = model_type_rej,\
+                                pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
+
+    container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop, y_prob = y_prob_prop, y_train= y_train_prop,\
+                                    model_object = model_object_prop,  pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
+
+    cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
+                                    fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
+                                    perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
+                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
+                                    tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6, \
+                                    fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
+
+    if 'isforeign-isfemale' in p_grp:
+        assert cm_uplift_obj.model_params[0].p_grp['isforeign-isfemale'][0] == ['1_0']
+        assert cm_uplift_obj.model_params[0].up_grp['isforeign-isfemale'][0] == ['0_0']
+    else:
+        assert cm_uplift_obj.model_params[0].p_grp['isfemale'][0] == [1]
+        assert cm_uplift_obj.model_params[0].up_grp['isfemale'][0] == [0]

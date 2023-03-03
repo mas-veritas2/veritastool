@@ -5,20 +5,23 @@ import pandas as pd
 import pytest
 from copy import deepcopy
 from sklearn.linear_model import LogisticRegression
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.util.utility import *
 #from veritastool.util.utility import check_datatype, check_value, convert_to_set, check_label, get_cpu_count, check_multiprocessing
 from veritastool.util.errors import MyError
 from veritastool.usecases.credit_scoring import CreditScoring
-sys.path.append("veritas-toolkit/veritastool/examples/customer_marketing_example")
+module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+sys.path.append(module_path)
+import selection, uplift, util
 #sample feature_imp
 feature_imp = pd.DataFrame(data = {'features': ['EDUCATION', 'SEX', 'MARRIAGE', 'AGE'], 'values': [0.04, 0.08, 0.03, 0.02]})
 
 #Load Credit Scoring Test Data
-#file = r"C:\Users\brian.zheng\OneDrive - Accenture\General\05 Deliverables\T2\test_credit_score_dict.pickle"
-file = "veritas-toolkit/veritastool/examples/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 from ..principles import Fairness, Transparency
 from ..metrics.fairness_metrics import FairnessMetrics
@@ -17,13 +18,13 @@ class BaseRegression(Fairness, Transparency):
     _model_type_to_metric_lookup: dictionary
                 Used to associate the model type (key) with the metric type, expected size of positive and negative labels (value) & length of model_params respectively.
                 
-                e.g. {"base_regression": ("regression", 2, 1), “rejection”: (“classification”, 2, 1), “uplift”: (“uplift”, 4, 2), “a_new_type”: (“regression”, -1, 1)}
+                e.g. {"regression": ("regression", 2, 1), “rejection”: (“classification”, 2, 1), “uplift”: (“uplift”, 4, 2), “a_new_type”: (“regression”, -1, 1)}
     """
 
     _model_type_to_metric_lookup = {"regression": ("regression", -1, 1)}
     _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, perf_metric_name = "rmse", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10):
+    def __init__(self, model_params, fair_threshold, perf_metric_name = "rmse", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
         """
         Parameters
         ----------
@@ -95,7 +96,7 @@ class BaseRegression(Fairness, Transparency):
         #Positive label is favourable for predictive underwriting use case
         fair_is_pos_label_fav = True
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display)
+        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features)
         self.perf_metric_name = perf_metric_name
         
         self.e_lift = None
@@ -217,6 +218,49 @@ class BaseRegression(Fairness, Transparency):
                 return [None] * 4  
             else :
                 return [None] * 8
+            
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
+
+        pos_class_count = None
+        neg_class_count = None
+        if is_max_bias:
+            metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
+        else:
+            metric_val = None
+
+        return pd.Series([pos_class_count, neg_class_count, metric_val])
+    
+    def _auto_assign_p_up_groups(self):
+        self.perf_metric_obj = PerformanceMetrics(self)
+        mdl = self.model_params[0]
+        for p_var_key in mdl.p_grp.keys():
+            if isinstance(mdl.p_grp[p_var_key],str):
+                p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
+                mdl.p_grp[p_var_key]  = p_grp
+                mdl.up_grp[p_var_key] = up_grp
+
+    def _max_bias(self, p_var, mdl):
+        perf_metric, direction = self.translate_fair_to_perf_metric()
+
+        max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred)],axis=1)
+        max_bias_df.columns=[p_var,'y_true','y_pred']
+
+        max_bias_df = max_bias_df.groupby(mdl.protected_features_cols[p_var]).apply(lambda grp: self._get_sub_group_data(grp, perf_metric))  
+                  
+        max_bias_df.columns = ["pos_labels","neg_labels",perf_metric]
+
+        best_ix, worst_ix, bestgrp_abv_min_size, worstgrp_abv_min_size = self._get_max_min_group(max_bias_df,perf_metric)
+        self.is_pgrp_abv_min_size[p_var] = bestgrp_abv_min_size
+        self.is_upgrp_abv_min_size[p_var] = worstgrp_abv_min_size
+
+        best = [[best_ix]]
+        worst = [[worst_ix]]
+        best = [[max_bias_df[perf_metric].idxmax()]]
+        worst = [[max_bias_df[perf_metric].idxmin()]]
+        if direction == 'lower':
+            best, worst = worst, best
+
+        return best, worst
 
     def rootcause(self, p_var=None, label=None):
         """

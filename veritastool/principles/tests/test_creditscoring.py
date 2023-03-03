@@ -1,6 +1,8 @@
 import pickle
+import os
 import sys
-sys.path.append('../../')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
 from veritastool.metrics.performance_metrics import PerformanceMetrics
@@ -15,8 +17,7 @@ from veritastool.util.errors import *
 
 
 #Load Credit Scoring Test Data
-#PATH = os.path.abspath(os.path.dirname(__file__))
-file = "veritas-toolkit/veritastool/examples/data/credit_score_dict.pickle"
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
 
@@ -38,8 +39,8 @@ model_obj = LogisticRegression(C=0.1)
 model_obj.fit(x_train, y_train)
 
 #rejection inference
-num_applicants = {'SEX': [3500, 5000], 'MARRIAGE':[3500, 5000]}
-base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
+num_applicants = {"SEX": [5841,5841], "MARRIAGE": [5841,5841]}
+base_default_rate = {"SEX": [0.5,0.5], "MARRIAGE": [0.5,0.5]}
 # model_object = LRwrapper(model_object)
 
 
@@ -66,8 +67,7 @@ def test_check_input():
 
 def test_check_special_params():
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -106,8 +106,7 @@ def test_check_special_params():
     # cre_sco_obj.spl_params = {'num_applicants': 1, 'base_default_rate': 2}
     
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -146,8 +145,7 @@ def test_check_special_params():
     # cre_sco_obj.spl_params  = {'num_applicants': {'SEX': ['3500', '5000'], 'MARRIAGE': [3500, 5000]},
     # 'base_default_rate': {'SEX': [0.1, 0.05], 'MARRIAGE': [0.1, 0.05]}}
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -185,8 +183,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError 
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -224,8 +221,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError     
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -263,8 +259,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -301,8 +296,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -340,8 +334,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -378,8 +371,7 @@ def test_check_special_params():
                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError 
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
@@ -418,8 +410,7 @@ def test_check_special_params():
 
 def test_get_confusion_matrix():
     #Load Credit Scoring Test Data
-    #PATH = os.path.abspath(os.path.dirname(__file__))
-    file = "veritas-toolkit/veritastool/resources/data/credit_score_dict.pickle"
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
     input_file = open(file, "rb")
     cs = pickle.load(input_file)
 
