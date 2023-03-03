@@ -7,3 +7,5 @@ IPython==7.27.0
 matplotlib==3.4.3
 tqdm==4.62.2
 pytest==6.2.5
+phik == 0.12.3
+shap == 0.41.0
