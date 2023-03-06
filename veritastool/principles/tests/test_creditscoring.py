@@ -51,7 +51,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                            num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 
 
 def test_check_input():
@@ -101,7 +101,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible",  
                                 fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", 
                                 num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                                tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                                tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError
     # cre_sco_obj.spl_params = {'num_applicants': 1, 'base_default_rate': 2}
     
@@ -140,7 +140,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)                         
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)                         
     assert toolkit_exit.type == MyError
     # cre_sco_obj.spl_params  = {'num_applicants': {'SEX': ['3500', '5000'], 'MARRIAGE': [3500, 5000]},
     # 'base_default_rate': {'SEX': [0.1, 0.05], 'MARRIAGE': [0.1, 0.05]}}
@@ -180,7 +180,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError 
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -218,7 +218,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError     
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -256,7 +256,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -293,7 +293,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -331,7 +331,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -368,7 +368,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError 
     #Load Credit Scoring Test Data
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
@@ -405,7 +405,7 @@ def test_check_special_params():
         cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                         num_applicants =num_applicants,  base_default_rate=base_default_rate,fair_metric_name = "mi_independence",
-                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                        tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     assert toolkit_exit.type == MyError  
 
 def test_get_confusion_matrix():
@@ -442,7 +442,7 @@ def test_get_confusion_matrix():
                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)                          
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)                          
     result = cre_sco_obj._get_confusion_matrix(None)
     assert len(result) == 4
     assert result[0] == None

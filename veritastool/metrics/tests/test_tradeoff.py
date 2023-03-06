@@ -60,7 +60,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "significant", perf_metric_name="accuracy", \
                             fair_metric_name = "disparate_impact", fair_metric_type='ratio',
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 
 tradeoff_obj = TradeoffRate(cre_sco_obj)
 tradeoff_obj.sigma = 0
@@ -267,7 +267,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 0.2, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="rejected_harm", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=1000, \
+                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
 
 cm_tradeoff_obj = TradeoffRate(cm_uplift_obj)

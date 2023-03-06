@@ -72,7 +72,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
+                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 
 #cm_uplift_obj.k = 1
@@ -364,7 +364,7 @@ def test_policy_max_bias(p_grp):
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                     fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                     perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
+                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                     tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6, \
                                     fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 

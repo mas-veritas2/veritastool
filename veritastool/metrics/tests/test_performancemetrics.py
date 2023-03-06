@@ -51,7 +51,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 #Create Use Case Object
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 # cre_sco_obj.k = 1
 
 import pickle
@@ -65,7 +65,7 @@ from veritastool.principles.fairness import Fairness
 import pytest
 import sys
 
-#Load Credit Scoring Test Data
+#Load Customer Marketing Test Data
 file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
 file_rej = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_rej_dict.pickle')
 input_prop = open(file_prop, "rb")
@@ -118,9 +118,69 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 80, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=1000, \
+                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
-# cm_uplift_obj.k = 1
+
+import pickle
+import numpy as np
+import pandas as pd
+from veritastool.model.model_container import ModelContainer
+from veritastool.usecases.predictive_underwriting import PredictiveUnderwriting
+from veritastool.metrics.performance_metrics import PerformanceMetrics
+import pytest
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import LabelEncoder
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+import imblearn
+
+#Load Predictive Underwriting Test Data
+file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'underwriting_dict.pickle')
+input_file = open(file, "rb")
+puw = pickle.load(input_file)
+
+#Model Contariner Parameters
+y_true = np.array(puw["y_test"])
+y_pred = np.array(puw["y_pred"])
+y_train = np.array(puw["y_train"])
+p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race-nationality':'max_bias'}
+up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+x_train = puw["X_train"]
+x_test = puw["X_test"]
+model_name = "pred_underwriting"
+model_type = "classification"
+y_prob = puw["y_prob"]
+
+#Building Model
+SEED=123
+obj_cols = x_train.select_dtypes(include='object').columns
+for col in obj_cols:
+    le = LabelEncoder()
+    le.fit(pd.concat([x_train[col], x_test[col]]))
+    x_train[col] = le.transform(x_train[col])
+    x_test[col] = le.transform(x_test[col])
+under = RandomUnderSampler(sampling_strategy=0.5, random_state=SEED)
+over = SMOTE(random_state=SEED)
+pipe = imblearn.pipeline.Pipeline([
+    ('under', under),
+    ('over', over)
+])
+x_train_resampled, y_train_resampled = pipe.fit_resample(x_train, y_train)
+x_train_final = pd.DataFrame(x_train_resampled, columns=x_train.columns)
+x_test_final = x_test
+gbc = GradientBoostingClassifier(random_state=SEED)
+gbc.fit(x_train_final, y_train_resampled)
+
+#Create Model Container 
+container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_prob, y_train_resampled, x_train=x_train_final, \
+                           x_test=x_test_final, model_object=gbc, up_grp=up_grp)
+
+
+#Create Use Case Object
+pred_underwriting_obj = PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                                              fair_priority = "benefit", fair_impact = "normal", fair_metric_type='difference', \
+                                              tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                              tran_pdp_feature = ['age','payout_amount'])
 
 def test_execute_all_perf():
     # cre_sco_obj._compute_fairness(1)
@@ -192,6 +252,10 @@ def test_compute_roc_auc():
     cre_sco_obj.feature_importance()
     assert round(cre_sco_obj.feature_imp_values['SEX']['SEX'][1],3) == -0.025
 
+    expected = 0.8308797123365667
+    result = pred_underwriting_obj.perf_metric_obj.result['perf_metric_values']['roc_auc'][0]
+    assert round(result, 3) == round(expected, 3)
+
 def test_compute_log_loss():
 
     cre_sco_obj.y_true = [[],[]]
@@ -209,3 +273,13 @@ def test_compute_log_loss():
     result = cre_sco_obj.perf_metric_obj.result['perf_metric_values']['log_loss'][0]
     #result = PerformanceMetrics._compute_log_loss(cre_sco_obj)
     assert round(result,3) == 0.612
+
+def test_compute_precision():
+    expected = 0.9622874806800619
+    result = pred_underwriting_obj.perf_metric_obj.result['perf_metric_values']['precision'][0]
+    assert round(result, 3) == round(expected, 3)
+
+def test_compute_log_loss():
+    expected = 6.220734764939911
+    result = pred_underwriting_obj.perf_metric_obj.result['perf_metric_values']['log_loss'][0]
+    assert round(result, 3) == round(expected, 3)

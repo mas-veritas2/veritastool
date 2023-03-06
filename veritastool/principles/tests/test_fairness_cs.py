@@ -51,7 +51,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 #Create Use Case Object
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 43.2, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "significant", perf_metric_name="balanced_acc", fair_metric_name = "disparate_impact", fair_metric_type= "ratio",\
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10,fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2} })
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10,fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2} })
 #cre_sco_obj.k = 1
 # cre_sco_obj.fair_metric_name = 'disparate_impact'
 # cre_sco_obj.compile()
@@ -193,7 +193,7 @@ def test_feature_importance_x_test_exception():
 #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
     
@@ -254,7 +254,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
         

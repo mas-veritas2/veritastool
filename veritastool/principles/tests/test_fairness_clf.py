@@ -47,7 +47,7 @@ container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_pro
 #Create Use Case Object
 clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                              fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                             tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                           
+                             tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                           
 
 clf_obj.compile()
 clf_obj.evaluate()
@@ -179,7 +179,7 @@ def test_feature_importance_x_test_exception():
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                                 fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                                tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
     
     test = clf_obj.feature_importance()
     assert test == None
@@ -242,7 +242,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                                 fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                                tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
 
     test = clf_obj.feature_importance()
     assert test == None
