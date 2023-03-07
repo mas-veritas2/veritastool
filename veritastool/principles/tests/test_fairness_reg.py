@@ -19,6 +19,7 @@ from veritastool.util.errors import *
 file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'regression_dict.pickle')
 input_file = open(file, "rb")
 br = pickle.load(input_file)
+input_file.close()
 
 #Model Container Parameters
 x_train = br["x_train"]

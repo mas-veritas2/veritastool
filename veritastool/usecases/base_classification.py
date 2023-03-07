@@ -104,7 +104,7 @@ class BaseClassification(Fairness, Transparency):
         self.pred_outcome = None
         self.multiclass_flag = False
 
-        if not BaseClassification._model_data_processing_flag:            
+        if not BaseClassification._model_data_processing_flag:
             if self.model_params[0].model_object.classes_ is not None and len(self.model_params[0].model_object.classes_)>2 and self.model_params[0].pos_label is None and self.model_params[0].neg_label is None:
                 self.classes_ = self.model_params[0].model_object.classes_
                 self.multiclass_flag = True                
@@ -250,12 +250,12 @@ class BaseClassification(Fairness, Transparency):
                 
                 super(BaseClassification, self).tradeoff( output,n_threads,sigma)
 
-    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7):
+    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7, disable=[]):
                         
         if self.multiclass_flag:
-                print("Tradeoff analysis is not supported for multiclass classification.")
+                print("Feature importance analysis is not supported for multiclass classification.")
         else:
-                super(BaseClassification, self).feature_importance(output,n_threads,correlation_threshold)
+                super(BaseClassification, self).feature_importance(output,n_threads,correlation_threshold,disable)
 
     def explain(self, disable = None, local_index = None, output = True, model_num = None):
                         

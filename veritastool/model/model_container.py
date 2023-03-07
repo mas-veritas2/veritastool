@@ -234,6 +234,8 @@ class ModelContainer(object):
         # Deduce up_grp values if up_grp is None and p_grp not a policy 
         self._process_up_grp_input()
 
+        for subclass in Fairness.__subclasses__():
+            subclass._model_data_processing_flag = False
     
     def _intersectional_fairness(self):
         if len(self.intersect_p_grp.keys())>0:

@@ -562,8 +562,8 @@ def check_multiprocessing(n_threads):
 
     return n_threads
 
-def check_install():
-    from ..fairness import CreditScoring
+def test_function_cs():
+    from ..usecases import CreditScoring
     from ..model import ModelContainer
     import pickle
     #Load Credit Scoring Test Data
@@ -579,20 +579,20 @@ def check_install():
     y_true = np.array(cs["y_test"])
     y_pred = np.array(cs["y_pred"])
     y_train = np.array(cs["y_train"])
-    p_var = ['SEX', 'MARRIAGE']
-    p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+    p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
+    up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
     x_train = cs["X_train"]
     x_test = cs["X_test"]
     model_object = cs["model"]
     model_name = "credit scoring"
-    model_type = "credit"
+    model_type = "classification"
     y_prob = cs["y_prob"]
 
     #rejection inference
     num_applicants = {'SEX': [3500, 5000], 'MARRIAGE':[3500, 5000]}
     base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
     
-    container = ModelContainer(y_true = y_true, y_train = y_train, p_var = p_var, p_grp = p_grp, x_train = x_train,  x_test = x_test, model_object = model_object, model_type  = model_type,model_name =  model_name, y_pred= y_pred, y_prob= y_prob)
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, x_test=x_test, model_object=model_object, up_grp=up_grp)
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", perf_metric_name = "balanced_acc", fair_metric_name = "equal_opportunity")
     cre_sco_obj.k = 1
     cre_sco_obj.evaluate(output = False)

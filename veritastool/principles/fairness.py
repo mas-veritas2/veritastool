@@ -1997,7 +1997,7 @@ class Fairness:
         # ignore user input for binary classes but print warning
         if len(self.model_params[self.rootcause_model_num].model_object.classes_) == 2 and multi_class_target is not None:
             print("Warning: Current use case does not support '{}' so input is discarded.".format(multi_class_target))
-            multi_class_target = self.model_params[self.rootcause_model_num].model_object.classes_[1]
+            multi_class_target = self.model_params[self.rootcause_model_num].model_object.classes_.tolist()[1]
 
         _input_parameter_lookup = {
             "p_var": [p_var, (list,), self.model_params[self.rootcause_model_num].non_intersect_pvars],
