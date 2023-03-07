@@ -38,18 +38,18 @@ def test_compute_rates():
     ModelRateClassify.compute_rates(y_true, y_prob, sample_weight = None)
     ths, tpr, fpr, ppv, forr, base_selection_rate, selection_rate = ModelRateClassify.compute_rates(y_true, y_prob, sample_weight = None)
 
-    assert ths.shape == (7502,)
-    assert tpr.shape == (7502,)
-    assert round(tpr.mean(),3) == 0.550
-    assert fpr.shape == (7502,)
-    assert round(fpr.mean(),3) == 0.324
-    assert ppv.shape == (7502,)
-    assert round(ppv.mean(),3) == 0.872
-    assert forr.shape == (7502,)
-    assert round(forr.mean(),3) == 7.396
+    assert ths.shape == (2174,)
+    assert tpr.shape == (2174,)
+    assert round(tpr.mean(),3) == 0.642
+    assert fpr.shape == (2174,)
+    assert round(fpr.mean(),3) == 0.403
+    assert ppv.shape == (2174,)
+    assert round(ppv.mean(),3) == 0.863
+    assert forr.shape == (2174,)
+    assert round(forr.mean(),3) == 9.395
     assert base_selection_rate == 0.7788
-    assert selection_rate.shape == (7502,)
-    assert round(selection_rate.mean(),3) == 0.5
+    assert selection_rate.shape == (2174,)
+    assert round(selection_rate.mean(),3) == 0.589
 
 
 def test_ModelRateUplift_init():

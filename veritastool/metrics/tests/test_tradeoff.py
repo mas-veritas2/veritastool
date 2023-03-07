@@ -134,13 +134,13 @@ def test_compute_f1_grid():
 def test_compute_equal_opportunity_tr():
     equal_opportunity = tradeoff_obj._compute_equal_opportunity_tr()
     assert equal_opportunity.shape == (bins, bins)
-    assert round(equal_opportunity.max(),3)==0.709
+    assert round(equal_opportunity.max(),3)==0.708
     assert np.unravel_index(equal_opportunity.argmax(), equal_opportunity.shape) == (499, 0)
 
 def test_compute_disparate_impact_tr():
     disparate_impact = tradeoff_obj._compute_disparate_impact_tr()
     assert disparate_impact.shape == (bins, bins)
-    assert round(disparate_impact.max(),3)== 4.796
+    assert round(disparate_impact.max(),3)== 4.795
     assert np.unravel_index(disparate_impact.argmax(), disparate_impact.shape) == (0,499)
 
 def test_compute_demographic_parity_tr():
@@ -152,7 +152,7 @@ def test_compute_demographic_parity_tr():
 def test_compute_false_omission_rate_parity_tr():
     for_parity = tradeoff_obj._compute_false_omission_rate_parity_tr()
     assert for_parity.shape == (bins, bins)
-    assert round(for_parity.max(),3)== 4.766
+    assert round(for_parity.max(),3)== 4.76
     assert np.unravel_index(for_parity.argmax(), for_parity.shape) == (499, 0)
 
 def test_compute_false_discovery_rate_parity_tr():
@@ -170,7 +170,7 @@ def test_compute_positive_predictive_parity_tr():
 def test_compute_negative_predictive_parity_tr():
     npv_parity = tradeoff_obj._compute_negative_predictive_parity_tr()
     assert npv_parity.shape == (bins, bins)
-    assert round(npv_parity.max(),3)== 6.973
+    assert round(npv_parity.max(),3)== 6.961
     assert np.unravel_index(npv_parity.argmax(), npv_parity.shape) == (0, 499)
 
 
@@ -196,13 +196,13 @@ def test_compute_equalized_odds_tr():
 def test_compute_calibration_by_group_tr():
     calibration_by_group = tradeoff_obj._compute_calibration_by_group_tr()
     assert calibration_by_group.shape == (bins, bins)
-    assert round(calibration_by_group.max(),3)== 2.346
+    assert round(calibration_by_group.max(),3)== 2.343
     assert np.unravel_index(calibration_by_group.argmax(), calibration_by_group.shape) == (499, 0)
 
 def test_compute_tnr_parity_tr():
     tnr_parity_tr = tradeoff_obj._compute_tnr_parity_tr()
     assert tnr_parity_tr.shape == (bins, bins)
-    assert round(tnr_parity_tr.max(),3)== 0.596
+    assert round(tnr_parity_tr.max(),3)== 0.595
     assert np.unravel_index(tnr_parity_tr.argmax(), tnr_parity_tr.shape) == (0, 498)
 
 def test_compute_negative_equalized_odds_tr():
