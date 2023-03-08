@@ -358,18 +358,18 @@ def test_global():
     assert type(cre_sco_obj.tran_results['model_list'][0]['summary_plot'].encode('utf-8'))==bytes
     assert type(cre_sco_obj.tran_results['model_list'][0]['plot']['summary'])==np.ndarray
 
-# def test_local():
-#     cre_sco_obj._local(n=40)
-#     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['efx'],3)==0.743
-#     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['fx'],3)==0.868
-#     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][0]['Shap'],2)==0.16
-#     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][1]['Shap'],2) in [-0.06,-0.07]
-#     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][-1]['Shap'],2)==-0.01
-#     assert cre_sco_obj.tran_results['model_list'][0]['plot']['local_plot'][40].any()!=0
-#     assert type(cre_sco_obj.tran_results['model_list'][0]['plot']['local_plot'][40])==np.ndarray
+def test_local():
+    cre_sco_obj._local(n=40)
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['efx'],3)==0.743
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['fx'],3)==0.868
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][0]['Shap'],2)==0.16
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][1]['Shap'],2) in [-0.06,-0.07]
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['feature_info'][-1]['Shap'],2)==-0.01
+    assert cre_sco_obj.tran_results['model_list'][0]['plot']['local_plot'][40].any()!=0
+    assert type(cre_sco_obj.tran_results['model_list'][0]['plot']['local_plot'][40])==np.ndarray
     
-#     cm_uplift_obj._tran_compile()
-#     assert cm_uplift_obj.model_params[model_num].model_object.classes_[cm_uplift_obj.tran_results['model_list'][0]['plot']['class_index'][40]]=='TN' 
+    cm_uplift_obj._tran_compile()
+    assert cm_uplift_obj.model_params[model_num].model_object.classes_[cm_uplift_obj.tran_results['model_list'][0]['plot']['class_index'][40]]=='TN' 
     
 
 def test_compute_partial_dependence():
@@ -425,94 +425,94 @@ def test_compute_partial_dependence():
     cm_uplift_obj._compute_partial_dependence()          
     assert cm_uplift_obj.tran_pdp_target=='TR'
  
-# def test_compute_permutation_importance():
-#     #testing for binary classification
-#     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
-#                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-#                         tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 8)
-#     cre_sco_obj._data_prep()
-#     cre_sco_obj._compute_permutation_importance()
-#     assert list(np.round_(np.array(cre_sco_obj.permutation_importance['diff']),3)) == [0.065, 0.029, 0.028, 0.01, 0.008, 0.007,
-#                                                                                         0.006, 0.006, 0.005]
-#     assert list(cre_sco_obj.permutation_importance['feature']) == ['BILL_AMT1', 'BILL_AMT2', 'BILL_AMT5', 'BILL_AMT3', 'PAY_AMT1', 'BILL_AMT6', 
-#                                                                     'PAY_AMT2', 'PAY_AMT4', 'LIMIT_BAL']
+def test_compute_permutation_importance():
+    #testing for binary classification
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                        fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
+                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 8)
+    cre_sco_obj._data_prep()
+    cre_sco_obj._compute_permutation_importance()
+    assert list(np.round_(np.array(cre_sco_obj.permutation_importance['diff']),3)) == [0.065, 0.029, 0.028, 0.01, 0.008, 0.007,
+                                                                                        0.006, 0.006, 0.005]
+    assert list(cre_sco_obj.permutation_importance['feature']) == ['BILL_AMT1', 'BILL_AMT2', 'BILL_AMT5', 'BILL_AMT3', 'PAY_AMT1', 'BILL_AMT6', 
+                                                                    'PAY_AMT2', 'PAY_AMT4', 'LIMIT_BAL']
 
-#     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
-#                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-#                            tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 10)
-#     cre_sco_obj._data_prep()
-#     cre_sco_obj._compute_permutation_importance()
-#     assert len(cre_sco_obj.tran_results['permutation_score'])==12
-#     assert cre_sco_obj.tran_results['permutation_score']!=None
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                           fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
+                           tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 10)
+    cre_sco_obj._data_prep()
+    cre_sco_obj._compute_permutation_importance()
+    assert len(cre_sco_obj.tran_results['permutation_score'])==12
+    assert cre_sco_obj.tran_results['permutation_score']!=None
     
-#     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
-#                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-#                            tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 20)
-#     cre_sco_obj._data_prep()
-#     cre_sco_obj._compute_permutation_importance()
-#     assert len(cre_sco_obj.tran_results['permutation_score'])==22
-#     assert cre_sco_obj.tran_results['permutation_score']!=None
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                           fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
+                           tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 20)
+    cre_sco_obj._data_prep()
+    cre_sco_obj._compute_permutation_importance()
+    assert len(cre_sco_obj.tran_results['permutation_score'])==22
+    assert cre_sco_obj.tran_results['permutation_score']!=None
 
-#     #testing for regression
-#     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'regression_dict.pickle') 
-#     input_file = open(file, "rb")
-#     br = pickle.load(input_file)
-#     x_train = br["x_train"]
-#     x_test = br["x_test"]
-#     y_train = np.array(br["y_train"])
-#     y_true = np.array(br["y_test"])
-#     y_pred = np.array(br["y_pred"])
-#     p_grp = {'sex': [[1]], 'children': 'maj_min'}
-#     model_object = LinearRegression()
-#     model_name = "base_regression"
-#     model_type = "regression"
-#     model_object.fit(x_train,y_train)
-#     reg_container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_train=y_train, x_train=x_train, \
-#                            x_test=x_test, model_object=model_object)
-#     base_reg_obj= BaseRegression(model_params = [reg_container], fair_threshold = 80, perf_metric_name = "mape", \
-#                              fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
-#                              tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                      
-#     base_reg_obj.evaluate()
-#     base_reg_obj.explain()
-#     assert list(np.round_(np.array(base_reg_obj.permutation_importance['diff']),6)) == [0.947482, 0.538425, 0.024973, 0.020413, 0.01412, 0.002763]
-#     assert list(base_reg_obj.permutation_importance['feature']) == ['smoker', 'age', 'sex', 'children', 'region', 'bmi']
+    #testing for regression
+    file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'regression_dict.pickle') 
+    input_file = open(file, "rb")
+    br = pickle.load(input_file)
+    x_train = br["x_train"]
+    x_test = br["x_test"]
+    y_train = np.array(br["y_train"])
+    y_true = np.array(br["y_test"])
+    y_pred = np.array(br["y_pred"])
+    p_grp = {'sex': [[1]], 'children': 'maj_min'}
+    model_object = LinearRegression()
+    model_name = "base_regression"
+    model_type = "regression"
+    model_object.fit(x_train,y_train)
+    reg_container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_train=y_train, x_train=x_train, \
+                           x_test=x_test, model_object=model_object)
+    base_reg_obj= BaseRegression(model_params = [reg_container], fair_threshold = 80, perf_metric_name = "mape", \
+                             fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
+                             tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                      
+    base_reg_obj.evaluate()
+    base_reg_obj.explain()
+    assert list(np.round_(np.array(base_reg_obj.permutation_importance['diff']),6)) == [0.947482, 0.538425, 0.024973, 0.020413, 0.01412, 0.002763]
+    assert list(base_reg_obj.permutation_importance['feature']) == ['smoker', 'age', 'sex', 'children', 'region', 'bmi']
 
-#     #testing for uplift model
-#     cm_uplift_obj._data_prep()
-#     cm_uplift_obj._compute_permutation_importance()
+    #testing for uplift model
+    cm_uplift_obj._data_prep()
+    cm_uplift_obj._compute_permutation_importance()
     
-#     assert list(np.round_(np.array(cm_uplift_obj.permutation_importance['diff']),6)) == [9125.655707, 8533.327963, 3525.103062, 1494.305157, 1465.025095, 517.923479]
-#     assert list(cm_uplift_obj.permutation_importance['feature']) == ['income', 'age', 'isforeign', 'noproducts', 'isfemale', 'didrespond']
+    assert list(np.round_(np.array(cm_uplift_obj.permutation_importance['diff']),6)) == [9125.655707, 8533.327963, 3525.103062, 1494.305157, 1465.025095, 517.923479]
+    assert list(cm_uplift_obj.permutation_importance['feature']) == ['income', 'age', 'isforeign', 'noproducts', 'isfemale', 'didrespond']
 
-#     #testing for multiclass model
-#     #creating a multi-class use case
-#     file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
-#     input_prop = open(file_prop, "rb")
-#     cm_prop = pickle.load(input_prop)
-#     y_true = cm_prop["y_test"]
-#     y_train = cm_prop["y_train"]
-#     model_obj = cm_prop['model']
-#     model_name = "base_classification" 
-#     model_type = "classification"
-#     y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
-#     p_grp = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
-#     x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
-#     x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
-#     clf = cm_prop['model']
-#     clf = clf.fit(x_train, y_train)
-#     y_pred = clf.predict(x_test)
-#     clf_container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_prob, y_train, \
-#                             x_train=x_train, x_test=x_test, model_object=clf, \
-#                             pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
-#     #Create Use Case Object
-#     clf_obj= BaseClassification(model_params = [clf_container], fair_threshold = 80, fair_concern = "eligible", \
-#                                 fair_priority = "benefit", fair_impact = "normal",fair_metric_type='difference', \
-#                                 perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=1000, \
-#                                 tran_pdp_feature = ['income','age'], tran_pdp_target='TR',tran_features=['income','isforeign','age','isfemale'],tran_max_display=4)
-#     clf_obj._data_prep()
-#     clf_obj._compute_permutation_importance()
-#     assert list(np.round_(np.array(clf_obj.permutation_importance['diff']),6)) == [0.1191, 0.014, 0.0102, 0.0003]
-#     assert list(clf_obj.permutation_importance['feature']) == ['income', 'isforeign', 'age', 'isfemale']
+    #testing for multiclass model
+    #creating a multi-class use case
+    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+    input_prop = open(file_prop, "rb")
+    cm_prop = pickle.load(input_prop)
+    y_true = cm_prop["y_test"]
+    y_train = cm_prop["y_train"]
+    model_obj = cm_prop['model']
+    model_name = "base_classification" 
+    model_type = "classification"
+    y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
+    p_grp = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
+    x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
+    clf = cm_prop['model']
+    clf = clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    clf_container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_prob, y_train, \
+                            x_train=x_train, x_test=x_test, model_object=clf, \
+                            pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
+    #Create Use Case Object
+    clf_obj= BaseClassification(model_params = [clf_container], fair_threshold = 80, fair_concern = "eligible", \
+                                fair_priority = "benefit", fair_impact = "normal",fair_metric_type='difference', \
+                                perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=1000, \
+                                tran_pdp_feature = ['income','age'], tran_pdp_target='TR',tran_features=['income','isforeign','age','isfemale'],tran_max_display=4)
+    clf_obj._data_prep()
+    clf_obj._compute_permutation_importance()
+    assert list(np.round_(np.array(clf_obj.permutation_importance['diff']),6)) == [0.1191, 0.014, 0.0102, 0.0003]
+    assert list(clf_obj.permutation_importance['feature']) == ['income', 'isforeign', 'age', 'isfemale']
 
 
 def test_data_prep():
