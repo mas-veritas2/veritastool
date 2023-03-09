@@ -158,66 +158,6 @@ class BaseRegression(Fairness, Transparency):
         else :
             self.fair_metric_name
 
-    def _get_confusion_matrix(self, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None, **kwargs):
-        """
-        Compute confusion matrix
-
-        Parameters
-        ----------
-        y_true : np.ndarray
-                Ground truth target values.
-
-        y_pred : np.ndarray
-                Copy of predicted targets as returned by classifier.
-
-        sample_weight : array of shape (n_samples,), default=None
-                Used to normalize y_true & y_pred.
-
-        curr_p_var : string, default=None
-                Current protected variable
-
-        feature_mask : dictionary of lists, default = None
-                Stores the mask array for every protected variable applied on the x_test dataset.
-
-        Returns
-        -------
-        Confusion matrix metrics based on privileged and unprivileged groups or a list of None if curr_p_var == None
-        """
-        #confusion matrix will only run for classification models        
-        if self._model_type_to_metric_lookup[self.model_params[0].model_type][0] == "classification" :
-
-            if 'y_true' in kwargs:
-                y_true = kwargs['y_true']
-
-            if 'y_pred' in kwargs:
-                y_pred = kwargs['y_pred']
-
-            if curr_p_var is None:
-                if y_pred is None:
-                    return [None] * 4
-
-                tn, fp, fn, tp = confusion_matrix(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight).ravel()
-                
-                return tp, fp, tn, fn
-            else :
-                if y_pred is None:
-                    return [None] * 8
-
-                mask = feature_mask[curr_p_var] 
-                    
-                if sample_weight is None :
-                    tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_true=np.array(y_true)[mask], y_pred=np.array(y_pred)[mask]).ravel()
-                    tn_u, fp_u, fn_u, tp_u  = confusion_matrix(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask]).ravel()
-                else :
-                    tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_true=np.array(y_true)[mask], y_pred=np.array(y_pred)[mask], sample_weight = sample_weight[mask]).ravel()
-                    tn_u, fp_u, fn_u, tp_u  = confusion_matrix(y_true=np.array(y_true)[~mask], y_pred=np.array(y_pred)[~mask], sample_weight = sample_weight[~mask]).ravel()
-
-                return tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u
-        else :
-            if curr_p_var is None :
-                return [None] * 4  
-            else :
-                return [None] * 8
             
     def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
 

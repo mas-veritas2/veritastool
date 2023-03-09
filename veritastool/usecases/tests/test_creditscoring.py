@@ -442,25 +442,26 @@ def test_get_confusion_matrix():
                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)                          
-    result = cre_sco_obj._get_confusion_matrix(None)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)   
+    y_true_reshape = np.array(cre_sco_obj.model_params[0].y_true).reshape(1, 1, -1)
+    y_pred_reshape = np.array(cre_sco_obj.model_params[0].y_pred).reshape(1, 1, -1)                
+    result = cre_sco_obj._get_confusion_matrix_optimized(y_true_reshape,None,None)
     assert len(result) == 4
-    assert result[0] == None
+    assert np.isnan(result[0]).all()
 
-    result = cre_sco_obj._get_confusion_matrix(curr_p_var = 'SEX')
+    result = cre_sco_obj._get_confusion_matrix_optimized(y_true_reshape,None,None,curr_p_var = 'SEX')
     assert len(result) == 8
-    assert result[0] == None
+    assert np.isnan(result[0]).all()
     
     cre_sco_obj.spl_params  = {'num_applicants': {'SEX': [3500, 5000], 'MARRIAGE': [3500, 5000]},
  'base_default_rate': {'SEX': [0.1, 0.05], 'MARRIAGE': [0.1, 0.05]}}
-    result = cre_sco_obj._get_confusion_matrix(None,y_true=y_true,y_pred=y_pred)
+    result = cre_sco_obj._get_confusion_matrix_optimized(y_true_reshape,y_pred_reshape,None)
     assert len(result) == 4
-    #assert result == (507, 61, 539.0, 7393.0)
-    assert result == [None,None,None,None]
+    assert tuple(round(a.item(), 1) for a in result) == (5039,819,840,802)
     cre_sco_obj._rejection_inference_flag = {'SEX': False, 'MARRIAGE': False}
     cre_sco_obj.spl_params  = {'num_applicants': {'SEX': [3500, 5000], 'MARRIAGE': [3500, 5000]},
  'base_default_rate': {'SEX': [0.1, 0.05], 'MARRIAGE': [0.1, 0.05]}}
-    result = cre_sco_obj._get_confusion_matrix(y_true=y_true,y_pred=y_pred,sample_weight = np.array([0.7 for x in range(len(y_pred))]),curr_p_var = 'SEX', feature_mask = cre_sco_obj.feature_mask)
+    result = cre_sco_obj._get_confusion_matrix_optimized(y_true=y_true_reshape,y_pred=y_pred_reshape,sample_weight = np.array([0.7 for x in range(len(y_pred))]),curr_p_var = 'SEX', feature_mask = cre_sco_obj.feature_mask)
     assert len(result) == 8
 #     assert result == (113.4000000000003,
 #  18.199999999999992,
@@ -470,4 +471,4 @@ def test_get_confusion_matrix():
 #  24.499999999999986,
 #  26.599999999999984,
 #  24.499999999999986)
-    assert result == [None,None,None,None,None,None,None,None]
+    assert tuple(round(a.item(), 1) for a in result) == (1309.7, 255.5, 275.8, 273, 2217.6, 317.8, 312.2, 288.4)

@@ -12,6 +12,8 @@ from veritastool.principles.transparency import Transparency
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import pytest
 from veritastool.util.errors import *
 
@@ -98,3 +100,8 @@ def test_policy_max_bias(p_grp):
     else:
         assert base_reg_obj.model_params[0].p_grp['sex'][0] == [1]
         assert base_reg_obj.model_params[0].up_grp['sex'][0] == [0]
+
+def test_mitigate(capfd):
+    base_reg_obj.mitigate(p_var=[], method=[])
+    captured = capfd.readouterr()
+    assert "Bias mitigation is not supported for regression use cases." in captured.out

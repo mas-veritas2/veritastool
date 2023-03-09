@@ -46,7 +46,7 @@ model_obj.fit(x_train, y_train)
 num_applicants = {'SEX': [3500, 5000], 'MARRIAGE':[3500, 5000]}
 base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
 
-container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_prob, y_train, x_train=x_train, \
+container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
 
 def test_check_datatype():
@@ -179,6 +179,54 @@ def test_check_multiprocessing():
     assert check_multiprocessing(2) == min(cpu_count, 2)
     assert check_multiprocessing(8) == min(cpu_count, 8)
     assert check_multiprocessing(32) == min(cpu_count, 32)
+
+@pytest.fixture
+def new_clf_setup():
+    from veritastool.usecases.base_classification import BaseClassification
+    #Load Base Classification Test Data
+    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+    input_prop = open(file_prop, "rb")
+    cm_prop = pickle.load(input_prop)
+    input_prop.close()
+
+    #Model Container Parameters
+    y_true = cm_prop["y_test"]
+    y_train = cm_prop["y_train"]
+    model_name = "base_classification" 
+    model_type = "classification"
+    y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
+    p_grp = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
+    x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
+    clf = cm_prop['model']
+    clf = clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+
+    container_clf = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, x_test=x_test, \
+                               model_object=clf, pos_label=['CR'], neg_label=['CN'])
+    clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
+                            fair_priority = "benefit", fair_impact = "normal",fair_metric_type='difference', \
+                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
+
+    yield container_clf, clf_obj
+
+def test_check_data_unassigned(new_clf_setup):
+    container_clf, _ = new_clf_setup
+
+    # Check y_true, y_pred arrays shape
+    labels_unassigned, counts_unassigned = np.unique(container_clf.y_true, return_counts=True)
+    assert np.array_equal(labels_unassigned, [0, 1])
+    assert np.array_equal(counts_unassigned, [3734, 2277])
+
+    labels_unassigned, counts_unassigned = np.unique(container_clf.y_pred, return_counts=True)
+    assert np.array_equal(labels_unassigned, [0, 1])
+    assert np.array_equal(counts_unassigned.sum(), 6011)
+
+    # Check y_prob probabilistic array & x_test, protected_features_cols dataframe shape
+    assert container_clf.y_prob.shape == container_clf.y_prob.shape
+    assert container_clf.x_test.shape[0] == container_clf.y_prob.shape[0]
+    assert container_clf.protected_features_cols.shape[0] == container_clf.y_prob.shape[0]
 
 # def test_test_function_cs():
 #     test_function_cs()

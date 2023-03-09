@@ -32,7 +32,6 @@ input_prop.close()
 #Model Container Parameters
 y_true = cm_prop["y_test"]
 y_train = cm_prop["y_train"]
-model_obj = cm_prop['model']
 model_name = "base_classification" 
 model_type = "classification"
 y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])

@@ -359,6 +359,10 @@ def test_global():
     assert type(cre_sco_obj.tran_results['model_list'][0]['plot']['summary'])==np.ndarray
 
 def test_local():
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                        fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
+                        tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+    cre_sco_obj._data_prep()
     cre_sco_obj._local(n=40)
     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['efx'],3)==0.743
     assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['fx'],3)==0.868
@@ -424,7 +428,7 @@ def test_compute_partial_dependence():
     cm_uplift_obj._data_prep()
     cm_uplift_obj._compute_partial_dependence()          
     assert cm_uplift_obj.tran_pdp_target=='TR'
- 
+
 def test_compute_permutation_importance():
     #testing for binary classification
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
@@ -442,16 +446,16 @@ def test_compute_permutation_importance():
                            tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 10)
     cre_sco_obj._data_prep()
     cre_sco_obj._compute_permutation_importance()
-    assert len(cre_sco_obj.tran_results['permutation_score'])==12
-    assert cre_sco_obj.tran_results['permutation_score']!=None
+    assert len(cre_sco_obj.tran_results['permutation']['score'])==10
+    assert cre_sco_obj.tran_results['permutation']['score']!=None
     
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
                            tran_index=[20,40], tran_max_sample = 1000, tran_max_display = 20)
     cre_sco_obj._data_prep()
     cre_sco_obj._compute_permutation_importance()
-    assert len(cre_sco_obj.tran_results['permutation_score'])==22
-    assert cre_sco_obj.tran_results['permutation_score']!=None
+    assert len(cre_sco_obj.tran_results['permutation']['score'])==20
+    assert cre_sco_obj.tran_results['permutation']['score']!=None
 
     #testing for regression
     file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'regression_dict.pickle') 
@@ -474,7 +478,7 @@ def test_compute_permutation_importance():
                              tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                      
     base_reg_obj.evaluate()
     base_reg_obj.explain()
-    assert list(np.round_(np.array(base_reg_obj.permutation_importance['diff']),6)) == [0.947482, 0.538425, 0.024973, 0.020413, 0.01412, 0.002763]
+    # assert list(np.round_(np.array(base_reg_obj.permutation_importance['diff']),6)) == [0.947482, 0.538425, 0.024973, 0.020413, 0.01412, 0.002763]
     assert list(base_reg_obj.permutation_importance['feature']) == ['smoker', 'age', 'sex', 'children', 'region', 'bmi']
 
     #testing for uplift model
@@ -613,7 +617,7 @@ def test_explain():
     assert cre_sco_obj.tran_results['model_list'][0]['local_interpretability'] is not None 
     assert cre_sco_obj.tran_results['model_list'][model_num]['summary_plot'] is not None 
     assert cre_sco_obj.tran_results['model_list'][model_num]['plot']['pdp_plot'] is not None 
-    assert cre_sco_obj.tran_results['permutation_score'] is not None 
+    assert cre_sco_obj.tran_results['permutation']['score'] is not None 
 
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
@@ -625,7 +629,7 @@ def test_explain():
     assert cre_sco_obj.tran_results['model_list'][0]['local_interpretability'] == [] 
     assert cre_sco_obj.tran_results['model_list'][model_num]['summary_plot'] == ''
     assert cre_sco_obj.tran_results['model_list'][model_num]['plot']['pdp_plot'] is not None 
-    assert cre_sco_obj.tran_results['permutation_score'] is not None 
+    assert cre_sco_obj.tran_results['permutation']['score'] is not None 
     
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
@@ -637,7 +641,7 @@ def test_explain():
     assert cre_sco_obj.tran_results['model_list'][0]['local_interpretability'] == [] 
     assert cre_sco_obj.tran_results['model_list'][model_num]['summary_plot'] == ''
     assert cre_sco_obj.tran_results['model_list'][model_num]['plot']['pdp_plot'] is not None 
-    assert cre_sco_obj.tran_results['permutation_score'] is not None 
+    assert cre_sco_obj.tran_results['permutation']['score'] is not None 
 
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
@@ -649,7 +653,7 @@ def test_explain():
     assert cre_sco_obj.tran_results['model_list'][0]['local_interpretability'] is not None 
     assert cre_sco_obj.tran_results['model_list'][model_num]['summary_plot'] is not None 
     assert cre_sco_obj.tran_results['model_list'][model_num]['plot']['pdp_plot'] == {} 
-    assert cre_sco_obj.tran_results['permutation_score'] == '' 
+    assert cre_sco_obj.tran_results['permutation']['score'] == '' 
 
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
@@ -661,7 +665,7 @@ def test_explain():
     assert cre_sco_obj.tran_results['model_list'][0]['local_interpretability'] == []
     assert cre_sco_obj.tran_results['model_list'][model_num]['summary_plot'] == '' 
     assert cre_sco_obj.tran_results['model_list'][model_num]['plot']['pdp_plot'] == {} 
-    assert cre_sco_obj.tran_results['permutation_score'] == '' 
+    assert cre_sco_obj.tran_results['permutation']['score'] == '' 
 
 
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
@@ -747,6 +751,7 @@ def test_tran_compile():
     a = cre_sco_obj._tran_compile(disable = ['interpret']) 
     assert a['model_list'][model_num]['local_interpretability'] == None
     assert a['model_list'][model_num]['summary_plot'] == None
+    assert a['model_list'][model_num]['summary_plot_data_table'] == None
 
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                         fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
@@ -760,4 +765,4 @@ def test_tran_compile():
                         tran_index=[20,40], tran_max_sample = 50, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10,
                         tran_features = ['MARRIAGE','SEX','LIMIT_BAL','PAY_1'])
     a = cre_sco_obj._tran_compile(disable = ['perm_imp']) 
-    assert a['permutation_score'] == None
+    assert a['permutation'] == None

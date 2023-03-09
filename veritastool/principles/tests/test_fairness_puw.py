@@ -630,7 +630,7 @@ def test_mitigate_reweigh(p_var):
     else:
         assert round(mitigated['reweigh'][1][(0, 1.0)], 3) == 0.9
 
-@pytest.mark.parametrize("p_var", [(['gender']), ([])])
+@pytest.mark.parametrize("p_var", [(['gender']), (['gender', 'race'])])
 def test_mitigate_reweigh_categorical(p_var):
     x_train_rwg = x_train.copy()
     x_test_rwg = x_test.copy()
@@ -654,8 +654,7 @@ def test_mitigate_reweigh_categorical(p_var):
     assert isinstance(next(iter(mitigated['reweigh'][1].keys())), tuple)
 
     # Check values of sample weights computation based on ground truth
-    if not p_var:
-        print(mitigated['reweigh'][1])
+    if 'race' in p_var:
         assert round(mitigated['reweigh'][1][('male', 'race_0', 1.0)], 3) == 0.5
     else:
         assert round(mitigated['reweigh'][1][('male', 1.0)], 3) == 0.9

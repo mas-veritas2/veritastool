@@ -5,6 +5,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
+from veritastool.usecases.base_classification import BaseClassification
 from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
 from sklearn.linear_model import LogisticRegression
@@ -193,7 +194,7 @@ pred_underwriting_obj = PredictiveUnderwriting(model_params = [container_puw], f
                                               tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
                                               tran_pdp_feature = ['age','payout_amount'])
 
-
+# Setup fixture to test ratio metrics
 @pytest.fixture
 def ratio_metrics_setup():
     p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
@@ -207,6 +208,20 @@ def ratio_metrics_setup():
     pred_underwriting_obj.evaluate(output=False)
     
     yield pred_underwriting_obj
+
+# Setup fixture to test multi-class classification
+@pytest.fixture
+def multi_class_setup():
+    x_train_prop = cm_prop["X_train"].drop(['ID'], axis = 1)
+    x_test_prop = cm_prop["X_test"].drop(['ID'], axis = 1)
+    y_pred_prop = model_object_prop.predict(x_test_prop)
+    p_grp_prop = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    model_type_prop = 'classification'
+    model_name_prop = 'base_classification'
+    container_clf = ModelContainer(y_true_prop, p_grp_prop, model_type_prop, model_name_prop, y_pred_prop, y_prob_prop, y_train_prop, \
+                            x_train=x_train_prop, x_test=x_test_prop, model_object=model_object_prop, \
+                            pos_label=None, neg_label=None) 
+    yield container_clf
 
 def test_execute_all_fair():
     # cre_sco_obj._compute_fairness(1)
@@ -369,3 +384,55 @@ def test_consistency_score():
     result = pred_underwriting_obj.fair_metric_obj.result['indiv_fair']['consistency_score']
     assert round(result, 3) == round(expected, 3)
     assert result >= 0 and result <= 1
+
+def test_disable_individual_fairness():
+    pred_underwriting_obj = PredictiveUnderwriting(model_params = [container_puw], fair_threshold = 80, fair_concern = "inclusive", \
+                                                fair_priority = "benefit", fair_impact = "normal", fair_metric_type='difference', \
+                                                tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_pdp_feature = ['age','payout_amount'])
+    pred_underwriting_obj.evaluate(disable=['individual_fair'])
+    assert pred_underwriting_obj.fair_metric_obj.result['indiv_fair'] is None
+
+def test_multi_class_difference(multi_class_setup):
+    container_clf = multi_class_setup
+    clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
+                            fair_priority = "benefit", fair_impact = "normal",fair_metric_type='difference', \
+                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
+    clf_obj.evaluate(output=False)
+    # Check result dict is not empty
+    assert bool(clf_obj.fair_metric_obj.result)
+
+    expected = -0.12032418952618457
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['demographic_parity'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = 0.07015762156225885
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['auc_parity'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = -0.426590059704548
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['log_loss_parity'][0]
+    assert round(result, 3) == round(expected, 3)
+
+def test_multi_class_ratio(multi_class_setup):
+    container_clf = multi_class_setup
+    clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
+                            fair_priority = "benefit", fair_impact = "normal",fair_metric_type='ratio', \
+                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
+    clf_obj.evaluate(output=False)
+    # Check result dict is not empty
+    assert bool(clf_obj.fair_metric_obj.result)
+
+    expected = 1.4812967581047383
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['disparate_impact'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = 0.979360431051702
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['auc_ratio'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = 1.246610111046669
+    result = clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['log_loss_ratio'][0]
+    assert round(result, 3) == round(expected, 3)

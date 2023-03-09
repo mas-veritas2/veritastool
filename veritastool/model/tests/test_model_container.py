@@ -10,7 +10,7 @@ sys.path.insert(0, project_root)
 from sklearn.linear_model import LogisticRegression
 from veritastool.model.model_container import ModelContainer
 from veritastool.util.errors import * #MyError
-from veritastool.util.utility import check_label
+from veritastool.principles.fairness import Fairness
 from veritastool.usecases.credit_scoring import CreditScoring
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 sys.path.append(module_path)
@@ -45,20 +45,20 @@ base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
 model_obj = LogisticRegression(C=0.1)
 model_obj.fit(x_train,y_train)
 
-m_container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_prob, y_train, x_train=x_train, \
+m_container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
 
 def test_model_container():
     #Create Model Container and Use Case Object
-    container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_prob, y_train, x_train=x_train, \
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                                x_test=x_test, model_object=model_obj, up_grp=up_grp)
 
     assert container is not None
 
     #y_true
-    pos_label = [[1]]
+    pos_label = [1]
     neg_label = None
-    s_y_true = check_label(np.array(y_true, dtype=int), pos_label, neg_label,obj_in=container)[0]
+    s_y_true = Fairness._check_label(Fairness, np.array(y_true, dtype=int), pos_label, neg_label, container)[0]
     assert np.array_equal(s_y_true, container.y_true)
 
     #y_train
@@ -71,9 +71,9 @@ def test_model_container():
     assert p_grp == container.p_grp
 
     #y_pred
-    pos_label = [[1]]
+    pos_label = [1]
     neg_label = None
-    s_y_pred = check_label(np.array(y_pred, dtype=int), pos_label, neg_label,obj_in=container)[0]
+    s_y_pred = Fairness._check_label(Fairness, np.array(y_pred, dtype=int), pos_label, neg_label, container)[0]
     assert np.array_equal(s_y_pred, container.y_pred)
 
     if model_name == 'auto':

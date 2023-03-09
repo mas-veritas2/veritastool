@@ -16,7 +16,7 @@ from veritastool.usecases.customer_marketing import CustomerMarketing
 from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.metrics.tradeoff import TradeoffRate
 from veritastool.metrics.performance_metrics import PerformanceMetrics
-from veritastool.util.utility import check_datatype, check_value, check_label
+from veritastool.util.utility import check_datatype, check_value
 from veritastool.config.constants import Constants
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 

@@ -118,7 +118,7 @@ class ModelContainer(object):
         self.pos_label2 = None
         self.policies = ['maj_min','maj_rest','max_bias']
         self.unassigned_y_label = (None, None)
-        self.label_count = len(set(self.y_true))
+        self.label_count = None
         self.err = VeritasError()
 
         check_y_label = None
@@ -208,6 +208,7 @@ class ModelContainer(object):
 
         check_value(self)
 
+        self.label_count = len(set(self.y_true))
         self.check_data_consistency()
         
         if y_pred is not None:
