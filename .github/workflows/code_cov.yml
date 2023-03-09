@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
-      PYTHON: '3.10'
+      PYTHON: '3.11'
     steps:
     - uses: actions/checkout@master
     - name: Setup Python
