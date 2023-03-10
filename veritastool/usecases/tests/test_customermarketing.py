@@ -124,7 +124,7 @@ def test_get_confusion_matrix():
 
     result = cm_uplift_obj._get_confusion_matrix_optimized(y_true_reshape,None,None)
     assert len(result) == 4
-    assert np.isnan(result[0]).all()
+    assert np.all(np.equal(result[0], None))
        
     # cm_uplift_obj._model_type_to_metric_lookup[cm_uplift_obj.model_params[0].model_type] = ('classification', 2, 1)
     # result = cm_uplift_obj._get_confusion_matrix_optimized(y_true,y_pred, sample_weight = np.array([0.7 for x in range(len(y_pred))]))
@@ -132,7 +132,7 @@ def test_get_confusion_matrix():
     
     result = cm_uplift_obj._get_confusion_matrix_optimized(y_true_reshape,None,None,curr_p_var = 'isforeign')
     assert len(result) == 8
-    assert np.isnan(result[0]).all()
+    assert np.all(np.equal(result[0], None))
     
 def test_select_fairness_metric_name():
     # cm_uplift_obj.fair_metric_name = 'auto'

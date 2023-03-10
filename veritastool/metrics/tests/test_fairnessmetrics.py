@@ -5,7 +5,6 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.credit_scoring import CreditScoring
-from veritastool.usecases.base_classification import BaseClassification
 from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.fairness import Fairness
 from sklearn.linear_model import LogisticRegression
@@ -210,6 +209,7 @@ def ratio_metrics_setup():
     yield pred_underwriting_obj
 
 # Setup fixture to test multi-class classification
+from veritastool.usecases.base_classification import BaseClassification
 @pytest.fixture
 def multi_class_setup():
     x_train_prop = cm_prop["X_train"].drop(['ID'], axis = 1)

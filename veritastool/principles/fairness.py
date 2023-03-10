@@ -2830,11 +2830,11 @@ class Fairness:
         Checks if primary performance metric is valid
         """
         try:
-            if PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][4] == False:
+            if PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][2] == False:
                 perf_list = []
                 for i,j in PerformanceMetrics.map_perf_metric_to_group.items():
                     if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0]:
-                        if PerformanceMetrics.map_perf_metric_to_group[i][4] == True:
+                        if PerformanceMetrics.map_perf_metric_to_group[i][2] == True:
                             perf_list.append(i)
                 self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected=perf_list, function_name="check_perf_metric_name")
         except:

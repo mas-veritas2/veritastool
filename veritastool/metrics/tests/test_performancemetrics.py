@@ -194,7 +194,20 @@ pred_underwriting_obj = PredictiveUnderwriting(model_params = [container_puw], f
                                               tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
                                               tran_pdp_feature = ['age','payout_amount'])
 
-
+# Setup fixture to test multi-class classification
+from veritastool.usecases.base_classification import BaseClassification
+@pytest.fixture
+def multi_class_setup():
+    x_train_prop = cm_prop["X_train"].drop(['ID'], axis = 1)
+    x_test_prop = cm_prop["X_test"].drop(['ID'], axis = 1)
+    y_pred_prop = model_object_prop.predict(x_test_prop)
+    p_grp_prop = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    model_type_prop = 'classification'
+    model_name_prop = 'base_classification'
+    container_clf = ModelContainer(y_true_prop, p_grp_prop, model_type_prop, model_name_prop, y_pred_prop, y_prob_prop, y_train_prop, \
+                            x_train=x_train_prop, x_test=x_test_prop, model_object=model_object_prop, \
+                            pos_label=None, neg_label=None) 
+    yield container_clf
 
 def test_execute_all_perf():
     # cre_sco_obj._compute_fairness(1)
@@ -219,12 +232,10 @@ def test_compute_wape():
     result_without_mask = base_reg_obj.perf_metric_obj.result['perf_metric_values']['wape'][0]    
     assert round(result_without_mask, 3) == round(expected_without_mask, 3)
     
-    
 def test_compute_mape():
     expected_without_mask = .419
     result_without_mask = base_reg_obj.perf_metric_obj.result['perf_metric_values']['mape'][0]    
     assert round(result_without_mask, 3) == round(expected_without_mask, 3)
-
 
 def test_compute_rmse():
     expected_without_mask = 6134.957
@@ -249,8 +260,6 @@ def test_loco_compute_roc_auc():
     cre_sco_obj.feature_importance(disable=['correlation'])
     assert round(cre_sco_obj.feature_imp_values['SEX']['SEX'][1],3) == -0.013
 
-
-
 def test_compute_roc_auc():
     expected = 0.988
     result = pred_underwriting_obj.perf_metric_obj.result['perf_metric_values']['roc_auc'][0]
@@ -265,4 +274,26 @@ def test_compute_precision():
 def test_compute_log_loss():
     expected = 0.128
     result = pred_underwriting_obj.perf_metric_obj.result['perf_metric_values']['log_loss'][0]
+    assert round(result, 3) == round(expected, 3)
+
+def test_multi_class(multi_class_setup):
+    container_clf = multi_class_setup
+    clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
+                            fair_priority = "benefit", fair_impact = "normal",fair_metric_name='demographic_parity', \
+                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                        
+    clf_obj.evaluate(output=False)
+    # Check result dict is not empty
+    assert bool(clf_obj.perf_metric_obj.result)
+
+    expected = 0.4169
+    result = clf_obj.perf_metric_obj.result['perf_metric_values']['precision'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = 0.4033185477005771
+    result = clf_obj.perf_metric_obj.result['perf_metric_values']['roc_auc'][0]
+    assert round(result, 3) == round(expected, 3)
+
+    expected = 0.7112950662542197
+    result = clf_obj.perf_metric_obj.result['perf_metric_values']['log_loss'][0]
     assert round(result, 3) == round(expected, 3)

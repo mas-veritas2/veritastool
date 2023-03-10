@@ -447,11 +447,11 @@ def test_get_confusion_matrix():
     y_pred_reshape = np.array(cre_sco_obj.model_params[0].y_pred).reshape(1, 1, -1)                
     result = cre_sco_obj._get_confusion_matrix_optimized(y_true_reshape,None,None)
     assert len(result) == 4
-    assert np.isnan(result[0]).all()
+    assert np.all(np.equal(result[0], None))
 
     result = cre_sco_obj._get_confusion_matrix_optimized(y_true_reshape,None,None,curr_p_var = 'SEX')
     assert len(result) == 8
-    assert np.isnan(result[0]).all()
+    assert np.all(np.equal(result[0], None))
     
     cre_sco_obj.spl_params  = {'num_applicants': {'SEX': [3500, 5000], 'MARRIAGE': [3500, 5000]},
  'base_default_rate': {'SEX': [0.1, 0.05], 'MARRIAGE': [0.1, 0.05]}}

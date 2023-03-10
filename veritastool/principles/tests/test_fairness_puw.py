@@ -11,9 +11,6 @@ from veritastool.metrics.fairness_metrics import FairnessMetrics
 from veritastool.principles.transparency import Transparency
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-import imblearn
 import shap
 import numpy as np
 import pandas as pd
@@ -97,14 +94,14 @@ def test_compile():
     assert pred_underwriting_obj.feature_imp_status_loo == True
     assert pred_underwriting_obj.feature_imp_status_corr == True
     
-def test_compile_skip():
+def test_compile_status():
     pred_underwriting_obj.feature_imp_status = 0
     pred_underwriting_obj.tradeoff_status = 0
     pred_underwriting_obj.feature_imp_status_corr = False
     #pred_underwriting_obj.compile(skip_tradeoff_flag=1, skip_feature_imp_flag=1) unknown args
     assert pred_underwriting_obj.feature_imp_status == 0 #-1
     assert pred_underwriting_obj.tradeoff_status == 0 #-1
-    
+
 def test_tradeoff():
     assert round(pred_underwriting_obj.tradeoff_obj.result['gender']['max_perf_point'][0],3) == 0.510
     pred_underwriting_obj.model_params[0].y_prob = None
@@ -318,6 +315,17 @@ def test_fairness_tree():
     pred_underwriting_obj.fair_priority = 'harm'
     #pred_underwriting_obj._fairness_tree()
     assert pred_underwriting_obj._fairness_tree() == 'fpr_ratio'
+    pred_underwriting_obj.fair_concern = 'eligible'
+    assert pred_underwriting_obj._fairness_tree() == 'fnr_ratio'
+    pred_underwriting_obj.fair_concern = 'both'
+    assert pred_underwriting_obj._fairness_tree() == 'equal_odds_ratio'
+    pred_underwriting_obj.fair_impact = 'significant'
+    pred_underwriting_obj.fair_concern = 'inclusive'
+    assert pred_underwriting_obj._fairness_tree() == 'fdr_ratio'
+    pred_underwriting_obj.fair_concern = 'eligible'
+    assert pred_underwriting_obj._fairness_tree() == 'for_ratio'
+    pred_underwriting_obj.fair_concern = 'both'
+    assert pred_underwriting_obj._fairness_tree() == 'calibration_by_group_ratio'
     
     pred_underwriting_obj.fair_concern = 'eligible'
     pred_underwriting_obj.fair_priority = 'benefit'
@@ -349,6 +357,17 @@ def test_fairness_tree():
     pred_underwriting_obj.fair_priority = 'harm'
     #pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False)
     assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_ratio'
+    pred_underwriting_obj.fair_concern = 'eligible'
+    assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'fpr_ratio'
+    pred_underwriting_obj.fair_concern = 'both'
+    assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'equal_odds_ratio'
+    pred_underwriting_obj.fair_impact = 'significant'
+    pred_underwriting_obj.fair_concern = 'inclusive'
+    assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'for_ratio'
+    pred_underwriting_obj.fair_concern = 'eligible'
+    assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'fdr_ratio'
+    pred_underwriting_obj.fair_concern = 'both'
+    assert pred_underwriting_obj._fairness_tree(is_pos_label_favourable = False) == 'calibration_by_group_ratio'
 
 def test_check_label():
     y = np.array([1,1,1,1,1,1,1])
@@ -741,3 +760,51 @@ def test_policy_max_bias_y_prob(fair_metric_name):
     elif fair_metric_name == 'log_loss_parity':
         assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['0_1']
         assert pred_underwriting_obj.model_params[0].up_grp['gender-race'][0] == ['1_1']
+
+def test_compile_disable():
+    pred_underwriting_obj.evaluate_status = 0
+    pred_underwriting_obj.feature_imp_status = 0
+    pred_underwriting_obj.feature_imp_status_loo = False
+    pred_underwriting_obj.feature_imp_status_corr = False
+    pred_underwriting_obj.tradeoff_status = 0
+    pred_underwriting_obj.compile(disable=['evaluate','explain'])
+    assert pred_underwriting_obj.feature_imp_status == -1
+    assert pred_underwriting_obj.tradeoff_status == -1
+
+def test_compile_disable_pipe_processing():
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
+                            x_test=x_test, model_object=model, up_grp=up_grp)
+    pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
+                                                    fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
+                                                    tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                    tran_pdp_feature = ['annual_premium','payout_amount'])
+    pred_underwriting_obj.compile(disable=['evaluate>perf_dynamic|calibration_curve|individual_fair','feature_importance>correlation','explain'])
+    assert pred_underwriting_obj.compile_disable_map['evaluate'] == set(['calibration_curve', 'individual_fair', 'perf_dynamic'])
+    assert pred_underwriting_obj.compile_disable_map['feature_importance'] == set(['correlation'])
+    assert pred_underwriting_obj.evaluate_status == 1
+    assert pred_underwriting_obj.feature_imp_status == 1
+    assert not pred_underwriting_obj.feature_imp_status_corr
+
+def test_compile_skip():
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
+                            x_test=x_test, model_object=model, up_grp=up_grp)
+    pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
+                                                    fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
+                                                    tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                    tran_pdp_feature = ['annual_premium','payout_amount'])
+    pred_underwriting_obj.feature_imp_status = -1
+    pred_underwriting_obj.tradeoff_status = -1
+    pred_underwriting_obj.compile(disable=['explain'])
+    assert pred_underwriting_obj.feature_imp_status == -1
+    assert pred_underwriting_obj.tradeoff_status == -1
+
+def test_check_perf_metric_name():
+    PerformanceMetrics.map_perf_metric_to_group['test_perf_metric'] = ('Custom Performance Metric', 'classification', False)
+    pred_underwriting_obj.perf_metric_name = 'test_perf_metric'
+
+    msg = "[value_error]: perf_metric_name: given test_perf_metric, expected ['selection_rate', 'accuracy', 'balanced_acc', 'recall', 'precision', 'f1_score', 'tnr', 'fnr', 'npv', 'roc_auc', 'log_loss'] at check_perf_metric_name()\n"
+    with pytest.raises(Exception) as toolkit_exit:
+        pred_underwriting_obj.check_perf_metric_name()
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
+    del PerformanceMetrics.map_perf_metric_to_group['test_perf_metric']

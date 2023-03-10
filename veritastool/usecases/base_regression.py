@@ -154,10 +154,12 @@ class BaseRegression(Fairness, Transparency):
         Retrieves the fairness metric name based on the values of model_type, fair_concern, fair_impact, fair_priority, fair_metric_type.
         """
         if self.fair_metric_name == 'auto':
-            self.fair_metric_name = 'rmse_parity'
-        else :
-            self.fair_metric_name
-
+            if self.fair_metric_type == 'difference':
+                self.fair_metric_name = 'rmse_parity'
+            elif self.fair_metric_type == 'ratio':
+                self.fair_metric_name = 'rmse_ratio'
+        else:
+            return self.fair_metric_name
             
     def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
 

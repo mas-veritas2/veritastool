@@ -5,13 +5,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.base_regression import BaseRegression
-from veritastool.metrics.performance_metrics import PerformanceMetrics
-from veritastool.metrics.fairness_metrics import FairnessMetrics
-from veritastool.principles.fairness import Fairness
-from veritastool.principles.transparency import Transparency
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import pytest
@@ -48,7 +43,6 @@ base_reg_obj.compile()
 base_reg_obj.evaluate()
 base_reg_obj.tradeoff()
 base_reg_obj.feature_importance()
-base_reg_obj.rootcause()
 
 def test_rootcause(capfd):
     # Check that print statement is shown for regression rootcause
