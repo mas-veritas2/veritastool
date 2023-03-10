@@ -4,11 +4,11 @@ scikit-learn==1.2.2
 pandas==1.5.3
 ipywidgets==8.0.4
 ipython == 8.11.0
-matplotlib==3.7.1 
+matplotlib==3.7.1
 tqdm==4.65.0
 phik==0.12.3
 shap==0.41.0
 matplotlib-inline==0.1.6
 pytest == 7.2.2
-Jinja2
+Jinja2==3.1.2
 
