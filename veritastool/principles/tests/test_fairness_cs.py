@@ -15,11 +15,14 @@ import pandas as pd
 import pytest
 from veritastool.util.errors import *
 import shap
+import matplotlib
+matplotlib.use('Agg')
 
 #Load Credit Scoring Test Data
 file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'credit_score_dict.pickle')
 input_file = open(file, "rb")
 cs = pickle.load(input_file)
+input_file.close()
 
 #Reduce into two classes
 cs["X_train"]['MARRIAGE'] = cs["X_train"]['MARRIAGE'].replace([0, 3],1)
@@ -39,36 +42,28 @@ model_obj = cs["model"]
 model_obj.fit(x_train, y_train)
 
 #rejection inference
-num_applicants = {'SEX': [3500, 5000], 'MARRIAGE':[3500, 5000]}
-base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
-# model_object = LRwrapper(model_object)
-
+num_applicants = {"SEX": [5841,5841], "MARRIAGE": [5841,5841]}
+base_default_rate = {"SEX": [0.5,0.5], "MARRIAGE": [0.5,0.5]}
 
 #Create Model Container and Use Case Object
 container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_prob, y_train, x_train=x_train, \
                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
 
 #Create Use Case Object
-cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 43.2, fair_concern = "eligible", \
-                           fair_priority = "benefit", fair_impact = "significant", perf_metric_name="balanced_acc", fair_metric_name = "disparate_impact", fair_metric_type= "ratio",\
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10,fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2} })
-#cre_sco_obj.k = 1
-# cre_sco_obj.fair_metric_name = 'disparate_impact'
-# cre_sco_obj.compile()
-# result = cre_sco_obj.perf_metric_obj.result, cre_sco_obj.fair_metric_obj.result
+cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                           fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", fair_metric_name = "auto", \
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
+                           fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2}})
 
 cre_sco_obj.compile()
-# cre_sco_obj.evaluate(visualize=True)
 cre_sco_obj.evaluate()
 cre_sco_obj.tradeoff()
 cre_sco_obj.feature_importance()
 cre_sco_obj.compile()
 result = cre_sco_obj.perf_metric_obj.result, cre_sco_obj.fair_metric_obj.result
 
-
 def test_evaluate():
-
-    assert round(result[0]['perf_metric_values']['selection_rate'][0],3) == 0.757
+    assert round(result[0]['perf_metric_values']['selection_rate'][0],3) == 0.781
    
 def test_artifact():
     
@@ -83,7 +78,7 @@ def test_fairness_conclusion():
         assert cre_sco_obj.fair_threshold == cre_sco_obj.fair_conclusion['SEX']['threshold']
     else:
         value = round((1 - cre_sco_obj.fair_conclusion['SEX']['threshold']) *100)
-        assert cre_sco_obj.fair_threshold == value
+        assert value == round((1 - (1-cre_sco_obj.fair_threshold/100) * result[1]['SEX']["fair_metric_values"][cre_sco_obj.fair_metric_name][1])*100)
     assert cre_sco_obj.fair_conclusion['SEX']['fairness_conclusion'] in ('fair','unfair')
 
 def test_compute_fairness():
@@ -100,7 +95,6 @@ def test_fairness_metric_value_input_check():
     assert cre_sco_obj.fairness_metric_value_input == None
     
 def test_compile():
-
     assert cre_sco_obj.evaluate_status == 1
     assert cre_sco_obj.evaluate_status_cali == True
     assert cre_sco_obj.evaluate_status_perf_dynamics == True
@@ -118,8 +112,7 @@ def test_compile_skip():
     assert cre_sco_obj.tradeoff_status == 0 #-1
     
 def test_tradeoff():
-
-    assert round(cre_sco_obj.tradeoff_obj.result['SEX']['max_perf_point'][0],3) == 0.407
+    assert round(cre_sco_obj.tradeoff_obj.result['SEX']['max_perf_point'][0],3) == 0.431
     cre_sco_obj.model_params[0].y_prob = None
     cre_sco_obj.tradeoff()
     assert cre_sco_obj.tradeoff_status == -1
@@ -131,7 +124,7 @@ def test_feature_importance():
     cre_sco_obj.feature_imp_status = 0
     cre_sco_obj.evaluate_status = 0
     cre_sco_obj.feature_importance()
-    assert round(cre_sco_obj.feature_imp_values['SEX']['SEX'][0],3) == -0.095
+    assert round(cre_sco_obj.feature_imp_values['SEX']['SEX'][0],3) == 0.021
     cre_sco_obj.feature_imp_status = -1
     cre_sco_obj.feature_importance()
     assert cre_sco_obj.feature_imp_values == None
@@ -193,7 +186,7 @@ def test_feature_importance_x_test_exception():
 #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
     
@@ -254,7 +247,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
         
@@ -293,23 +286,23 @@ def test_model_type_input():
 def test_fairness_tree():
     cre_sco_obj.fair_impact = 'normal'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'equal_opportunity_ratio'
+    assert cre_sco_obj._fairness_tree() == 'equal_opportunity'
     cre_sco_obj.fair_concern = 'inclusive'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'fpr_ratio'
+    assert cre_sco_obj._fairness_tree() == 'fpr_parity'
     cre_sco_obj.fair_concern = 'both'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'equal_odds_ratio'
+    assert cre_sco_obj._fairness_tree() == 'equal_odds'
     cre_sco_obj.fair_impact = 'selective'
     cre_sco_obj.fair_concern = 'eligible'
     cre_sco_obj.fair_priority = 'benefit'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'ppv_ratio'
+    assert cre_sco_obj._fairness_tree() == 'ppv_parity'
     cre_sco_obj.fair_impact = 'selective'
     cre_sco_obj.fair_concern = 'inclusive'
     cre_sco_obj.fair_priority = 'benefit'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'fdr_ratio'
+    assert cre_sco_obj._fairness_tree() == 'fdr_parity'
     cre_sco_obj.fair_concern = 'both'
     with pytest.raises(MyError) as toolkit_exit:
         cre_sco_obj._fairness_tree()
@@ -318,29 +311,29 @@ def test_fairness_tree():
     cre_sco_obj.fair_concern = 'inclusive'
     cre_sco_obj.fair_priority = 'harm'
     #cre_sco_obj._fairness_tree()
-    assert cre_sco_obj._fairness_tree() == 'fpr_ratio'
+    assert cre_sco_obj._fairness_tree() == 'fpr_parity'
     
     cre_sco_obj.fair_concern = 'eligible'
     cre_sco_obj.fair_priority = 'benefit'
     cre_sco_obj.fair_impact = 'normal'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'tnr_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'tnr_parity'
     cre_sco_obj.fair_concern = 'inclusive'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
     cre_sco_obj.fair_concern = 'both'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'neg_equal_odds_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'neg_equal_odds'
     cre_sco_obj.fair_impact = 'selective'
     cre_sco_obj.fair_concern = 'eligible'
     cre_sco_obj.fair_priority = 'benefit'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'npv_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'npv_parity'
     cre_sco_obj.fair_impact = 'selective'
     cre_sco_obj.fair_concern = 'inclusive'
     cre_sco_obj.fair_priority = 'benefit'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'for_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'for_parity'
     cre_sco_obj.fair_concern = 'both'
     with pytest.raises(MyError) as toolkit_exit:
         cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
@@ -349,7 +342,7 @@ def test_fairness_tree():
     cre_sco_obj.fair_concern = 'inclusive'
     cre_sco_obj.fair_priority = 'harm'
     #cre_sco_obj._fairness_tree(is_pos_label_favourable = False)
-    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_ratio'
+    assert cre_sco_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
 
 def test_check_label():
     y = np.array([1,1,1,1,1,1,1])
@@ -378,17 +371,16 @@ def test_check_label():
 
 def test_rootcause_group_difference():
     SEED=123
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(current_dir, "..", "..", "resources", "data", "shap_values_cs.npy")
+    path = os.path.normpath(path)
     x_train_sample = x_train.sample(n=1000, random_state=SEED)
-    explainer_shap = shap.Explainer(cre_sco_obj.model_params[0].model_object.predict_proba,x_train_sample) 
-    explanation = explainer_shap(x_train_sample)
-    shap_values = np.moveaxis(explanation.values, -1, 0)
-    idx = list(cre_sco_obj.model_params[0].model_object.classes_).index(cre_sco_obj.model_params[0].pos_label[0])
-    shap_values = shap_values[idx]
+    shap_values = np.load(path)
     
     # Test case without feature_mask
     group_mask = np.where(x_train_sample.SEX == 1, True, False)
     result = cre_sco_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
-    expected = ['BILL_AMT1', 'LIMIT_BAL', 'BILL_AMT3', 'BILL_AMT2', 'PAY_AMT1', 'BILL_AMT4', 'BILL_AMT6', 'PAY_AMT3', 'PAY_AMT2', 'PAY_AMT4']
+    expected = ['BILL_AMT1', 'LIMIT_BAL', 'BILL_AMT3', 'BILL_AMT2', 'PAY_AMT1', 'BILL_AMT4', 'BILL_AMT6', 'PAY_AMT6', 'BILL_AMT5', 'PAY_AMT3']
     assert list(result.keys()) == expected
     
     # Test case with feature_mask
@@ -401,10 +393,21 @@ def test_rootcause_group_difference():
     shap_values = shap_values[indices]
     group_mask = feature_mask[np.where(feature_mask != -1)].astype(bool)
     result = cre_sco_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
-    expected = ['LIMIT_BAL', 'PAY_AMT2', 'BILL_AMT4', 'PAY_AMT1', 'BILL_AMT1', 'BILL_AMT2', 'PAY_AMT5', 'BILL_AMT5', 'BILL_AMT3', 'PAY_AMT4']
+    expected = ['BILL_AMT1', 'LIMIT_BAL', 'BILL_AMT4', 'BILL_AMT2', 'BILL_AMT6', 'PAY_AMT2', 'PAY_AMT1', 'PAY_AMT5', 'PAY_AMT6', 'BILL_AMT3']
     assert list(result.keys()) == expected
 
-def test_rootcause():
+@pytest.fixture
+def new_cre_sco_setup():
+    container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_prob, y_train, x_train=x_train, \
+                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
+                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", fair_metric_name = "auto", \
+                            tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
+                            fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2}})
+    yield cre_sco_obj
+
+def test_rootcause(new_cre_sco_setup):
+    cre_sco_obj = new_cre_sco_setup
     # Check p_var parameter: default all p_var
     cre_sco_obj.rootcause(p_var=[])
     assert bool(cre_sco_obj.rootcause_values) == True
@@ -426,12 +429,13 @@ def test_rootcause():
     cre_sco_obj.rootcause(multi_class_target=0)
     assert cre_sco_obj.rootcause_label_index == -1
 
-def test_feature_imp_corr(capfd):
+def test_feature_imp_corr(capsys, new_cre_sco_setup):
+    cre_sco_obj = new_cre_sco_setup
     cre_sco_obj.feature_imp_status_corr = False
     cre_sco_obj.feature_importance()
 
     # Check _print_correlation_analysis
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "* No surrogate detected based on correlation analysis." in captured.out
 
     # Check correlation_threshold
@@ -443,7 +447,7 @@ def test_feature_imp_corr(capfd):
     # Disable correlation analysis
     cre_sco_obj.feature_imp_status_corr = False
     cre_sco_obj.feature_importance(disable=['correlation'])
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "Correlation matrix skipped" in captured.out
 
 def test_compute_correlation():

@@ -5,13 +5,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 sys.path.insert(0, project_root)
 from veritastool.model.model_container import ModelContainer
 from veritastool.usecases.base_regression import BaseRegression
-from veritastool.metrics.performance_metrics import PerformanceMetrics
-from veritastool.metrics.fairness_metrics import FairnessMetrics
-from veritastool.principles.fairness import Fairness
-from veritastool.principles.transparency import Transparency
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import pytest
 from veritastool.util.errors import *
 
@@ -19,6 +16,7 @@ from veritastool.util.errors import *
 file = os.path.join(project_root, 'veritastool', 'examples', 'data', 'regression_dict.pickle')
 input_file = open(file, "rb")
 br = pickle.load(input_file)
+input_file.close()
 
 #Model Container Parameters
 x_train = br["x_train"]
@@ -45,7 +43,6 @@ base_reg_obj.compile()
 base_reg_obj.evaluate()
 base_reg_obj.tradeoff()
 base_reg_obj.feature_importance()
-base_reg_obj.rootcause()
 
 def test_rootcause(capfd):
     # Check that print statement is shown for regression rootcause
@@ -97,3 +94,8 @@ def test_policy_max_bias(p_grp):
     else:
         assert base_reg_obj.model_params[0].p_grp['sex'][0] == [1]
         assert base_reg_obj.model_params[0].up_grp['sex'][0] == [0]
+
+def test_mitigate(capfd):
+    base_reg_obj.mitigate(p_var=[], method=[])
+    captured = capfd.readouterr()
+    assert "Bias mitigation is not supported for regression use cases." in captured.out

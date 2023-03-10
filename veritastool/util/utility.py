@@ -237,106 +237,6 @@ def convert_to_set(var):
         result = var
     return result
 
-def check_label(y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
-    """
-    Creates copy of y_true as y_true_bin and convert favourable labels to 1 and unfavourable to 0 for non-uplift models.
-    Overwrite y_pred with the conversion.
-    Checks if pos_labels are inside y
-
-    Parameters
-    -----------
-    y : numpy.ndarray
-            Ground truth target values.
-
-    pos_label : list
-            Label values which are considered favorable.
-            For all model types except uplift, converts the favourable labels to 1 and others to 0.
-            For uplift, user is to provide 2 label names e.g. [["a"], ["b"]] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
-
-    neg_label : list, default=None
-            Label values which are considered unfavorable.
-            neg_label will only be used in uplift models.
-            For uplift, user is to provide 2 label names e.g. [["c"], ["d"]] in unfav label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
-
-    Returns
-    -----------------
-    y_bin : list
-            Encoded labels.
-
-    pos_label2 : list
-            Label values which are considered favorable.
-    """
-    # uplift model
-    # 0, 1 => control (others, rejected/responded)
-    # 2, 3 => treatment (others, rejected/responded)
-    err = VeritasError()
-    err_= []
-    model_type = obj_in.model_type
-
-    if neg_label is not None and model_type == 'uplift':
-        y_bin = y
-        n=0
-
-        row = y_bin == pos_label[0]  
-        indices_pos_0 = [i for i, x in enumerate(y_bin) if x == pos_label[0]]
-        n += np.sum(row)
-
-        row = y_bin == pos_label[1]  
-        indices_pos_1 = [i for i, x in enumerate(y_bin) if x == pos_label[1]]
-        n += np.sum(row)
-
-        row = y_bin == neg_label[0]  
-        indices_neg_0 = [i for i, x in enumerate(y_bin) if x == neg_label[0]]
-        n += np.sum(row)
-
-        row = y_bin == neg_label[1]  
-        indices_neg_1 = [i for i, x in enumerate(y_bin) if x == neg_label[1]]
-        n += np.sum(row)     
-
-        for i in indices_pos_0:
-            y_bin[i] = "TR"
-        for i in indices_pos_1:
-            y_bin[i] = "CR"
-        for i in indices_neg_0:
-            y_bin[i] = "TN"
-        for i in indices_neg_1:
-            y_bin[i] = "CN"
-
-        if n != len(y_bin):
-            err_.append(['conflict_error', "pos_label, neg_label", "inconsistent values", pos_label + neg_label])
-            for i in range(len(err_)):
-                err.push(err_[i][0], var_name_a=err_[i][1], some_string=err_[i][2], value=err_[i][3],
-                        function_name="check_label")
-        pos_label2 = [['TR'],['CR']]
-    
-    else:
-        y_bin = y
-
-        if y_pred_flag == True and obj_in.unassigned_y_label[0]:
-            y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
-            
-        else:
-            row = np.isin(y_bin, pos_label)
-            if sum(row) == len(y_bin) :
-                err_.append(['value_error', "pos_label", pos_label, "not all y_true labels"])
-            elif sum(row) == 0 :
-                err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
-            for i in range(len(err_)):
-                err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                        function_name="check_label")
-            y_bin[row] = 1 
-            y_bin[~row] = 0
-        
-        pos_label2 = [[1]]
-        y_bin = y_bin.astype(np.int8)
-        
-    if y_bin.dtype.kind in ['i']:
-        y_bin  = y_bin.astype(np.int8)
-
-    err.pop()
-
-    return y_bin, pos_label2
-
 def check_data_unassigned(obj_in, y=None, y_pred_negation_flag=False):
     """
     Deletes y_true, y_pred, y_prob, x_test, protected_feature_cols rows if there are unassigned labels based on y_true index for multi-class classification models.
@@ -562,8 +462,8 @@ def check_multiprocessing(n_threads):
 
     return n_threads
 
-def check_install():
-    from ..fairness import CreditScoring
+def test_function_cs():
+    from ..usecases import CreditScoring
     from ..model import ModelContainer
     import pickle
     #Load Credit Scoring Test Data
@@ -579,20 +479,20 @@ def check_install():
     y_true = np.array(cs["y_test"])
     y_pred = np.array(cs["y_pred"])
     y_train = np.array(cs["y_train"])
-    p_var = ['SEX', 'MARRIAGE']
-    p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+    p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
+    up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
     x_train = cs["X_train"]
     x_test = cs["X_test"]
     model_object = cs["model"]
     model_name = "credit scoring"
-    model_type = "credit"
+    model_type = "classification"
     y_prob = cs["y_prob"]
 
     #rejection inference
     num_applicants = {'SEX': [3500, 5000], 'MARRIAGE':[3500, 5000]}
     base_default_rate = {'SEX': [0.10,0.05], 'MARRIAGE':[0.10,0.05]}
     
-    container = ModelContainer(y_true = y_true, y_train = y_train, p_var = p_var, p_grp = p_grp, x_train = x_train,  x_test = x_test, model_object = model_object, model_type  = model_type,model_name =  model_name, y_pred= y_pred, y_prob= y_prob)
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, x_test=x_test, model_object=model_object, up_grp=up_grp)
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", perf_metric_name = "balanced_acc", fair_metric_name = "equal_opportunity")
     cre_sco_obj.k = 1
     cre_sco_obj.evaluate(output = False)

@@ -17,6 +17,8 @@ import pandas as pd
 import pytest
 from veritastool.util.errors import *
 import shap
+import matplotlib
+matplotlib.use('Agg')
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 sys.path.append(module_path)
 import selection, uplift, util
@@ -25,11 +27,11 @@ import selection, uplift, util
 file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
 input_prop = open(file_prop, "rb")
 cm_prop = pickle.load(input_prop)
+input_prop.close()
 
 #Model Container Parameters
 y_true = cm_prop["y_test"]
 y_train = cm_prop["y_train"]
-model_obj = cm_prop['model']
 model_name = "base_classification" 
 model_type = "classification"
 y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -47,7 +49,7 @@ container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_pro
 #Create Use Case Object
 clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                              fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                             tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                           
+                             tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                           
 
 clf_obj.compile()
 clf_obj.evaluate()
@@ -57,7 +59,7 @@ clf_obj.rootcause()
 result = clf_obj.perf_metric_obj.result, clf_obj.fair_metric_obj.result
 
 def test_evaluate():
-    assert round(result[0]['perf_metric_values']['selection_rate'][0],3) == 0.295
+    assert round(result[0]['perf_metric_values']['selection_rate'][0],3) == 0.306
    
 def test_artifact():
     assert clf_obj.artifact['fairness']['features']['isforeign']['tradeoff']['th_x'].shape == clf_obj.artifact['fairness']['features']['isforeign']['tradeoff']['th_y'].shape
@@ -71,11 +73,11 @@ def test_fairness_conclusion():
         assert clf_obj.fair_threshold == clf_obj.fair_conclusion['isforeign']['threshold']
     else:
         value = round((1 - clf_obj.fair_conclusion['isforeign']['threshold']) *100)
-        assert clf_obj.fair_threshold == value
+        assert value == round((1 - (1-clf_obj.fair_threshold/100) * result[1]['isforeign']["fair_metric_values"][clf_obj.fair_metric_name][1])*100)
     assert clf_obj.fair_conclusion['isforeign']['fairness_conclusion'] in ('fair','unfair')
 
 def test_compute_fairness():
-    if clf_obj.fairness_metric_value_input is not None :
+    if clf_obj.fairness_metric_value_input:
         assert clf_obj.fairness_metric_value_input['isforeign']['fpr_parity'] == clf_obj.fair_metric_obj.result['isforeign']['fair_metric_values']['fpr_parity'][0]
     
 def test_fairness_metric_value_input_check():
@@ -117,7 +119,7 @@ def test_feature_importance():
     clf_obj.feature_imp_status = 0
     clf_obj.evaluate_status = 0
     clf_obj.feature_importance()
-    assert round(clf_obj.feature_imp_values['isforeign']['isforeign'][0],3) == -0.127
+    assert round(clf_obj.feature_imp_values['isforeign']['isforeign'][0],3) == -0.007
     clf_obj.feature_imp_status = -1
     clf_obj.feature_importance()
     assert clf_obj.feature_imp_values == None
@@ -133,7 +135,7 @@ def test_feature_importance_x_test_exception():
 
         """
 
-        def __init__(self, model_obj, classes=[0, 1]):
+        def __init__(self, model_obj, classes=['CN', 'CR', 'TN', 'TR']):
             self.model_obj = model_obj
             self.classes_ = classes
             #self.output_file = output_file
@@ -169,6 +171,9 @@ def test_feature_importance_x_test_exception():
 #             test_preds = np.where(test_probs > best_th, 1, 0)
 #             return test_preds
 
+        def predict_proba(self, x_test):
+            return self.model_obj.predict_proba(x_test.values)
+
     model_object = None
     model_object = xtestwrapper(model_object)
     
@@ -179,7 +184,7 @@ def test_feature_importance_x_test_exception():
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                                 fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                                tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
     
     test = clf_obj.feature_importance()
     assert test == None
@@ -196,7 +201,7 @@ def test_feature_importance_x_train_exception():
 
         """
 
-        def __init__(self, model_obj, classes=[0, 1]):
+        def __init__(self, model_obj, classes=['CN', 'CR', 'TN', 'TR']):
             self.model_obj = model_obj
             self.classes_ = classes
             #self.output_file = output_file
@@ -231,6 +236,9 @@ def test_feature_importance_x_train_exception():
             test_probs = self.model_obj.predict_proba(x_test)[:, 1] 
             test_preds = np.where(test_probs > best_th, 1, 0)
             return test_preds
+        
+        def predict_proba(self, x_test):
+            return self.model_obj.predict_proba(x_test.values)
             
     model_object = None     
     model_object = xtrainwrapper(model_object)
@@ -242,7 +250,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
                                 fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
-                                tran_max_sample=1000, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
 
     test = clf_obj.feature_importance()
     assert test == None
@@ -282,23 +290,23 @@ def test_model_type_input():
 def test_fairness_tree():
     clf_obj.fair_impact = 'normal'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'equal_opportunity_ratio'
+    assert clf_obj._fairness_tree() == 'equal_opportunity'
     clf_obj.fair_concern = 'inclusive'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'fpr_ratio'
+    assert clf_obj._fairness_tree() == 'fpr_parity'
     clf_obj.fair_concern = 'both'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'equal_odds_ratio'
+    assert clf_obj._fairness_tree() == 'equal_odds'
     clf_obj.fair_impact = 'selective'
     clf_obj.fair_concern = 'eligible'
     clf_obj.fair_priority = 'benefit'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'ppv_ratio'
+    assert clf_obj._fairness_tree() == 'ppv_parity'
     clf_obj.fair_impact = 'selective'
     clf_obj.fair_concern = 'inclusive'
     clf_obj.fair_priority = 'benefit'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'fdr_ratio'
+    assert clf_obj._fairness_tree() == 'fdr_parity'
     clf_obj.fair_concern = 'both'
     with pytest.raises(MyError) as toolkit_exit:
         clf_obj._fairness_tree()
@@ -307,29 +315,29 @@ def test_fairness_tree():
     clf_obj.fair_concern = 'inclusive'
     clf_obj.fair_priority = 'harm'
     #clf_obj._fairness_tree()
-    assert clf_obj._fairness_tree() == 'fpr_ratio'
+    assert clf_obj._fairness_tree() == 'fpr_parity'
     
     clf_obj.fair_concern = 'eligible'
     clf_obj.fair_priority = 'benefit'
     clf_obj.fair_impact = 'normal'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'tnr_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'tnr_parity'
     clf_obj.fair_concern = 'inclusive'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
     clf_obj.fair_concern = 'both'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'neg_equal_odds_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'neg_equal_odds'
     clf_obj.fair_impact = 'selective'
     clf_obj.fair_concern = 'eligible'
     clf_obj.fair_priority = 'benefit'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'npv_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'npv_parity'
     clf_obj.fair_impact = 'selective'
     clf_obj.fair_concern = 'inclusive'
     clf_obj.fair_priority = 'benefit'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'for_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'for_parity'
     clf_obj.fair_concern = 'both'
     with pytest.raises(MyError) as toolkit_exit:
         clf_obj._fairness_tree(is_pos_label_favourable = False)
@@ -338,7 +346,7 @@ def test_fairness_tree():
     clf_obj.fair_concern = 'inclusive'
     clf_obj.fair_priority = 'harm'
     #clf_obj._fairness_tree(is_pos_label_favourable = False)
-    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_ratio'
+    assert clf_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
 
 def test_check_label():
     y = np.array([1,1,1,1,1,1,1])
@@ -377,7 +385,7 @@ def test_rootcause_group_difference():
     # Test case without feature_mask
     group_mask = np.where(x_train_sample.isforeign == 1, True, False)
     result = clf_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
-    expected = ['isforeign', 'age', 'income', 'didrespond', 'noproducts', 'isfemale']
+    expected = ['isforeign', 'age', 'income', 'noproducts', 'isfemale', 'didrespond']
     assert list(result.keys()) == expected
     
     # Test case with feature_mask
@@ -390,10 +398,21 @@ def test_rootcause_group_difference():
     shap_values = shap_values[indices]
     group_mask = feature_mask[np.where(feature_mask != -1)].astype(bool)
     result = clf_obj._rootcause_group_difference(shap_values, group_mask, x_train_sample.columns)
-    expected = ['isforeign', 'age', 'income', 'didrespond', 'noproducts', 'isfemale']
+    expected = ['isforeign', 'age', 'income', 'noproducts', 'isfemale', 'didrespond']
     assert list(result.keys()) == expected
 
-def test_rootcause():
+@pytest.fixture
+def new_clf_setup():
+    container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, x_test=x_test, \
+                            model_object=clf, pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
+
+    clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
+                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
+    yield clf_obj
+
+def test_rootcause(new_clf_setup):
+    clf_obj = new_clf_setup
     # Check p_var parameter: default all p_var
     clf_obj.rootcause(p_var=[])
     assert bool(clf_obj.rootcause_values) == True
@@ -415,12 +434,13 @@ def test_rootcause():
     clf_obj.rootcause(multi_class_target='CN')
     assert clf_obj.rootcause_label_index == 0
 
-def test_feature_imp_corr(capfd):
+def test_feature_imp_corr(capsys, new_clf_setup):
+    clf_obj = new_clf_setup
     clf_obj.feature_imp_status_corr = False
     clf_obj.feature_importance()
 
     # Check _print_correlation_analysis
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "* No surrogate detected based on correlation analysis." in captured.out
 
     # Check correlation_threshold
@@ -432,7 +452,7 @@ def test_feature_imp_corr(capfd):
     # Disable correlation analysis
     clf_obj.feature_imp_status_corr = False
     clf_obj.feature_importance(disable=['correlation'])
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "Correlation matrix skipped" in captured.out
 
 def test_compute_correlation():

@@ -118,7 +118,7 @@ class ModelContainer(object):
         self.pos_label2 = None
         self.policies = ['maj_min','maj_rest','max_bias']
         self.unassigned_y_label = (None, None)
-        self.label_count = len(set(self.y_true))
+        self.label_count = None
         self.err = VeritasError()
 
         check_y_label = None
@@ -208,6 +208,7 @@ class ModelContainer(object):
 
         check_value(self)
 
+        self.label_count = len(set(self.y_true))
         self.check_data_consistency()
         
         if y_pred is not None:
@@ -234,6 +235,8 @@ class ModelContainer(object):
         # Deduce up_grp values if up_grp is None and p_grp not a policy 
         self._process_up_grp_input()
 
+        for subclass in Fairness.__subclasses__():
+            subclass._model_data_processing_flag = False
     
     def _intersectional_fairness(self):
         if len(self.intersect_p_grp.keys())>0:

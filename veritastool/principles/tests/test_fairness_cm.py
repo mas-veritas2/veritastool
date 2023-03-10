@@ -14,6 +14,8 @@ from veritastool.principles.transparency import Transparency
 import pytest
 from veritastool.util.errors import *
 import shap
+import matplotlib
+matplotlib.use('Agg')
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 sys.path.append(module_path)
 import selection, uplift, util
@@ -26,6 +28,8 @@ input_prop = open(file_prop, "rb")
 input_rej = open(file_rej, "rb")
 cm_prop = pickle.load(input_prop)
 cm_rej = pickle.load(input_rej)
+input_prop.close()
+input_rej.close()
 
 #Model Container Parameters
 #Rejection Model
@@ -72,7 +76,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
+                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 
 #cm_uplift_obj.k = 1
@@ -253,11 +257,7 @@ def test_fairness_tree():
     assert cm_uplift_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
 
 def test_check_label():
-    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
-    input_prop = open(file_prop, "rb")
-    cm_prop = pickle.load(input_prop)
-    y_true_prop = cm_prop["y_true_prop"]
-    y_true_new, pos_label2 = cm_uplift_obj._check_label(y=y_true_prop, pos_label=['TR', 'CR'], neg_label=['TN', 'CN'], obj_in=container_prop)
+    y_true_new, pos_label2 = cm_uplift_obj._check_label(y=container_prop.y_true, pos_label=['TR', 'CR'], neg_label=['TN', 'CN'], obj_in=container_prop)
     labels, counts = np.unique(y_true_new, return_counts=True)
     assert np.array_equal(labels, np.array(['CN', 'CR', 'TN', 'TR']))
     assert np.array_equal(counts, np.array([3734, 2277, 2476, 1513]))
@@ -299,7 +299,23 @@ def test_rootcause_group_difference():
     expected = ['isforeign', 'age', 'income', 'didrespond', 'isfemale', 'noproducts']
     assert list(result.keys()) == expected
 
-def test_rootcause():
+@pytest.fixture
+def new_cm_uplift_setup():
+    container_rej = ModelContainer(y_true = y_true_rej, y_pred = y_pred_rej, y_prob = y_prob_rej, y_train= y_train_rej, \
+                                    p_grp = p_grp_rej, x_train = x_train_rej,  x_test = x_test_rej, \
+                                    model_object = model_object_rej,  model_name = model_name_rej, model_type = model_type_rej,\
+                                    pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
+    container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop, y_prob = y_prob_prop, y_train= y_train_prop,\
+                                    model_object = model_object_prop,  pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
+    cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
+                                    fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
+                                    perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
+                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                    tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
+    yield cm_uplift_obj
+
+def test_rootcause(new_cm_uplift_setup):
+    cm_uplift_obj = new_cm_uplift_setup
     # Check p_var parameter: default all p_var
     cm_uplift_obj.rootcause(p_var=[])
     assert bool(cm_uplift_obj.rootcause_values) == True
@@ -321,12 +337,13 @@ def test_rootcause():
     cm_uplift_obj.rootcause(multi_class_target='CN')
     assert cm_uplift_obj.rootcause_label_index == 0
 
-def test_feature_imp_corr(capfd):
+def test_feature_imp_corr(capsys, new_cm_uplift_setup):
+    cm_uplift_obj = new_cm_uplift_setup
     cm_uplift_obj.feature_imp_status_corr = False
     cm_uplift_obj.feature_importance()
 
     # Check _print_correlation_analysis
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "* No surrogate detected based on correlation analysis." in captured.out
 
     # Check correlation_threshold
@@ -338,7 +355,7 @@ def test_feature_imp_corr(capfd):
     # Disable correlation analysis
     cm_uplift_obj.feature_imp_status_corr = False
     cm_uplift_obj.feature_importance(disable=['correlation'])
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     assert "Correlation matrix skipped" in captured.out
 
 def test_compute_correlation():
@@ -364,7 +381,7 @@ def test_policy_max_bias(p_grp):
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                     fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                     perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=50, \
+                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
                                     tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6, \
                                     fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 

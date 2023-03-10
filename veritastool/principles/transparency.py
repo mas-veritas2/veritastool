@@ -27,41 +27,60 @@ class Transparency:
         tran_index : list
                 It holds the list of indices given by the user for which the user wants to see the local interpretability.
 
-        tran_list_of_features : str/list
-                Stores the string or list of features given by the user. String input can either be "top n" or "all".
-                If none is given, the top 10 features will be chosed while sampling the data.
-
+        tran_max_sample : int/float
+                Stores the number of records user wants in his sample. If none is given, the entire dataset will be considered.
+                A float value between 0 an 1 is considered as percentage. A float value greater than 1 is converted to integer.
+                An integer value is considered as is.
+                
         tran_max_records : float
                 Stores the number or percentage of rows to be included for sampling. 
                 For a number less than 1, it will be considered as percentage. Any number above 1 will be counted as number of rows.
                 By default 100 records will be included. 
 
         tran_pdp_feature : list
-                Stores the list of the top 2 features for which user wants to see the partial dependence plot. 
+                Stores the list of features for which user wants to see the partial dependence plot. 
                 If none is passed, plot for top 2 features will be shown by default. 
+
+        tran_pdp_target : str/int
+                Stores the target class to be used for partial dependence in the case of a multi-class classification model.
+                If none is given, the first positive label value will be taken by default for multi-class classification.
+
+        tran_max_display : int/float
+                Stores the value of maximum number of columns user wants to see in output. 
+                A float value is converted to integer and integer value is read as is. If none is passed, 10 is considered as default.
+            
+        tran_features : list
+                Stores the list of features given by the user. Default value is a blank list.    
 
         Instance Attributes
         -------------------
-        tran_results : dict, default=None
-                Stores the dictionary containing the all the required transparency output.
-
-        tran_shap_values : Explanation object, default=None
-                Stores the shapley explanation values obtained based on the model and data passed.
+        tran_shap_values : dict, default = {}
+                Stores the shapley values obtained for each model where model number is the key.
+        
+        tran_shap_extra : dict, default = {}
+                Stores the base values obtained for each model where model number is the key.
 
         tran_processed_data : dataframe, default=None
                 Stores the processed dataframe which will be used to create the shap values. 
-                The data will be created based on the list of features and max records that the user gives.
+                The data will be created based on the max_sample and tran_index that the user gives.
 
-        tran_status_local : Boolean, default=False
-                Stores a flag for whether the local interpretability plot points for all indices given by the user has been executed or not.
-                False: Plot points not executed for all indices.
-                True: Plot points executed for all indices.
+        tran_top_features : dict, default = {}
+                Stores a dataframe of features along with their importances basis the shap values for each model where model number is the key.
 
-        tran_status_total : Boolean, default=False
-                Stores a flag for whether all the transparency analysis functions have been executed or not.
-                False: All results of transparency analysis are not computed.
-                True: All results of transparency analysis are computed.
+        tran_pdp_feature_list : dict, default = {}
+                Stores the list of 2 strings for which partial dependence plot has to be made for each model where model number is the key.
+
+        permutation_importance : dataframe, default = pd.DataFrame(columns = ["feature", "diff", "neg_flag"])
+                Stores the features, their importances and negative value flag for each model where model number is the key.
         
+        tran_flag : dict, default={'data_sampling_flag':False}
+                Stores a flag for whether the data sampling has been done or not. For each model, it also stores flags for data preparation, interpretability, partial dependence and permutation importance status.
+                False: The execution is not done.
+                True: Execution is done.
+
+        tran_results : dict, default='permutation_score':{'title':'','footnote':'','score':''},'model_list':[]
+                Stores the dictionary containing the all the required transparency output.
+
         """
         self.tran_max_sample = tran_max_sample
         self.tran_pdp_feature = tran_pdp_feature
@@ -76,10 +95,12 @@ class Transparency:
         self.tran_pdp_feature_list={}
         self.permutation_importance = pd.DataFrame(columns = ["feature", "diff", "neg_flag"])
         self.tran_flag = {'data_sampling_flag':False} 
-        self.tran_results = {'permutation_score':'','model_list':[]}
+        self.tran_results = {'permutation':{'title':'','footnote':'','score':''},
+                            'model_list':[]}
 
         for i in range(len(self.model_params)):
             self.tran_results['model_list'].append({'id':i,
+                                    'summary_plot_data_table':'',
                                     'summary_plot':'',
                                     'local_interpretability':[],
                                     'partial_dependence_plot':{},
@@ -162,10 +183,15 @@ class Transparency:
     def _shap(self,model_num=0):
         """
         Calculates shap values for the given model and dataset 
+        
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
 
         Returns
-        This function does not return anything. It stores the shap values in the attribute tran_shap_values. 
         ----------
+        This function does not return anything. It stores the shap values and base in the attributes tran_shap_values and tran_shap_extra. 
         """
         if(self.model_params[model_num].model_type == 'regression'):
             explainer_shap = shap.Explainer(self.model_params[model_num].model_object.predict,self.tran_processed_data) 
@@ -188,15 +214,12 @@ class Transparency:
         
     def _data_sampling(self):
         """
-        Identifies the list of features basis the user's input to be used in processed data.
+        Creates the processed data based on the user input of max sample and tran index.
 
         Returns
         ----------
-        This function does not return anything. It creates a list of features to be used for sampling.
-                
-        For customer mkting: list of list []
+        This function does not return anything. It creates the processed data.        
         """ 
-
         if 0 < self.tran_max_sample < 1:
             self.tran_max_sample = round(self.tran_max_sample*self.model_params[0].x_train.shape[0])
         elif 1 < self.tran_max_sample <= self.model_params[0].x_train.shape[0]:
@@ -227,7 +250,16 @@ class Transparency:
 
     def _top_features(self,model_num=0): 
         """
-        Function to create tran_list_of_features and tran_pdp_feature basis the user input. The computation is done basis the first model obtained from the container incase more than 1 model is passed. Feature importance for the features is also calculated here for selection of top features basis the shap values. 
+        Creates a dictionary of dataframe of features for the given model based on their shap values.
+        
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
+
+        Returns
+        ----------
+        This function does not return anything. It stores the top features in tran_top_features. 
         """
         if(type(self.tran_shap_values[model_num])==list):
             importances = np.sum(np.mean(np.abs(self.tran_shap_values[model_num]),axis=1),axis=0) 
@@ -239,6 +271,21 @@ class Transparency:
         self.tran_top_features[model_num] = feature_imp
         
     def _plot_encode(self, f, plot = None):
+        """
+        Encodes the plot image as either base64 and binary encoding or only binary encoding depending on the plot argument value.
+        
+        Parameters
+        ------------------
+        f : fig
+                It holds the fogure which needs to be encoded.
+
+        plot : str, default = None
+                It holds the plot type basis which it's decided if base64 encoding needs to be done or not
+
+        Returns
+        ----------
+        This function returns either the binary and base64 encoded image or only the binary encoded image depending upon the plot argument input. 
+        """
         buff = io.BytesIO()
         f.savefig(buff, format='raw')
         buff.seek(0)
@@ -262,12 +309,14 @@ class Transparency:
         """
         Computes the global interpretability on the processed data.
 
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
+
         Returns
         ----------
-        This function does not return anything. It provides the encoded plot image in the results dictionary.
-        
-        tran_list_of_features will only for list/string
-        
+        This function does not return anything. It stores the global interpretability values in the dictionary. 
         """
         if(self.tran_features==[]):
             if(type(self.tran_shap_values[model_num])==list):
@@ -282,11 +331,13 @@ class Transparency:
                 pl.close()
             
             self.tran_results['model_list'][model_num]['summary_plot'] = image_base_64
+            self.tran_results['model_list'][model_num]['summary_plot_data_table'] = None
             self.tran_results['model_list'][model_num]['plot']['summary'] = im
         
         else:
             summary = self.tran_top_features[model_num][np.isin(self.tran_top_features[model_num], self.tran_features).any(axis=1)]
-            self.tran_results['model_list'][model_num]['summary_plot'] = summary.to_dict(orient='records')
+            self.tran_results['model_list'][model_num]['summary_plot_data_table'] = summary.to_dict(orient='records')
+            self.tran_results['model_list'][model_num]['summary_plot'] = None
             self.tran_results['model_list'][model_num]['plot']['summary'] = ''
 
     def _local(self, n, model_num=0):
@@ -298,13 +349,12 @@ class Transparency:
         n : int
                 Index for which the local interpretability is to be calculated.
 
-        update_flag : True
-                If True, the tran_results dictionary is updated. 
-                If False, the dictionary is not updated. Only the plot is shown in the console
-        
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
+
         Returns
         ----------
-        This function does not return anything. It saves the plot values in the results dictionary. 
+        This function does not return anything. It saves the local interpretability plot values in the results dictionary. 
         """
         class_index = "NA"
         ind=[]
@@ -344,7 +394,6 @@ class Transparency:
             plot_points=plot_points.sort_values(by='Shap', key=abs, ascending = False)
             efx = exp.base_values[row_index]
             fx = (exp.base_values[row_index]) + sum(exp[row_index].values)
-
             if(self.tran_features==[]):
                 pl.figure(constrained_layout = True)
                 shap.plots.waterfall(exp[row_index], max_display = self.tran_max_display, show=False)    
@@ -353,7 +402,7 @@ class Transparency:
                 pl.close()
                 im = self._plot_encode(fig, plot=None)
             
-                other_features = pd.DataFrame({'Feature_name':str(len(plot_points[self.tran_max_display-1:])) + " OTHER",'Value' : "" ,'Shap': plot_points[self.tran_max_display-1:][['Shap']].sum().values})
+                other_features = pd.DataFrame({'Feature_name':str(len(plot_points[self.tran_max_display-1:])) + " OTHER",'Value' : np.nan ,'Shap': plot_points[self.tran_max_display-1:][['Shap']].sum().values}).replace({np.nan:None})
                 if(plot_points.shape[0]==self.tran_max_display):
                     local_plot_points = plot_points[:self.tran_max_display]
                     feature_list = local_plot_points[['Feature_name','Value', 'Shap']]
@@ -361,14 +410,14 @@ class Transparency:
                     local_plot_points = plot_points[:self.tran_max_display-1]
                     feature_list = pd.concat([local_plot_points,other_features])
 
-                dict_item = {'id':n,'efx': efx,'fx':fx,'feature_info':feature_list[['Feature_name','Value', 'Shap']].to_dict(orient='records')}
+                dict_item = {'id':n,'efx': efx,'fx':fx, 'plot_display':True, 'feature_info':feature_list[['Feature_name','Value', 'Shap']].to_dict(orient='records')}
                 #generating dictionary of values for the indices passed
                 self.tran_results['model_list'][model_num]['local_interpretability'].append(dict_item)
                 self.tran_results['model_list'][model_num]['plot']['local_plot'][n] = im
                 self.tran_results['model_list'][model_num]['plot']['class_index'][n] = class_index
             else:
                 local = plot_points[np.isin(plot_points, self.tran_features).any(axis=1)]
-                dict_item = {'id':n,'efx': efx,'fx':fx,'feature_info':local[['Feature_name','Value', 'Shap']].to_dict(orient='records')}
+                dict_item = {'id':n,'efx': efx,'fx':fx,'plot_display':False,'feature_info':local[['Feature_name','Value', 'Shap']].to_dict(orient='records')}
                 #generating dictionary of values for the indices passed
                 self.tran_results['model_list'][model_num]['local_interpretability'].append(dict_item)
                 self.tran_results['model_list'][model_num]['plot']['local_plot'][n] = ''
@@ -378,9 +427,14 @@ class Transparency:
         """
         Creates partial dependence plots using sklearn and computes the values for 2 features as required.
         
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
+
         Returns
         ----------
-        This function does not return anything. It saves the plot values in the results dictionary.
+        This function does not return anything. It saves the partial dependence plot values in the results dictionary.
         """   
         top_two = self.tran_top_features[model_num]['Feature_name'].tolist()[:2]
         tran_pdp_feature = self.tran_pdp_feature + top_two
@@ -419,10 +473,15 @@ class Transparency:
         """
         Computes permutation importance of each of the features from the process data. 
         Normalize the importance score to get relative percentages for the chart.
+
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
  
         Returns
         ----------
-        This function does not return anything. It saves the plot values in the results dictionary.
+        This function does not return anything. It saves the permutation importance plot values in the results dictionary.
         """
         eval_pbar = tqdm(total=100, desc='Computing Permutation Importance', bar_format='{l_bar}{bar}')
         eval_pbar.update(5)
@@ -517,8 +576,8 @@ class Transparency:
         perm_imp = perm_imp[:self.tran_max_display]
         neg_feature_list = list(perm_imp.loc[perm_imp['neg_flag'] == 1, 'feature'])
         perm_imp['feature'] = perm_imp.apply(lambda row: row['feature'] + '*' if row['neg_flag'] == 1 else row['feature'], axis=1)
-        self.tran_results['permutation_score'] = perm_imp[['feature','score']].to_dict(orient='records')
-        self.tran_results['permutation_score'].insert(0,{'title': "Permutation Importance Plot based on |Metric_old - Metric_new|"})
+        self.tran_results['permutation']['score'] = perm_imp[['feature','score']].to_dict(orient='records')
+        self.tran_results['permutation']['title'] = "Permutation Importance Plot based on |Metric_old - Metric_new|"
         
         pl.figure(constrained_layout = True)
         pl.barh(y=perm_imp.feature, width=perm_imp.score,height=0.5)
@@ -526,12 +585,12 @@ class Transparency:
         if len(neg_feature_list) > 0:
             if self.perf_metric_name in ['log_loss','rmse','mape','wape']:
                 pl.xlabel('* indicates $Metric_{old} > Metric_{new}$', fontsize = 8, loc='left')
-                self.tran_results['permutation_score'].append({'footnote': '* indicates Metric_old > Metric_new'})
+                self.tran_results['permutation']['footnote'] = '* indicates Metric_old > Metric_new'
             else:
                 pl.xlabel('* indicates $Metric_{old} < Metric_{new}$', fontsize = 8, loc='left')
-                self.tran_results['permutation_score'].append({'footnote': '* indicates Metric_old < Metric_new'})
+                self.tran_results['permutation']['footnote'] = '* indicates Metric_old < Metric_new'
         else:
-            self.tran_results['permutation_score'].append({'footnote': None})
+            self.tran_results['permutation']['footnote'] = None
 
         fig=pl.gcf()
         pl.close()
@@ -544,34 +603,61 @@ class Transparency:
         print('{:5s}{:35s}{:<10}'.format('','Permutation importance','done'))
 
     def _plot(self,model_num=0,interpretability_plot_flag=True,pdp_plot_flag=True,perm_imp_plot_flag=True):
+        """
+        Displays the plots in the console basis the flag values.
+        
+        Parameters
+        ------------------
+        model_num : int, default = 0
+                It holds the model number for which analysis has to be done.
+
+        interpretability_plot_flag : bool, default = True
+                It determines whether local and global interpretability plots have to be displayed or not.
+
+        pdp_plot_flag : bool, default = True
+                It determines whether partial dependence plots have to be displayed or not.
+
+        perm_imp_plot_flag : bool, default = True
+                It determines whether permutation importance plots have to be displayed or not.
+
+        Returns
+        ----------
+        This function does not return anything. It displays the plots in the console.
+        """
         if(interpretability_plot_flag == True):
             summary_plot = self.tran_results['model_list'][model_num]['plot']['summary']
             latest_local_key = list(self.tran_results['model_list'][model_num]['plot']['local_plot'].keys())[-1]
             local_plot = self.tran_results['model_list'][model_num]['plot']['local_plot'][latest_local_key]
-        
             if(type(summary_plot)!=str):
-            #creating grid for subplots
                 fig = pl.figure()
-                #fig.set_figheight(10)
-                fig.set_figwidth(15)
+                fig.set_figheight((0.35 * self.tran_max_display) + 1)
+                fig.set_figwidth(12)
                 ax1 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
-                ax2 = pl.subplot2grid(shape=(1, 2), loc=(0, 1), colspan=1)
                 ax1.imshow(summary_plot,aspect='auto')
-                ax1.set_title("Global Interpretability Plot",fontsize=12,fontweight='bold')
+                ax1.set_title("Global Interpretability Plot",fontsize=9,fontweight='bold')
+                ax1.spines[['top','right','bottom','left']].set_visible(False)
+                ax1.set_xticks([])
+                ax1.set_yticks([])
+                pl.tight_layout(pad=1.0)
+                pl.show()
+
+                fig = pl.figure()
+                fig.set_figheight((self.tran_max_display * 0.4) + 1)
+                fig.set_figwidth(12)
+                ax2 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
                 ax2.imshow(local_plot,aspect='auto')
                 if(self.tran_results['model_list'][model_num]['plot']['class_index'][latest_local_key] != "NA"): 
                     label = self.model_params[model_num].model_object.classes_[self.tran_results['model_list'][model_num]['plot']['class_index'][latest_local_key]]
-                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key) + ", target class: " + str(label), fontsize=12,fontweight='bold')
+                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key) + ", target class: " + str(label), fontsize=9,fontweight='bold')
                 else:
-                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key), fontsize=12,fontweight='bold')
-                for i in [ax1,ax2]:
-                    i.spines[['top','right','bottom','left']].set_visible(False)
-                    i.set_xticks([])
-                    i.set_yticks([]) 
+                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key), fontsize=9,fontweight='bold')
+                ax2.spines[['top','right','bottom','left']].set_visible(False)
+                ax2.set_xticks([])
+                ax2.set_yticks([]) 
                 pl.tight_layout(pad=1.0)
                 pl.show()
             else:
-                summary_plot_datapoints = self.tran_results['model_list'][model_num]['summary_plot']
+                summary_plot_datapoints = self.tran_results['model_list'][model_num]['summary_plot_data_table']
                 summary_plot_datapoints = pd.DataFrame(summary_plot_datapoints)
                 local_plot_datapoints = self.tran_results['model_list'][model_num]['local_interpretability'][-1]['feature_info']
                 local_plot_datapoints=pd.DataFrame(local_plot_datapoints)
@@ -584,19 +670,20 @@ class Transparency:
                 else:
                     local_title = 'Local interpretability for index: ' + str(ids) + '\\nefx: ' + str(efx) + ', fx: ' + str(fx)
                 styles = [dict(selector="caption",
-                       props=[("text-align", "center"),
-                              ("font-size", "12"),
-                              ("font-weight",'950'),
-                              ("color", 'black')])]
+                    props=[("text-align", "center"),
+                            ("font-size", "12"),
+                            ("font-weight",'950'),
+                            ("color", 'black')])]
                 summary_plot_datapoints = summary_plot_datapoints.style.set_table_attributes("style='display:inline'").set_caption('Global interpretability values').set_table_styles(styles)
                 local_plot_datapoints = local_plot_datapoints.style.set_table_attributes("style='display:inline'").set_caption(local_title).set_table_styles(styles)
-                display_html(20*"\xa0"+summary_plot_datapoints._repr_html_()+75*"\xa0"+local_plot_datapoints._repr_html_().replace("\\n","<br>"), raw=True)
+                display_html(summary_plot_datapoints._repr_html_(), raw=True)
+                display_html(local_plot_datapoints._repr_html_().replace("\\n","<br>"), raw=True)
         
-        if(pdp_plot_flag==True):
+        if(pdp_plot_flag==True):    
             pdp_plot1 = (self.tran_results['model_list'][model_num]['plot']['pdp_plot'][self.tran_pdp_feature_list[model_num][0]])
             pdp_plot2 = (self.tran_results['model_list'][model_num]['plot']['pdp_plot'][self.tran_pdp_feature_list[model_num][1]])
             fig = pl.figure()
-            fig.set_figheight(14)
+            fig.set_figheight(9)
             fig.set_figwidth(12)
             ax3=pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
             ax4=pl.subplot2grid(shape=(1, 2), loc=(0, 1), colspan=1)
@@ -614,21 +701,35 @@ class Transparency:
                 i.set_yticks([])
             pl.tight_layout(pad=0.7)
             pl.show()
-        
+
         if(perm_imp_plot_flag==True):
             perm_plot = self.tran_results['model_list'][0]['plot']['perm_plot']
             fig = pl.figure()
-            fig.set_figheight(8)
-            fig.set_figwidth(6)
-            ax5 = pl.subplot2grid(shape=(1, 1), loc=(0, 0), colspan=2)
+            fig.set_figheight((1 * self.tran_max_display) + 1)
+            fig.set_figwidth(15) 
+            ax5 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
             ax5.imshow(perm_plot)
             ax5.set_title("Permutation Importance Plot based on $\mathbf{|Metric_{old} - Metric_{new}|}$",fontsize=9,fontweight='bold')
             ax5.spines[['top','right','bottom','left']].set_visible(False)
             ax5.set_xticks([])
             ax5.set_yticks([]) 
             pl.show()  
-              
+ 
     def _data_prep(self,model_num=0):
+        """
+        Prepares the data for analysis by executing data sampling, shap and top features functions.
+        Sets the necessary flags status as required.
+        Prepares tran_features in the case of user input for further usage in the analysis.
+
+        Parameters
+        ----------
+        model_num : int, default=None
+                It holds the model number for which analysis has to be done.
+
+        Returns
+        ----------
+        This function does not return anything. It prepares the data for analysis, the tran features and sets the necessary flag conditions for the model.
+        """
         if(self.tran_flag['data_sampling_flag']==False):
             self._data_sampling()
             self.tran_flag['data_sampling_flag']=True
@@ -650,16 +751,18 @@ class Transparency:
 
         Parameters
         ----------
-        local_index : int/list, default=None
+        disable : list, default = None
+                It gives a list of analysis that the user can skip.
+                Accepted values: ['interpret','partial_dep','perm_imp']
+
+        local_index : int, default=None
                 It stores the value of the index required to calculate local interpretability.
 
         output : boolean, default=True
                 If output = True, all the transparency plots will be shown to the user on the console.
 
-        force : boolean, default=False
-                Stores the binary flag to indicate if the processed dataset needs to be updated.
-                It true, the processed data is updated to include the given local index.
-                If false, the existing processed data will be used to shown any relevant outputs.
+        model_num : int, default=None
+                It holds the model number for which analysis has to be done.
 
         Returns
         ----------
@@ -831,7 +934,13 @@ class Transparency:
     def _tran_compile(self,disable=[]):
 
         """
-        Ensures tran results dictionary is udpated with all the results.
+        Ensures tran results dictionary is udpated with all the results based on the user input.
+        
+        Parameters
+        ----------
+        disable : list, default = []
+                It gives a list of analysis that the user can skip.
+                Accepted values: ['interpret','partial_dep','perm_imp']
         
         Returns
         ----------
@@ -844,8 +953,8 @@ class Transparency:
         if (len(list(set({'interpret','partial_dep','perm_imp'})-set(disable)))==0):
             tran_results = None
         else:
-            if(tran_results['permutation_score']==''):
-                tran_results['permutation_score'] = None
+            if(tran_results['permutation']['score']==''):
+                tran_results['permutation'] = None
             for i in range(len(self.model_params)):
                 del tran_results['model_list'][i]['plot']
                 if(len(tran_results['model_list'][i]['local_interpretability']))==0:
@@ -853,72 +962,7 @@ class Transparency:
                 if(tran_results['model_list'][i]['partial_dependence_plot'])=={}:
                     tran_results['model_list'][i]['partial_dependence_plot'] = None
                 if(tran_results['model_list'][i]['summary_plot'])=='':
-                    tran_results['model_list'][i]['summary_plot'] = None    
+                    tran_results['model_list'][i]['summary_plot'] = None   
+                if(tran_results['model_list'][i]['summary_plot_data_table']) == '':
+                    tran_results['model_list'][i]['summary_plot_data_table'] = None 
         return tran_results    
-
-    def _check_label(self, y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
-        """
-        Creates copy of y_true as y_true_bin and convert favourable labels to 1 and unfavourable to 0 for non-uplift models.
-        Overwrites y_pred with the conversion, if `y_pred_flag` is set to True.
-        Checks if pos_labels are inside y
-
-        Parameters
-        -----------
-        y : numpy.ndarray
-                Ground truth target values.
-
-        pos_label : list
-                Label values which are considered favorable.
-                For all model types except uplift, converts the favourable labels to 1 and others to 0.
-                For uplift, user is to provide 2 label names e.g. [["a"], ["b"]] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
-
-        neg_label : list, default=None
-                Label values which are considered unfavorable.
-                neg_label will only be used in uplift models.
-                For uplift, user is to provide 2 label names e.g. [["c"], ["d"]] in unfav label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
-
-        obj_in : object, default=None
-                The object of the model_container class.
-
-        y_pred_flag : boolean, default=False
-                Flag to indicate if the function is to process y_pred.
-
-        Returns
-        -----------------
-        y_bin : list
-                Encoded labels.
-
-        pos_label2 : list
-                Label values which are considered favorable.
-        """
-        # uplift model
-        # 0, 1 => control (others, rejected/responded)
-        # 2, 3 => treatment (others, rejected/responded)
-        err = VeritasError()
-        err_= []
-
-        y_bin = y
-        if y_pred_flag == True and obj_in.unassigned_y_label[0]:
-            y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
-            
-        else:
-            row = np.isin(y_bin, pos_label)
-            if sum(row) == len(y_bin) :
-                err_.append(['value_error', "pos_label", pos_label, "not all y_true labels"])
-            elif sum(row) == 0 :
-                err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
-            for i in range(len(err_)):
-                err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                        function_name="_check_label")
-            y_bin[row] = 1 
-            y_bin[~row] = 0
-        
-        pos_label2 = [[1]]
-        y_bin = y_bin.astype(np.int8)
-            
-        if y_bin.dtype.kind in ['i']:
-            y_bin  = y_bin.astype(np.int8)
-
-        err.pop()
-
-        return y_bin, pos_label2
