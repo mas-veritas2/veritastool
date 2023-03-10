@@ -476,14 +476,12 @@ def test_compute_permutation_importance():
     base_reg_obj= BaseRegression(model_params = [reg_container], fair_threshold = 80, perf_metric_name = "mape", \
                              fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
                              tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                      
-    base_reg_obj.evaluate()
     base_reg_obj.explain()
     # assert list(np.round_(np.array(base_reg_obj.permutation_importance['diff']),6)) == [0.947482, 0.538425, 0.024973, 0.020413, 0.01412, 0.002763]
     assert list(base_reg_obj.permutation_importance['feature']) == ['smoker', 'age', 'sex', 'children', 'region', 'bmi']
 
     #testing for uplift model
-    cm_uplift_obj._data_prep()
-    cm_uplift_obj._compute_permutation_importance()
+    cm_uplift_obj.explain()
     
     assert list(np.round_(np.array(cm_uplift_obj.permutation_importance['diff']),6)) == [9125.655707, 8533.327963, 3525.103062, 1494.305157, 1465.025095, 517.923479]
     assert list(cm_uplift_obj.permutation_importance['feature']) == ['income', 'age', 'isforeign', 'noproducts', 'isfemale', 'didrespond']
@@ -583,17 +581,16 @@ def test_explain():
     assert toolkit_exit.type == MyError
     assert toolkit_exit.value.message == msg
 
+    msg = '[type_error]: disable: given <class \'dict\'>, expected list at explain()\n'
+    with pytest.raises(Exception) as toolkit_exit:
+        cre_sco_obj.explain(disable = {})
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
+
     cre_sco_obj.explain(local_index=20)
     assert cre_sco_obj.tran_flag[0]['interpret'] == True
     cre_sco_obj.explain()
     assert cre_sco_obj.tran_flag[0]['interpret'] == True
-    
-    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
-                        fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                        tran_index=[20,40], tran_max_sample = 100, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 16)
-    cre_sco_obj.explain()
-    assert cre_sco_obj.tran_flag[0]['interpret'] == True
-    assert cre_sco_obj.tran_flag[0]['interpret'] == True  
 
     msg = '[value_error]: model_num: given 5, expected one of the following integers: [1, 2] at explain()\n'
     with pytest.raises(Exception) as toolkit_exit:

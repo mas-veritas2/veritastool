@@ -257,11 +257,7 @@ def test_fairness_tree():
     assert cm_uplift_obj._fairness_tree(is_pos_label_favourable = False) == 'fnr_parity'
 
 def test_check_label():
-    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
-    input_prop = open(file_prop, "rb")
-    cm_prop = pickle.load(input_prop)
-    y_true_prop = cm_prop["y_test"]
-    y_true_new, pos_label2 = cm_uplift_obj._check_label(y=y_true_prop, pos_label=['TR', 'CR'], neg_label=['TN', 'CN'], obj_in=container_prop)
+    y_true_new, pos_label2 = cm_uplift_obj._check_label(y=container_prop.y_true, pos_label=['TR', 'CR'], neg_label=['TN', 'CN'], obj_in=container_prop)
     labels, counts = np.unique(y_true_new, return_counts=True)
     assert np.array_equal(labels, np.array(['CN', 'CR', 'TN', 'TR']))
     assert np.array_equal(counts, np.array([3734, 2277, 2476, 1513]))

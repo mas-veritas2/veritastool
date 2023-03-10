@@ -34,9 +34,10 @@ up_grp = {'gender': [[0]], 'race': [[2, 3]] }
 x_train = puw["X_train"]
 x_test = puw["X_test"]
 y_prob = puw["y_prob"]
-model = puw["model"]
 model_name = "pred_underwriting"
 model_type = "classification"
+model = RandomForestClassifier(random_state=123)
+model.fit(x_train, y_train)
 
 #Create Model Container
 container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \

@@ -394,7 +394,6 @@ class Transparency:
             plot_points=plot_points.sort_values(by='Shap', key=abs, ascending = False)
             efx = exp.base_values[row_index]
             fx = (exp.base_values[row_index]) + sum(exp[row_index].values)
-
             if(self.tran_features==[]):
                 pl.figure(constrained_layout = True)
                 shap.plots.waterfall(exp[row_index], max_display = self.tran_max_display, show=False)    
@@ -403,7 +402,7 @@ class Transparency:
                 pl.close()
                 im = self._plot_encode(fig, plot=None)
             
-                other_features = pd.DataFrame({'Feature_name':str(len(plot_points[self.tran_max_display-1:])) + " OTHER",'Value' : "" ,'Shap': plot_points[self.tran_max_display-1:][['Shap']].sum().values})
+                other_features = pd.DataFrame({'Feature_name':str(len(plot_points[self.tran_max_display-1:])) + " OTHER",'Value' : np.nan ,'Shap': plot_points[self.tran_max_display-1:][['Shap']].sum().values}).replace({np.nan:None})
                 if(plot_points.shape[0]==self.tran_max_display):
                     local_plot_points = plot_points[:self.tran_max_display]
                     feature_list = local_plot_points[['Feature_name','Value', 'Shap']]
@@ -629,30 +628,36 @@ class Transparency:
             summary_plot = self.tran_results['model_list'][model_num]['plot']['summary']
             latest_local_key = list(self.tran_results['model_list'][model_num]['plot']['local_plot'].keys())[-1]
             local_plot = self.tran_results['model_list'][model_num]['plot']['local_plot'][latest_local_key]
-        
             if(type(summary_plot)!=str):
-            #creating grid for subplots
                 fig = pl.figure()
-                #fig.set_figheight(10)
-                fig.set_figwidth(15)
+                fig.set_figheight((0.35 * self.tran_max_display) + 1)
+                fig.set_figwidth(12)
                 ax1 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
-                ax2 = pl.subplot2grid(shape=(1, 2), loc=(0, 1), colspan=1)
                 ax1.imshow(summary_plot,aspect='auto')
-                ax1.set_title("Global Interpretability Plot",fontsize=12,fontweight='bold')
+                ax1.set_title("Global Interpretability Plot",fontsize=9,fontweight='bold')
+                ax1.spines[['top','right','bottom','left']].set_visible(False)
+                ax1.set_xticks([])
+                ax1.set_yticks([])
+                pl.tight_layout(pad=1.0)
+                pl.show()
+
+                fig = pl.figure()
+                fig.set_figheight((self.tran_max_display * 0.4) + 1)
+                fig.set_figwidth(12)
+                ax2 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
                 ax2.imshow(local_plot,aspect='auto')
                 if(self.tran_results['model_list'][model_num]['plot']['class_index'][latest_local_key] != "NA"): 
                     label = self.model_params[model_num].model_object.classes_[self.tran_results['model_list'][model_num]['plot']['class_index'][latest_local_key]]
-                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key) + ", target class: " + str(label), fontsize=12,fontweight='bold')
+                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key) + ", target class: " + str(label), fontsize=9,fontweight='bold')
                 else:
-                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key), fontsize=12,fontweight='bold')
-                for i in [ax1,ax2]:
-                    i.spines[['top','right','bottom','left']].set_visible(False)
-                    i.set_xticks([])
-                    i.set_yticks([]) 
+                    ax2.set_title("Local Interpretability Plot for index = " + str(latest_local_key), fontsize=9,fontweight='bold')
+                ax2.spines[['top','right','bottom','left']].set_visible(False)
+                ax2.set_xticks([])
+                ax2.set_yticks([]) 
                 pl.tight_layout(pad=1.0)
                 pl.show()
             else:
-                summary_plot_datapoints = self.tran_results['model_list'][model_num]['summary_plot']
+                summary_plot_datapoints = self.tran_results['model_list'][model_num]['summary_plot_data_table']
                 summary_plot_datapoints = pd.DataFrame(summary_plot_datapoints)
                 local_plot_datapoints = self.tran_results['model_list'][model_num]['local_interpretability'][-1]['feature_info']
                 local_plot_datapoints=pd.DataFrame(local_plot_datapoints)
@@ -665,19 +670,20 @@ class Transparency:
                 else:
                     local_title = 'Local interpretability for index: ' + str(ids) + '\\nefx: ' + str(efx) + ', fx: ' + str(fx)
                 styles = [dict(selector="caption",
-                       props=[("text-align", "center"),
-                              ("font-size", "12"),
-                              ("font-weight",'950'),
-                              ("color", 'black')])]
+                    props=[("text-align", "center"),
+                            ("font-size", "12"),
+                            ("font-weight",'950'),
+                            ("color", 'black')])]
                 summary_plot_datapoints = summary_plot_datapoints.style.set_table_attributes("style='display:inline'").set_caption('Global interpretability values').set_table_styles(styles)
                 local_plot_datapoints = local_plot_datapoints.style.set_table_attributes("style='display:inline'").set_caption(local_title).set_table_styles(styles)
-                display_html(20*"\xa0"+summary_plot_datapoints._repr_html_()+75*"\xa0"+local_plot_datapoints._repr_html_().replace("\\n","<br>"), raw=True)
+                display_html(summary_plot_datapoints._repr_html_(), raw=True)
+                display_html(local_plot_datapoints._repr_html_().replace("\\n","<br>"), raw=True)
         
-        if(pdp_plot_flag==True):
+        if(pdp_plot_flag==True):    
             pdp_plot1 = (self.tran_results['model_list'][model_num]['plot']['pdp_plot'][self.tran_pdp_feature_list[model_num][0]])
             pdp_plot2 = (self.tran_results['model_list'][model_num]['plot']['pdp_plot'][self.tran_pdp_feature_list[model_num][1]])
             fig = pl.figure()
-            fig.set_figheight(14)
+            fig.set_figheight(9)
             fig.set_figwidth(12)
             ax3=pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
             ax4=pl.subplot2grid(shape=(1, 2), loc=(0, 1), colspan=1)
@@ -695,20 +701,20 @@ class Transparency:
                 i.set_yticks([])
             pl.tight_layout(pad=0.7)
             pl.show()
-        
+
         if(perm_imp_plot_flag==True):
             perm_plot = self.tran_results['model_list'][0]['plot']['perm_plot']
             fig = pl.figure()
-            fig.set_figheight(8)
-            fig.set_figwidth(6)
-            ax5 = pl.subplot2grid(shape=(1, 1), loc=(0, 0), colspan=2)
+            fig.set_figheight((1 * self.tran_max_display) + 1)
+            fig.set_figwidth(15) 
+            ax5 = pl.subplot2grid(shape=(1, 2), loc=(0, 0), colspan=1)
             ax5.imshow(perm_plot)
             ax5.set_title("Permutation Importance Plot based on $\mathbf{|Metric_{old} - Metric_{new}|}$",fontsize=9,fontweight='bold')
             ax5.spines[['top','right','bottom','left']].set_visible(False)
             ax5.set_xticks([])
             ax5.set_yticks([]) 
             pl.show()  
-              
+ 
     def _data_prep(self,model_num=0):
         """
         Prepares the data for analysis by executing data sampling, shap and top features functions.
@@ -960,70 +966,3 @@ class Transparency:
                 if(tran_results['model_list'][i]['summary_plot_data_table']) == '':
                     tran_results['model_list'][i]['summary_plot_data_table'] = None 
         return tran_results    
-
-    def _check_label(self, y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
-        """
-        Creates copy of y_true as y_true_bin and convert favourable labels to 1 and unfavourable to 0 for non-uplift models.
-        Overwrites y_pred with the conversion, if `y_pred_flag` is set to True.
-        Checks if pos_labels are inside y
-
-        Parameters
-        -----------
-        y : numpy.ndarray
-                Ground truth target values.
-
-        pos_label : list
-                Label values which are considered favorable.
-                For all model types except uplift, converts the favourable labels to 1 and others to 0.
-                For uplift, user is to provide 2 label names e.g. [["a"], ["b"]] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
-
-        neg_label : list, default=None
-                Label values which are considered unfavorable.
-                neg_label will only be used in uplift models.
-                For uplift, user is to provide 2 label names e.g. [["c"], ["d"]] in unfav label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
-
-        obj_in : object, default=None
-                The object of the model_container class.
-
-        y_pred_flag : boolean, default=False
-                Flag to indicate if the function is to process y_pred.
-
-        Returns
-        -----------------
-        y_bin : list
-                Encoded labels.
-
-        pos_label2 : list
-                Label values which are considered favorable.
-        """
-        # uplift model
-        # 0, 1 => control (others, rejected/responded)
-        # 2, 3 => treatment (others, rejected/responded)
-        err = VeritasError()
-        err_= []
-
-        y_bin = y
-        if y_pred_flag == True and obj_in.unassigned_y_label[0]:
-            y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
-            
-        else:
-            row = np.isin(y_bin, pos_label)
-            if sum(row) == len(y_bin) :
-                err_.append(['value_error', "pos_label", pos_label, "not all y_true labels"])
-            elif sum(row) == 0 :
-                err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
-            for i in range(len(err_)):
-                err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                        function_name="_check_label")
-            y_bin[row] = 1 
-            y_bin[~row] = 0
-        
-        pos_label2 = [[1]]
-        y_bin = y_bin.astype(np.int8)
-            
-        if y_bin.dtype.kind in ['i']:
-            y_bin  = y_bin.astype(np.int8)
-
-        err.pop()
-
-        return y_bin, pos_label2
