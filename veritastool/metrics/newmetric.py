@@ -40,6 +40,7 @@ class NewMetric: # discuss the case when more than 1 new metric is defined, new 
     metric_difference_ratio = "difference"
     metric_equiv_perf_metric = 'balanced_acc'
     metric_direction = 'higher'
+    metric_reqt = 'y_prob'
     enable_flag = True
 
     def compute(self, **kwargs):

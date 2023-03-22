@@ -19,6 +19,9 @@ class ModelWrapper(object):
 
         output_file : str, default=None
                 Path to which the prediction results will be written to in the form of a csv file. e.g. "/home/results.csv"
+        
+        self.classes_ : list, default=None
+                Classes to be predicted by the model. 
         """
         self.model_obj = model_obj
         self.model_file = model_file
@@ -50,10 +53,8 @@ class ModelWrapper(object):
     def predict(self, x_test):
         """
         This function is a template for user to specify a custom predict() method
-        that uses the model saved in self.model_file to make predictions on the test dataset.
-    
-        Predictions can be either probabilities or labels.
-    
+        that uses the model saved in self.model_file to make label predictions on the test dataset.
+            
         An example is as follows:
     
         pred_cmd = "pred_func --predict {self.model_file} {x_test} {self.output_file}"
@@ -78,7 +79,18 @@ class ModelWrapper(object):
     def predict_proba(self, x):
         """
         This function is a template for user to specify a custom predict_proba() method
-        that uses the model saved in self.model_file to get probabilities on the given dataset.
+        that uses the model saved in self.model_file to make probability predictions on the given dataset.
+
+        An example is as follows:
+    
+        proba_cmd = "pred_func --predict {self.model_file} {x_test} {self.output_file}"
+        import subprocess
+        process = subprocess.Popen(proba_cmd.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        return pd.read_csv(output_file) // any preprocessing required has to be done too
+
+        The column order of class probabilities from predict_proba output has to be aligned with the order of classes in classes_ . 
+        This processing can be done in the predict_proba function after reading output_file.    
 
         Parameters
         -----------
@@ -132,7 +144,7 @@ class ModelWrapper(object):
             print("Predict proba success")
             return 1
         except Exception as error:
-            print("Error during predict ", error)
+            print("Error during predict_proba ", error)
             return 0                
 
 

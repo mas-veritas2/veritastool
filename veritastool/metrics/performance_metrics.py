@@ -7,34 +7,35 @@ from .newmetric import *
 from ..config.constants import Constants
 import concurrent.futures
 from sklearn.preprocessing import LabelBinarizer
+from ..util.errors import *
 
 class PerformanceMetrics:
     """
     A class that computes all the performance metrics
 
-    Class Attributes
+    Class Attributes    
     ------------------------
     map_perf_metric_to_group : dict
             Maps the performance metric names to their corresponding full names, metric group eg classification or regression metric types, and whether it can be a primary metric
     """
     map_perf_metric_to_group = {
-        'selection_rate':('Selection Rate', 'classification', True),
-        'accuracy': ('Accuracy', 'classification', True),
-        'balanced_acc': ('Balanced Accuracy', 'classification', True),
-        'recall': ('Recall', 'classification', True),
-        'precision': ('Precision', 'classification', True),
-        'f1_score': ('F1 Score', 'classification', True),
-        'tnr': ('True Negative Rate', 'classification', True),
-        'fnr': ('False Negative Rate', 'classification', True),
-        'npv': ('Negative Predictive Value', 'classification', True),
-        'roc_auc': ('ROC AUC Score', 'classification', True),
-        'log_loss': ('Log-loss', 'classification', True),
-        'rmse': ('Root Mean Squared Error', 'regression', True),
-        'mape': ('Mean Absolute Percentage Error', 'regression', True),
-        'wape': ('Weighted Absolute Percentage Error', 'regression', True),
-        'emp_lift': ('Empirical Lift', 'uplift', True),
-        'expected_profit': ('Expected Profit Lift', 'uplift', True),
-        'expected_selection_rate':('Expected Selection Rate', 'uplift', True)
+        'selection_rate':('Selection Rate', 'classification', True, 'y_pred'),
+        'accuracy': ('Accuracy', 'classification', True, 'y_pred'),
+        'balanced_acc': ('Balanced Accuracy', 'classification', True, 'y_pred'),
+        'recall': ('Recall', 'classification', True, 'y_pred'),
+        'precision': ('Precision', 'classification', True, 'y_pred'),
+        'f1_score': ('F1 Score', 'classification', True, 'y_pred'),
+        'tnr': ('True Negative Rate', 'classification', True, 'y_pred'),
+        'fnr': ('False Negative Rate', 'classification', True, 'y_pred'),
+        'npv': ('Negative Predictive Value', 'classification', True, 'y_pred'),
+        'roc_auc': ('ROC AUC Score', 'classification', True, 'y_prob'),
+        'log_loss': ('Log-loss', 'classification', True, 'y_prob'),
+        'rmse': ('Root Mean Squared Error', 'regression', True, 'y_pred'),
+        'mape': ('Mean Absolute Percentage Error', 'regression', True, 'y_pred'),
+        'wape': ('Weighted Absolute Percentage Error', 'regression', True, 'y_pred'),
+        'emp_lift': ('Empirical Lift', 'uplift', True, 'y_prob'),
+        'expected_profit': ('Expected Profit Lift', 'uplift', True, 'y_prob'),
+        'expected_selection_rate':('Expected Selection Rate', 'uplift', True, 'y_prob')
     }
 
     @staticmethod
@@ -42,7 +43,7 @@ class PerformanceMetrics:
         #to get cutomized metrics inherited from NewMetric class 
         for metric in NewMetric.__subclasses__() :
             if metric.enable_flag == True and metric.metric_type == "perf":
-                PerformanceMetrics.map_perf_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, True)  
+                PerformanceMetrics.map_perf_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, True, metric.metric_reqt)  
 
     def __init__(self, use_case_object):
         """
@@ -119,7 +120,7 @@ class PerformanceMetrics:
         for metric in NewMetric.__subclasses__() :
             if metric.enable_flag == True and metric.metric_type == "perf":
                 self.map_perf_metric_to_method[metric.metric_name] =  metric.compute
-                self.map_perf_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, True)
+                self.map_perf_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, True, metric.metric_reqt)
                 if metric.metric_name not in use_case_object._use_case_metrics["perf"]:
                     use_case_object._use_case_metrics["perf"].append(metric.metric_name)
                     
@@ -134,6 +135,14 @@ class PerformanceMetrics:
         self.revenue = None
         self.label_size = None
         self.use_case_object = use_case_object
+
+    def _check_y_prob_pred(self):
+        if(self.perf_metric_name is not None and PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][3]=='y_prob' and self.model_params[0].y_prob is None):
+            self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected="y_prob", function_name="_check_y_prob_pred")
+            self.err.pop()
+        if(self.perf_metric_name is not None and PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][3]=='y_pred' and self.model_params[0].y_pred is None):
+            self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected="y_pred", function_name="_check_y_prob_pred")
+            self.err.pop()
 
     def execute_all_perf(self, n_threads, seed, eval_pbar, disable=[]):
         """
@@ -164,7 +173,6 @@ class PerformanceMetrics:
         self.perf_metric_name = self.use_case_object.perf_metric_name
         self._use_case_metrics = self.use_case_object._use_case_metrics
         self.y_train = [model.y_train for model in self.use_case_object.model_params]
-
         #initialize result structure
         self.result = {}
         self.result["perf_metric_values"] = {}
@@ -202,10 +210,6 @@ class PerformanceMetrics:
                     if len(indexes[k]) > 0:
                         threads.append(executor.submit(PerformanceMetrics._execute_all_perf_map, metric_obj=metric_obj, index=indexes[k], eval_pbar=eval_pbar, worker_progress=worker_progress))
 
-                #retrive results from each thread
-                for thread in threads:
-                    for key, v in thread.result().items():
-                        self.result['perf_metric_values'][key] = self.result['perf_metric_values'][key] + v
         else:
             #if multithreading is not triggered, directly update the progress bar by 24
             eval_pbar.update(24)
@@ -217,7 +221,7 @@ class PerformanceMetrics:
             if self.result['perf_metric_values'][j][-1] is None :
                 self.result['perf_metric_values'][j] = (None, None)
             else :
-               self.result['perf_metric_values'][j] = (self.result['perf_metric_values'][j][-1],  2*np.std(self.result['perf_metric_values'][j]))
+               self.result['perf_metric_values'][j] = (self.result['perf_metric_values'][j][-1],  2*np.nanstd(np.array(self.result['perf_metric_values'][j], dtype=float)))
         self.label_size = self.use_case_object._model_type_to_metric_lookup[self.use_case_object.model_params[0].model_type][1]
         self.result["class_distribution"] = self._get_class_distribution(self.y_true[-1], self.use_case_object.model_params[-1].pos_label2)
         self.result['weighted_confusion_matrix'] = { "tp":self.tp_s[0][0], "fp": self.fp_s[0][0], "tn": self.tn_s[0][0], "fn": self.fn_s[0][0] }
@@ -272,60 +276,69 @@ class PerformanceMetrics:
         else:
             metric_obj.sample_weights = np.array(metric_obj.sample_weights)
         
-        if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+        metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = PerformanceMetrics._translate_confusion_matrix(metric_obj, metric_obj.y_trues, metric_obj.y_preds,metric_obj.sample_weights)
 
-                y_onehot_true = []
-                y_onehot_pred = []
-                for y_true_sample,y_pred_sample in zip(metric_obj.y_trues,metric_obj.y_preds):
+        with np.errstate(divide="ignore", invalid="ignore"):
+            for j in metric_obj._use_case_metrics['perf']:
+                if j in metric_obj.map_perf_metric_to_method_optimized.keys():
+                    metric_obj.result["perf_metric_values"][j] += metric_obj.map_perf_metric_to_method_optimized[j](obj=metric_obj)
 
-                        label_binarizer = LabelBinarizer().fit(y_true_sample[0])
-                        y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
-                        y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
-                                                
-                y_onehot_true = np.array(y_onehot_true)
-                y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))
-                metric_obj.y_onehot_true = y_onehot_true
-                y_onehot_pred = np.array(y_onehot_pred)        
-                y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
-                metric_obj.y_onehot_pred = y_onehot_pred
+        return metric_obj.result['perf_metric_values']
+
+    def _one_hot_encode(y_true, y_pred):
+        y_onehot_true = []
+        y_onehot_pred = []
+        for y_true_sample,y_pred_sample in zip(y_true,y_pred):
+
+                label_binarizer = LabelBinarizer().fit(y_true_sample[0])
+                y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
+                y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
+                                        
+        y_onehot_true = np.array(y_onehot_true)
+        y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))        
+        y_onehot_pred = np.array(y_onehot_pred)        
+        y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
+
+        return y_onehot_true, y_onehot_pred
+        
+    
+    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight):
+        
+        if metric_obj.use_case_object.multiclass_flag:
                 
-                metric_obj.tp_s = 0 
-                metric_obj.fp_s = 0 
-                metric_obj.tn_s = 0
-                metric_obj.fn_s = 0
+                y_onehot_true,y_onehot_pred = PerformanceMetrics._one_hot_encode(y_true, y_pred)
                 
-                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_
+                tp_s_total = 0 
+                fp_s_total = 0 
+                tn_s_total = 0
+                fn_s_total = 0
                 
-                for idx,_ in enumerate(metric_obj.ohe_classes_):
+                ohe_classes_ = metric_obj.use_case_object.classes_
+                
+                for idx,_ in enumerate(ohe_classes_):
                     y_trues = y_onehot_true[:,:,:,idx]
                     y_preds = y_onehot_pred[:,:,:,idx]
-
-                    
-
+                
                     tp_s, fp_s, tn_s, fn_s =  metric_obj.use_case_object._get_confusion_matrix_optimized(
                         y_trues,
                         y_preds, 
-                        metric_obj.sample_weights
+                        sample_weight
                     ) 
 
-                    metric_obj.tp_s += tp_s
-                    metric_obj.fp_s += fp_s
-                    metric_obj.tn_s += tn_s
-                    metric_obj.fn_s += fn_s
+                    tp_s_total += tp_s
+                    fp_s_total += fp_s
+                    tn_s_total += tn_s
+                    fn_s_total += fn_s
         else:
-
-            metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = \
+            
+            tp_s_total, fp_s_total, tn_s_total, fn_s_total = \
                 metric_obj.use_case_object._get_confusion_matrix_optimized(
-                        metric_obj.y_trues,
-                        metric_obj.y_preds, 
-                        metric_obj.sample_weights
+                        y_true,
+                        y_pred, 
+                        sample_weight
                     ) 
-
-        for j in metric_obj._use_case_metrics['perf']:
-            if j in metric_obj.map_perf_metric_to_method_optimized.keys():
-                metric_obj.result["perf_metric_values"][j] += metric_obj.map_perf_metric_to_method_optimized[j](obj=metric_obj)
-
-        return metric_obj.result['perf_metric_values']
+        
+        return tp_s_total, fp_s_total, tn_s_total, fn_s_total
 
     def translate_metric(self, metric_name, **kwargs):
         """
@@ -361,11 +374,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))             
             selection_rate = (tp + fp) / (tp + tn + fp + fn)
             return selection_rate[0][0]        
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -390,11 +402,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             accuracy = (tp + tn) / (tp + tn + fp + fn)
             return accuracy[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -419,11 +430,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             balanced_accuracy = ((tp/(tp+fn)) + (tn/(tn+fp)))/2 
             return balanced_accuracy[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -448,11 +458,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             f1_scr = 2 * ((tp / (tp + fp)) * (tp / (tp + fn))) / ((tp / (tp + fp)) + tp / (tp + fn))
             return f1_scr[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -478,11 +487,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             precision = tp / (tp + fp)
             return precision[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -507,11 +515,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             recall = tp / (tp + fn)
             return recall[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -536,11 +543,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             tnr = tn / (tn + fp)
             return tnr[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -565,11 +571,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             fnr = fn / (tp + fn)
             return fnr[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -605,7 +610,7 @@ class PerformanceMetrics:
         if 'y_prob_new' in kwargs:
             y_prob = kwargs['y_prob_new']
             e_lift = self.use_case_object._get_e_lift(y_pred_new=y_prob[1])
-            y_true = self.y_true[1]
+            y_true = self.use_case_object.model_params[1].y_true
         
         elif ('subgrp_e_lift' in kwargs) and ('subgrp_y_true' in kwargs):
             
@@ -728,11 +733,10 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1)
-            )
+            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
             npv = tn / (tn + fn)
             return npv[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
@@ -764,9 +768,9 @@ class PerformanceMetrics:
         
       
         if 'y_pred_new' in kwargs:
-            y_true = self.y_true[0]
+            y_true = self.use_case_object.model_params[0].y_true
             y_pred=kwargs['y_pred_new'][0]            
-            rmse = mean_squared_error(y_true=y_true, y_pred=y_pred, sample_weight=self.sample_weight[0]) ** 0.5
+            rmse = mean_squared_error(y_true=y_true, y_pred=y_pred, sample_weight=self.use_case_object.model_params[0].sample_weight) ** 0.5
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_pred = kwargs['subgrp_y_pred']
@@ -795,9 +799,9 @@ class PerformanceMetrics:
         """
        
         if 'y_pred_new' in kwargs:
-            y_true = self.y_true[0]
+            y_true = self.use_case_object.model_params[0].y_true
             y_pred=kwargs['y_pred_new'][0]
-            mape = mean_absolute_percentage_error(y_true=y_true, y_pred=y_pred, sample_weight=self.sample_weight[0])
+            mape = mean_absolute_percentage_error(y_true=y_true, y_pred=y_pred, sample_weight=self.use_case_object.model_params[0].sample_weight)
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_pred = kwargs['subgrp_y_pred']
@@ -824,7 +828,7 @@ class PerformanceMetrics:
         """
         
         if 'y_pred_new' in kwargs:
-            y_true = self.y_true[0]
+            y_true = self.use_case_object.model_params[0].y_true
             y_pred = kwargs['y_pred_new'][0]            
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
             y_true = kwargs['subgrp_y_true']
@@ -847,14 +851,23 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_prob_new' in kwargs:
-            y_true = self.y_true[0]
+            y_true = self.use_case_object.model_params[0].y_true
             y_prob = kwargs['y_prob_new'][0]
-            if self.sample_weight[0] is None :
-                roc_auc = roc_auc_score(y_true=y_true, y_score=y_prob)
-            else: 
-                sample_weight = self.sample_weight[0]
-                roc_auc = roc_auc_score(y_true=y_true, y_score=y_prob, sample_weight=self.sample_weight[0])
-            return roc_auc
+            if len(np.unique(y_true)) == 1 or np.all(np.isnan(y_prob)):
+                return None
+            y_true=y_true.reshape(1, 1, -1) 
+            if self.use_case_object.multiclass_flag: 
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.y_onehot_true, y_prob, True)
+            else:
+                y_prob=y_prob.reshape(1, 1, -1)
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, y_true, y_prob, False)
+            
+            roc_auc = np.trapz(TPR, FPR, axis=2)  
+
+            return roc_auc[0][0]
+        
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_prob' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_prob = kwargs['subgrp_y_prob']
@@ -862,44 +875,48 @@ class PerformanceMetrics:
                 return None
             roc_auc = roc_auc_score(y_true=y_true, y_score=y_prob)
             return roc_auc
+        
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
+
+            if self.use_case_object.multiclass_flag:
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.y_onehot_true, self.y_probs, True)
+            else:
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.y_trues, self.y_probs, False)
             
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            roc_auc = np.trapz(TPR, FPR, axis=2)
+            
+            return roc_auc.reshape(-1).tolist()
+
+    def _compute_TPR_FPR(self, y_true, y_prob, multiclass=False):
+            
+            if multiclass:
+
+                y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
+                y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
                 
-                for index,_ in enumerate(self.ohe_classes_):
-                    
-                    y_probs = self.y_probs[:,:,:,index]                    
-                    y_trues = self.y_onehot_true[:,:,:,index]                    
-                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+                idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
 
-                    y_probs = np.take_along_axis(y_probs, idx, axis=2)
-                    y_trues = np.take_along_axis(y_trues, idx, axis=2)
+                y_trues = np.take_along_axis(y_trues, idx, axis=2)
 
-                    tpr_class = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)                    
-                    fpr_class = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
-
-                    TPR = tpr_class if index == 0 else np.append(TPR,tpr_class,axis=2)
-                    FPR = fpr_class if index == 0 else np.append(FPR,fpr_class,axis=2)
-                                        
-                TPR = np.sort(TPR)                
-                FPR = np.sort(FPR)                
+                TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)                    
+                FPR = np.cumsum((1-y_trues),axis=2)/np.sum((1-y_trues), axis=2, keepdims=True)
+              
                 TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
                 FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
-
+            
             else:
-                idx = self.y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-                y_probs = np.take_along_axis(self.y_probs, idx, axis=2)
+                idx = y_prob.argsort(axis=2)[:,:,::-1] # sort by descending order
+                y_probs = np.take_along_axis(y_prob, idx, axis=2)
                 
-                y_trues = np.take_along_axis(self.y_trues, idx, axis=2)
+                y_trues = np.take_along_axis(y_true, idx, axis=2)
                 TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)
                 FPR = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
                 TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
                 FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
-
-            roc_auc = np.trapz(TPR, FPR, axis=2)
-            return roc_auc.reshape(-1).tolist()
+            
+            return TPR, FPR
 
     def _compute_log_loss(self, **kwargs):
         """
@@ -910,15 +927,24 @@ class PerformanceMetrics:
         _compute_log_loss : list of float
                 The performance metric value
         """
-        if 'y_pred_new' in kwargs:
-            y_true = self.y_true[0]
-            y_prob = kwargs['y_pred_new'][0]
-            if self.sample_weight[0] is None :
-                log_loss_score = log_loss(y_true=y_true, y_pred=y_prob)
-            else: 
-                sample_weight = self.sample_weight[0]
-                log_loss_score = log_loss(y_true=y_true, y_pred=y_prob, sample_weight=self.sample_weight[0])
-            return log_loss_score
+        if 'y_prob_new' in kwargs:
+            y_true = self.use_case_object.model_params[0].y_true
+            y_prob = kwargs['y_prob_new'][0]
+            if len(np.unique(y_true)) == 1 or np.all(np.isnan(y_prob)):
+                return None
+            
+            y_true=y_true.reshape(1, 1, -1) 
+            if self.use_case_object.multiclass_flag: 
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.y_onehot_true, y_prob, True)
+            else:
+                y_prob=y_prob.reshape(1, 1, -1)
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, y_true, y_prob, False)
+            
+
+            return log_loss_score[0][0]
+        
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_prob' in kwargs):
             y_true = kwargs['subgrp_y_true']
             y_prob = kwargs['subgrp_y_prob']
@@ -926,22 +952,30 @@ class PerformanceMetrics:
                 return None
             log_loss_score = log_loss(y_true=y_true, y_pred=y_prob)
             return log_loss_score
+        
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
 
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
-                
-                for index,_ in enumerate(self.ohe_classes_):
-                    y_probs = self.y_probs[:,:,:,index]
-                    y_trues = self.y_onehot_true[:,:,:,index]
-                    log_loss_score_class = -(y_trues*ma.log(y_probs) + (1-y_trues)*ma.log(1-y_probs))                    
-                    log_loss_score = log_loss_score_class if index == 0 else np.append(log_loss_score, log_loss_score_class, axis=2) 
-                log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
+            if self.use_case_object.multiclass_flag:
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.y_onehot_true, self.y_probs, True)
             else:
-                log_loss_score = -(self.y_trues*ma.log(self.y_probs) + (1-self.y_trues)*ma.log(1-self.y_probs))
-                log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.y_trues, self.y_probs, False)
+ 
             return log_loss_score.reshape(-1).tolist()
+
+    def _compute_log_loss_score(self, y_true, y_prob, multiclass=False):
+        
+        if multiclass:
+            
+            loss = -(y_true * np.log(y_prob)).sum(axis=3)
+            log_loss_score = loss.sum(axis=2)/loss.shape[2]
+
+        else:
+            log_loss_score = -(y_true*ma.log(y_prob) + (1-y_true)*ma.log(1-y_prob))
+            log_loss_score = np.sum(log_loss_score, 2)/log_loss_score.shape[2]
+
+        return log_loss_score
 
     def _performance_dynamics(self):
         """
@@ -956,7 +990,7 @@ class PerformanceMetrics:
         if self.y_prob[0] is None or metric_group == 'regression':
             return None
         else:
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:                
+            if self.use_case_object.multiclass_flag:                
                 return None
             d = {}
             d['perf_metric_name'] = []
@@ -1036,7 +1070,7 @@ class PerformanceMetrics:
             calibration_curve_bin = None
         else:
 
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            if self.use_case_object.multiclass_flag:
                 calibration_curve_bin = None
                 return calibration_curve_bin
 

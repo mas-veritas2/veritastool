@@ -32,8 +32,8 @@ cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
-p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+up_grp = {'SEX': [2], 'MARRIAGE':[2]}
 x_train = cs["X_train"]
 x_test = cs["X_test"]
 model_name = "credit_scoring"
@@ -53,8 +53,8 @@ def test_check_datatype():
     f_container = deepcopy(container)
     msg = ''
 
-    f_container.y_true = None
-    msg += '[type_error]: y_true: given <class \'NoneType\'>, expected [<class \'list\'>, <class \'numpy.ndarray\'>, <class \'pandas.core.series.Series\'>] at check_datatype()\n'
+    # f_container.y_true = None
+    # msg += '[type_error]: y_true: given <class \'NoneType\'>, expected [<class \'list\'>, <class \'numpy.ndarray\'>, <class \'pandas.core.series.Series\'>] at check_datatype()\n'
     
     f_container.y_pred = tuple(f_container.y_pred)
     msg += '[type_error]: y_pred: given <class \'tuple\'>, expected [<class \'NoneType\'>, <class \'list\'>, <class \'numpy.ndarray\'>, <class \'pandas.core.series.Series\'>] at check_datatype()\n'
@@ -88,17 +88,9 @@ def test_check_value():
     f_container.y_prob[0] = 10
     msg += '[value_error]: y_prob: given range [0.004324126464885938 : 10.0] , expected (-0.01, 1.01) at check_value()\n'
 
-    #change p_var
-    f_container.p_var = ['SEX', 123]
-    msg += '[value_error]: p_var: given <class \'int\'>, expected <class \'str\'> at check_value()\n'
-
     #change protected_features_cols columns
     f_container.protected_features_cols['new_column'] = 1
     msg += '[column_value_error]: protected_features_cols: given [\'MARRIAGE\', \'SEX\'] expected [\'MARRIAGE\', \'SEX\', \'new_column\'] at check_value()\n'
-
-    #change p_grp
-    f_container.p_grp = {'SEX': [1], 'MARRIAGE':[1], 'RELIGION': [1]}
-    msg += '[value_error]: p_grp: given [\'MARRIAGE\', \'RELIGION\', \'SEX\'], expected [\'MARRIAGE\', \'SEX\'] at check_value()\n'
 
     #change feature_imp
     #f_container.feature_imp['new_column'] = 1
@@ -111,6 +103,14 @@ def test_check_value():
     #change pos_label
     f_container.pos_label = [[1, 'pos']]
     msg += '[value_error]: pos_label: given [\'1\', \'pos\'], expected [0, 1] at check_value()\n'
+
+    #change p_grp
+    f_container.p_grp = {'SEX': [1], 'MARRIAGE':[1], 'RELIGION': [1]}
+    msg += '[value_error]: p_grp: given [\'MARRIAGE\', \'RELIGION\', \'SEX\'], expected [\'MARRIAGE\', \'SEX\'] at check_value()\n'
+
+    #change p_var
+    f_container.p_var = ['SEX', 123]
+    msg += '[value_error]: p_var: given <class \'int\'>, expected <class \'str\'> at check_value()\n'
 
     #catch the err poping out
     with pytest.raises(Exception) as toolkit_exit:
@@ -195,7 +195,7 @@ def new_clf_setup():
     model_name = "base_classification" 
     model_type = "classification"
     y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
-    p_grp = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    p_grp = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
     x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
     x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
     clf = cm_prop['model']

@@ -29,8 +29,8 @@ def test_newmetric():
     y_true = np.array(cs["y_test"])
     y_pred = np.array(cs["y_pred"])
     y_train = np.array(cs["y_train"])
-    p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-    up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+    p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+    up_grp = {'SEX': [2], 'MARRIAGE':[2]}
     x_train = cs["X_train"]
     x_test = cs["X_test"]
     model_name = "credit_scoring"

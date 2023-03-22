@@ -31,8 +31,8 @@ cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
-p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+up_grp = {'SEX': [2], 'MARRIAGE':[2]}
 x_train = cs["X_train"]
 x_test = cs["X_test"]
 model_name = "credit_scoring"
@@ -53,7 +53,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 #Create Use Case Object
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 # cre_sco_obj.k = 1
 
 import pickle
@@ -81,7 +81,7 @@ input_rej.close()
 y_true_rej = cm_rej["y_test"]
 y_pred_rej = cm_rej["y_test"]
 y_train_rej = cm_rej["y_train"]
-p_grp_rej = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+p_grp_rej = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
 x_train_rej = cm_rej["X_train"].drop(['ID'], axis = 1)
 x_test_rej = cm_rej["X_test"].drop(['ID'], axis = 1)
 y_prob_rej = pd.DataFrame(cm_rej["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -121,7 +121,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 80, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                  treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
 
 #Load Base Regression Test Data
@@ -135,7 +135,7 @@ x_test = br["x_test"]
 y_train = np.array(br["y_train"])
 y_true = np.array(br["y_test"])
 y_pred = np.array(br["y_pred"])
-p_grp = {'sex': [[1]], 'children': 'maj_min'}
+p_grp = {'sex': [1], 'children': 'maj_min'}
 
 from sklearn.linear_model import LinearRegression
 model_object = LinearRegression()
@@ -153,7 +153,7 @@ container_br = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_t
 #Create Use Case Object
 base_reg_obj= BaseRegression(model_params = [container_br], fair_threshold = 80, perf_metric_name = "mape", \
                              fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
-                             tran_index = [1,10,25], tran_max_sample = 10, tran_pdp_feature = ['age','bmi'])
+                             tran_row_num = [1,10,25], tran_max_sample = 10, tran_pdp_feature = ['age','bmi'])
 
 import pickle
 import numpy as np
@@ -174,8 +174,8 @@ input_file.close()
 y_true = np.array(puw["y_test"])
 y_pred = np.array(puw["y_pred"])
 y_train = np.array(puw["y_train"])
-p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+up_grp = {'gender': [0], 'race': [2, 3]}
 x_train = puw["X_train"]
 x_test = puw["X_test"]
 y_prob = puw["y_prob"]
@@ -191,7 +191,7 @@ container_puw = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y
 #Create Use Case Object
 pred_underwriting_obj = PredictiveUnderwriting(model_params = [container_puw], fair_threshold = 80, fair_concern = "inclusive", \
                                               fair_priority = "benefit", fair_impact = "normal", fair_metric_type='difference', \
-                                              tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                              tran_row_num=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
                                               tran_pdp_feature = ['age','payout_amount'])
 
 # Setup fixture to test multi-class classification
@@ -201,7 +201,7 @@ def multi_class_setup():
     x_train_prop = cm_prop["X_train"].drop(['ID'], axis = 1)
     x_test_prop = cm_prop["X_test"].drop(['ID'], axis = 1)
     y_pred_prop = model_object_prop.predict(x_test_prop)
-    p_grp_prop = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+    p_grp_prop = {'isforeign':[0], 'isfemale':[0]}
     model_type_prop = 'classification'
     model_name_prop = 'base_classification'
     container_clf = ModelContainer(y_true_prop, p_grp_prop, model_type_prop, model_name_prop, y_pred_prop, y_prob_prop, y_train_prop, \
@@ -280,20 +280,39 @@ def test_multi_class(multi_class_setup):
     container_clf = multi_class_setup
     clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
                             fair_priority = "benefit", fair_impact = "normal",fair_metric_name='demographic_parity', \
-                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            perf_metric_name = "accuracy", tran_row_num=[12,42], tran_max_sample=10, \
                             tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                        
     clf_obj.evaluate(output=False)
     # Check result dict is not empty
     assert bool(clf_obj.perf_metric_obj.result)
 
-    expected = 0.4169
+    expected = 0.417
     result = clf_obj.perf_metric_obj.result['perf_metric_values']['precision'][0]
     assert round(result, 3) == round(expected, 3)
 
-    expected = 0.4033185477005771
+    expected = 0.362
     result = clf_obj.perf_metric_obj.result['perf_metric_values']['roc_auc'][0]
     assert round(result, 3) == round(expected, 3)
 
-    expected = 0.7112950662542197
+    expected = 1.854
     result = clf_obj.perf_metric_obj.result['perf_metric_values']['log_loss'][0]
     assert round(result, 3) == round(expected, 3)
+
+def test_check_perf_metric_name(): 
+    msg = "[value_error]: perf_metric_name: given accurac, expected ['selection_rate', 'accuracy', 'balanced_acc', 'recall', 'precision', 'f1_score', 'tnr', 'fnr', 'npv', 'roc_auc', 'log_loss'] at check_perf_metric_name()\n"
+    with pytest.raises(Exception) as toolkit_exit:
+        pred_underwriting_obj= PredictiveUnderwriting(model_params = [container_puw], fair_threshold = 80, fair_concern = "inclusive", \
+                                                        fair_priority = "benefit", fair_impact = "normal", perf_metric_name = "accurac",\
+                                                        tran_row_num=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                                        tran_pdp_feature = ['age','payout_amount'])
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
+
+    msg = "[value_error]: perf_metric_name: given None, expected ['selection_rate', 'accuracy', 'balanced_acc', 'recall', 'precision', 'f1_score', 'tnr', 'fnr', 'npv', 'roc_auc', 'log_loss'] at check_perf_metric_name()\n"
+    with pytest.raises(Exception) as toolkit_exit:
+        pred_underwriting_obj= PredictiveUnderwriting(model_params = [container_puw], fair_threshold = 80, fair_concern = "inclusive", \
+                                                        fair_priority = "benefit", fair_impact = "normal", perf_metric_name = None,\
+                                                        tran_row_num=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                                        tran_pdp_feature = ['age','payout_amount'])
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg

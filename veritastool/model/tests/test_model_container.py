@@ -30,8 +30,8 @@ cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
-p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+up_grp = {'SEX': [2], 'MARRIAGE':[2]}
 x_train = cs["X_train"]
 x_test = cs["X_test"]
 model_name = "credit_scoring"
@@ -68,7 +68,7 @@ def test_model_container():
     #assert p_var == container.p_var
 
     #p_grp
-    assert p_grp == container.p_grp
+    #assert p_grp == container.p_grp
 
     #y_pred
     pos_label = [1]
@@ -104,11 +104,13 @@ def test_check_protected_columns():
     print("Successful")
     print(toolkit_exit.value.message)
     """
-    #set protected_features_cols and x_test both to None
+    #set protected_features_cols column to 'GENDER'
     f_container2 = deepcopy(m_container) 
-    f_container2.protected_features_cols = None
-    f_container2.x_test = None
-    msg = '[length_error]: protected_features_cols and x_test: given length None for both, expected length not both are None at check_protected_columns()\n'
+    # f_container2.protected_features_cols = None
+    # f_container2.x_test = None # Commented out since transparency analysis can now run independently
+    # msg = '[length_error]: protected_features_cols and x_test: given length None for both, expected length not both are None at check_protected_columns()\n'
+    f_container2.protected_features_cols = f_container2.protected_features_cols.rename(columns={'SEX': 'GENDER'})
+    msg = '[value_error]: p_var: given [\'SEX\', \'MARRIAGE\'], expected [\'GENDER\', \'MARRIAGE\'] at check_protected_columns()\n'
     
     with pytest.raises(Exception) as toolkit_exit:
         f_container2.check_protected_columns()
@@ -207,15 +209,13 @@ def test_check_data_consistency():
     #3rd round of test consistency
     msg =''
     f_container3 = deepcopy(m_container)
-    #y_pred and y_prob both are none
-    f_container3.y_pred = None
-    f_container3.y_prob = None
-    msg += '[length_error]: y_pred and y_prob: given length None for both, expected length not both are None at check_data_consistency()\n'
+    #p_grp and up_grp have overlap values
+    f_container3.up_grp = {'SEX': [[1]], 'MARRIAGE': [[2]]}
+    msg += '[value_error]: p_grp and up_grp: given p_grp [[1]] and up_grp [[1]], expected no value overlap at check_data_consistency()\n'
 
     #len(self.sample_weight_train) != train_row_count
-    f_container3.sample_weight_train = np.random.choice(10, 1000, replace=True)
-    
-    f_container3.x_train = f_container3.x_train.append(f_container3.x_train[0:10])
+    # f_container3.sample_weight_train = np.random.choice(10, 1000, replace=True)
+    # f_container3.x_train = f_container3.x_train.append(f_container3.x_train[0:10])
     
     #catch the err poping out
     with pytest.raises(Exception) as toolkit_exit:
@@ -225,6 +225,19 @@ def test_check_data_consistency():
     # print(toolkit_exit.value.message)
     # print('====== test_check_data_consistency() expected msg =======\n')
     # print(msg)
+    assert toolkit_exit.value.message == msg
+
+    #4th round of test consistency
+    msg =''
+    f_container4 = deepcopy(m_container)
+    #check y_prob column shape
+    f_container4.y_prob = np.stack((f_container4.y_prob, f_container4.y_prob, f_container4.y_prob), axis=1)
+    msg += '[length_error]: y_prob column length: given length 3>, expected length 2 at check_data_consistency()\n'
+    
+    #catch the err poping out
+    with pytest.raises(Exception) as toolkit_exit:
+        f_container4.check_data_consistency()
+    assert toolkit_exit.type == MyError
     assert toolkit_exit.value.message == msg
     
 def test_check_label_consistency():

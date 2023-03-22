@@ -35,7 +35,7 @@ y_train = cm_prop["y_train"]
 model_name = "base_classification" 
 model_type = "classification"
 y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
-p_grp = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+p_grp = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
 x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
 x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
 clf = cm_prop['model']
@@ -48,7 +48,7 @@ container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_pro
 
 #Create Use Case Object
 clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
-                             fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
+                             fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_row_num=[12,42], \
                              tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')                           
 
 clf_obj.compile()
@@ -183,7 +183,7 @@ def test_feature_importance_x_test_exception():
 
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
-                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
+                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_row_num=[12,42], \
                                 tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
     
     test = clf_obj.feature_importance()
@@ -249,7 +249,7 @@ def test_feature_importance_x_train_exception():
 
     #Create Use Case Object
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
-                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
+                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_row_num=[12,42], \
                                 tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
 
     test = clf_obj.feature_importance()
@@ -407,7 +407,7 @@ def new_clf_setup():
                             model_object=clf, pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
 
     clf_obj = BaseClassification(model_params = [container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
-                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_index=[12,42], \
+                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_row_num=[12,42], \
                                 tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
     yield clf_obj
 
@@ -441,7 +441,7 @@ def test_feature_imp_corr(capsys, new_clf_setup):
 
     # Check _print_correlation_analysis
     captured = capsys.readouterr()
-    assert "* No surrogate detected based on correlation analysis." in captured.out
+    assert "* No surrogate detected based on correlation analysis" in captured.out
 
     # Check correlation_threshold
     clf_obj.feature_imp_status_corr = False

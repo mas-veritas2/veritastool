@@ -37,8 +37,8 @@ cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
-p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+up_grp = {'SEX': [2], 'MARRIAGE':[2]}
 x_train = cs["X_train"]
 x_test = cs["X_test"]
 model_name = "credit_scoring"
@@ -56,7 +56,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "significant", perf_metric_name="accuracy", \
                             fair_metric_name = "disparate_impact", fair_metric_type='ratio',
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
 
 tradeoff_obj = TradeoffRate(cre_sco_obj)
 tradeoff_obj.sigma = 0
@@ -227,7 +227,7 @@ input_rej.close()
 y_true_rej = cm_rej["y_test"]
 y_pred_rej = cm_rej["y_test"]
 y_train_rej = cm_rej["y_train"]
-p_grp_rej = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+p_grp_rej = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
 x_train_rej = cm_rej["X_train"].drop(['ID'], axis = 1)
 x_test_rej = cm_rej["X_test"].drop(['ID'], axis = 1)
 y_prob_rej = pd.DataFrame(cm_rej["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -262,7 +262,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 0.2, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="rejected_harm", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                  treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
 
 cm_tradeoff_obj = TradeoffRate(cm_uplift_obj)
