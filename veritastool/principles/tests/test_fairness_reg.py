@@ -24,7 +24,7 @@ x_test = br["x_test"]
 y_train = np.array(br["y_train"])
 y_true = np.array(br["y_test"])
 y_pred = np.array(br["y_pred"])
-p_grp = {'sex': [[1]], 'children': 'maj_min'}
+p_grp = {'sex': [1], 'children': 'maj_min'}
 model_object = LinearRegression()
 model_name = "base_regression"
 model_type = "regression"
@@ -37,7 +37,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_trai
 #Create Use Case Object     
 base_reg_obj = BaseRegression(model_params = [container], fair_threshold = 80, perf_metric_name = "mape", \
                              fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
-                             tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                    
+                             tran_row_num = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])                    
 
 base_reg_obj.compile()
 base_reg_obj.evaluate()
@@ -56,7 +56,7 @@ def test_feature_imp_corr(capfd):
 
     # Check _print_correlation_analysis
     captured = capfd.readouterr()
-    assert "* No surrogate detected based on correlation analysis." in captured.out
+    assert "* No surrogate detected based on correlation analysis" in captured.out
 
     # Check correlation_threshold
     base_reg_obj.feature_imp_status_corr = False
@@ -77,7 +77,7 @@ def test_compute_correlation():
     assert bool(base_reg_obj.surrogate_features['sex']) == False
 
 @pytest.mark.parametrize("p_grp", [
-    ({'sex': [[1]], 'children': 'max_bias'}),
+    ({'sex': [1], 'children': 'max_bias'}),
     ({'sex': 'max_bias'})
 ])
 def test_policy_max_bias(p_grp):
@@ -86,7 +86,7 @@ def test_policy_max_bias(p_grp):
                             x_test=x_test, model_object=model_object)
     base_reg_obj= BaseRegression(model_params = [container], fair_threshold = 80, perf_metric_name = "mape", \
                                 fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", \
-                                tran_index = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])
+                                tran_row_num = [1,10,25], tran_max_sample = 1, tran_pdp_feature = ['age','bmi'])
 
     if 'children' in p_grp:
         assert base_reg_obj.model_params[0].p_grp['children'][0] == [5]

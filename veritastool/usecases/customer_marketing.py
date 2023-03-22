@@ -21,9 +21,8 @@ class CustomerMarketing(Fairness,Transparency):
     """
     _model_type_to_metric_lookup = {"uplift":("uplift", 4, 2),
                                    "classification":("classification", 0, 1)}
-    _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
+    def __init__(self, model_params, fair_threshold = 80, fair_is_pos_label_fav = None, perf_metric_name = "emp_lift", fair_metric_name = "auto",  fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', treatment_cost = None, revenue = None, fairness_metric_value_input = {}, proportion_of_interpolation_fitting = 1.0, tran_row_num = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[],tran_processed_data = None,tran_processed_label = None):
         """
         Parameters
         ----------
@@ -34,15 +33,15 @@ class CustomerMarketing(Fairness,Transparency):
                 If 2 objects are provided, while the model_type flag is "uplift", the first one corresponds to rejection model while the second one corresponds to propensity model.
                 **x_train[0] = x_train[1] and x_test[0]=x_test[1] must be the same when len(model_param) > 1
 
-        fair_threshold: int or float
+        Instance Attributes
+        ------------------
+        fair_threshold: int or float, default=80
                 Value between 0 and 100. If a float between 0 and 1 (inclusive) is provided, it is used to benchmark against the primary fairness metric value to determine the fairness_conclusion.
                 If an integer between 1 and 100 is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.
 
-        fair_is_pos_label_fav: boolean, default=True
+        fair_is_pos_label_fav: boolean, default=None
                 Used to indicate if positive label specified is favourable for the classification use case. If True, 1 is specified to be favourable and 0 as unfavourable.
-
-        Instance Attributes
-        ------------------
+        
         perf_metric_name: string, default = "balanced_acc"
                 Name of the primary performance metric to be used for computations in the evaluate() and/or compile() functions.
 
@@ -111,13 +110,13 @@ class CustomerMarketing(Fairness,Transparency):
         pred_outcome: dict
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
         """
+        self.perf_metric_name = perf_metric_name
         #Positive label is favourable for customer marketing use case
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features)
+        Transparency.__init__(self, tran_row_num, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features,tran_processed_data,tran_processed_label)
 
         # This captures the fair_metric input by the user
         self.fair_metric_input = fair_metric_name
-        self.perf_metric_name = perf_metric_name
         
         self.proportion_of_interpolation_fitting = proportion_of_interpolation_fitting
     
@@ -126,17 +125,23 @@ class CustomerMarketing(Fairness,Transparency):
         self.spl_params = {'revenue': revenue, 'treatment_cost': treatment_cost}
         self.selection_threshold = Constants().selection_threshold
 
-        if not CustomerMarketing._model_data_processing_flag:
-            self._model_data_processing()
-            CustomerMarketing._model_data_processing_flag = True
         self._check_input()        
         self.e_lift = self._get_e_lift()
-        self._check_non_policy_p_var_min_samples()
-        self._auto_assign_p_up_groups()
-        self.feature_mask = self._set_feature_mask()
+        if self.model_params[0].p_grp is not None:
+            self._check_non_policy_p_var_min_samples()
+            self._auto_assign_p_up_groups()
+            self.feature_mask = self._set_feature_mask()
+            PerformanceMetrics._check_y_prob_pred(self)
+            FairnessMetrics._check_y_prob_pred(self)
+        else:
+            self.feature_mask = None
 
         self.pred_outcome = self._compute_pred_outcome()
         self._tran_check_input()
+        for model in self.model_params:
+            if not model._model_data_processing_flag:
+                self._model_data_processing()
+            model._model_data_processing_flag = True
 
     def _check_input(self):
         """
@@ -177,14 +182,14 @@ class CustomerMarketing(Fairness,Transparency):
         self._fairness_metric_value_input_check()
 
         #check for y_prob not None if model is uplift, else check for y_pred not None
-        if self.model_params[0].model_type  == "uplift":
-            for i in range(len(self.model_params)):
-                if self.model_params[i].y_prob is None:
-                    err.push('type_error', var_name="y_prob", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
-        else:
-            for i in range(len(self.model_params)):
-                if self.model_params[i].y_pred is None:
-                    err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
+        # if self.model_params[0].model_type  == "uplift":
+        #     for i in range(len(self.model_params)):
+        #         if self.model_params[i].y_prob is None:
+        #             err.push('type_error', var_name="y_prob", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
+        # else:
+        #     for i in range(len(self.model_params)):
+        #         if self.model_params[i].y_pred is None:
+        #             err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
 
         #check for y_pred not None if model is uplift, if yes set to None as it is not required
         if self.model_params[0].model_type == 'uplift' and self.model_params[0].y_pred is not None:
@@ -203,21 +208,16 @@ class CustomerMarketing(Fairness,Transparency):
             spl_range = (0, np.inf)
             #check if spl params are in expected type, otherwise throw exception
             for i in self.spl_params.keys() :
-                if type(self.spl_params[i]) not in exp_type :
+                if type(self.spl_params[i]) not in exp_type:
                     err.push('type_error', var_name=str(i), given=type(self.spl_params[i]), expected=exp_type, function_name="_check_input")
                 #check if spl params are within expected range, otherwise throw exception
-                try:
-                    if type(self.spl_params[i]) != type(None):
-                        if  self.spl_params[i] < spl_range[0]  or self.spl_params[i] > spl_range[1] :
-                            err.push('value_error', var_name=str(i), given=self.spl_params[i],  expected="range " + str(spl_range), function_name="_check_input")
-                except:
-                    pass
+                if type(self.spl_params[i]) != type(None) and type(self.spl_params[i]) in exp_type:
+                    if self.spl_params[i] < spl_range[0]  or self.spl_params[i] > spl_range[1] :
+                        err.push('value_error', var_name=str(i), given=self.spl_params[i],  expected="range " + str(spl_range), function_name="_check_input")
+                err.pop()
             #check if in spl params, revenue value provided is not less than treatment_cost 
-            try:
-                if self.spl_params['revenue'] < self.spl_params['treatment_cost']:
-                    err.push('value_error_compare', var_name_a="revenue", var_name_b="treatment_cost", function_name="_check_input")
-            except:
-                pass
+            if self.spl_params['revenue'] < self.spl_params['treatment_cost']:
+                err.push('value_error_compare', var_name_a="revenue", var_name_b="treatment_cost", function_name="_check_input")
         
         #print any exceptions occured        
         err.pop()
@@ -236,15 +236,17 @@ class CustomerMarketing(Fairness,Transparency):
     def _auto_assign_p_up_groups(self):
 
         self.perf_metric_obj = PerformanceMetrics(self)
-        mdl = self.model_params[1]
-        for p_var_key in mdl.p_grp.keys():
-            if isinstance(mdl.p_grp[p_var_key],str):
-                if mdl.p_grp[p_var_key] =='max_bias':
-                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, self.model_params)
+        mdl = self.model_params
+        for p_var_key in mdl[1].p_grp.keys():
+            if isinstance(mdl[1].p_grp[p_var_key],str):
+                if mdl[1].p_grp[p_var_key] =='max_bias':
+                    p_grp, up_grp = self.map_policy_to_method[mdl[1].p_grp[p_var_key]](p_var_key, self.model_params)
                 else:
-                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, self.model_params[1])
-                mdl.p_grp[p_var_key]  = p_grp
-                mdl.up_grp[p_var_key] = up_grp
+                    p_grp, up_grp = self.map_policy_to_method[mdl[1].p_grp[p_var_key]](p_var_key, self.model_params[1])
+                mdl[0].p_grp[p_var_key]  = p_grp
+                mdl[0].up_grp[p_var_key] = up_grp
+                mdl[1].p_grp[p_var_key]  = p_grp
+                mdl[1].up_grp[p_var_key] = up_grp
 
     def _max_bias(self, p_var, mdls):
         perf_metric, direction = self.translate_fair_to_perf_metric()

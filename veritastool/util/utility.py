@@ -199,7 +199,7 @@ def check_value(obj_in):
                         i_range= set()
                     else:    
                         i_range = convert_to_set(var_range.get(key))                    
-                    if not i_var.issubset(i_range):
+                    if i_range is not None and not i_var.issubset(i_range):
                         err_.append(['value_error', var_name + " " + key, str(sorted(list(i_var))), str(sorted(list(i_range)))])
         
         else:
@@ -343,6 +343,11 @@ def input_parameter_validation(_input_parameter_lookup):
     # loop through each input parameter specified in _input_parameter_lookup
     for param_name, param_info in _input_parameter_lookup.items():
         param_value, exp_type, param_range = param_info
+
+        # Check mitigate methods for empty list
+        if param_name == 'method':
+            if not param_value:
+                err_.append(['value_error', param_name, str(param_value), str(param_range)])
         
         # Skip validation if param_name is an empty list or is None
         if (isinstance(param_value, list) and param_value == []) or param_value is None:
@@ -381,7 +386,7 @@ def input_parameter_validation(_input_parameter_lookup):
             err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3], function_name="input_parameter_validation")
         err.pop()
 
-def input_parameter_filtering(_input_parameter_lookup):
+def input_parameter_filtering(_input_parameter_lookup, obj_in=None):
     """
     Filters the input parameters to only include valid values.
 
@@ -389,6 +394,9 @@ def input_parameter_filtering(_input_parameter_lookup):
     ----------------
     _input_parameter_lookup : dict
             Dictionary that maps input parameter names to their expected values
+
+    obj_in : object
+            Object that needs to be checked
 
     Returns:
     ---------------
@@ -413,10 +421,45 @@ def input_parameter_filtering(_input_parameter_lookup):
         elif param_range is None:
             filtered_params[param_name] = param_value
 
+    # Check if mitigate method specified has sufficient data
+    if 'method' in filtered_params:
+        new_methods = []
+        for mtd in filtered_params['method']:
+            if mtd == 'threshold' and (obj_in.y_true is None or obj_in.y_prob is None or obj_in.protected_features_cols is None or obj_in.p_grp is None):
+                print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
+            elif mtd == 'reweigh' and (obj_in.y_train is None or obj_in.x_train is None or obj_in.protected_features_cols is None or obj_in.p_grp is None):
+                print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
+            elif mtd == 'correlate' and (obj_in.x_train is None or obj_in.x_test is None or obj_in.protected_features_cols is None or obj_in.p_grp is None or obj_in.model_object is None):
+                print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
+            else:
+                new_methods.append(mtd)
+        filtered_params['method'] = new_methods
+
     return filtered_params
 
 def process_y_prob(classes, y_prob, pos_label, y_label):
-    
+    """
+    Processes y_prob for multi_class classification cases
+
+    Parameters
+    -------------
+    classes : list
+            Target labels from model object
+
+    y_prob : numpy.ndarray
+            Predicted probabilities as returned by classifier. 
+
+    pos_label : list
+            Label values which are considered favorable.
+
+    y_label : list
+            List containing target labels
+
+    Returns
+    -------------
+    y_prob : numpy.ndarray
+            Processed y_prob array
+    """
     pos_idxs = np.argwhere(np.isin(classes, pos_label)).ravel()    
     return y_prob[:,pos_idxs].sum(axis=1)
 

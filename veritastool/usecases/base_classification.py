@@ -22,24 +22,23 @@ class BaseClassification(Fairness, Transparency):
     """
 
     _model_type_to_metric_lookup = {"classification": ("classification", 0, 1)}
-    _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, fair_is_pos_label_fav = True, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
+    def __init__(self, model_params, fair_threshold = 80, fair_is_pos_label_fav = True, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = "difference", fairness_metric_value_input = {}, tran_row_num = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[],tran_processed_data = None,tran_processed_label = None):
         """
         Parameters
         ----------
         model_params: list containing 1 ModelContainer object
                 Data holder that contains all the attributes of the model to be assessed. Compulsory input for initialization. Single object corresponds to model_type of "default".
-
-        fair_threshold: int or float
+        
+        Instance Attributes
+        --------------------
+        fair_threshold: int or float, default=80
                 Value between 0 and 100. If a float between 0 and 1 (not inclusive) is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.
                 If an integer between 1 and 100 is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.
 
         fair_is_pos_label_fav: boolean, default=True
                 Used to indicate if positive label specified is favourable for the classification use case. If True, 1 is specified to be favourable and 0 as unfavourable.
         
-        Instance Attributes
-        --------------------
         perf_metric_name: string, default='balanced_acc'
                 Name of the primary performance metric to be used for computations in the evaluate() and/or compile() functions.
 
@@ -96,30 +95,35 @@ class BaseClassification(Fairness, Transparency):
         pred_outcome: dictionary, default=None
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
         """
-        Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display, tran_features)
         self.perf_metric_name = perf_metric_name
+        Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)
+        Transparency.__init__(self, tran_row_num, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display, tran_features,tran_processed_data,tran_processed_label)
      
         self.e_lift = None
         self.pred_outcome = None
-        self.multiclass_flag = False
 
-        if not BaseClassification._model_data_processing_flag:
-            if self.model_params[0].model_object.classes_ is not None and len(self.model_params[0].model_object.classes_)>2 and self.model_params[0].pos_label is None and self.model_params[0].neg_label is None:
-                self.classes_ = self.model_params[0].model_object.classes_
-                self.multiclass_flag = True                
-            else:
-                self._model_data_processing()
-                BaseClassification._model_data_processing_flag = True
+        if self.model_params[0].model_object is not None and self.model_params[0].model_object.classes_ is not None and len(self.model_params[0].model_object.classes_) > 2 and self.model_params[0].pos_label is None:
+              self.classes_ = self.model_params[0].model_object.classes_
+              self.multiclass_flag = True
+              self.y_onehot_true,self.y_onehot_pred = PerformanceMetrics._one_hot_encode([[self.model_params[0].y_true]], [[self.model_params[0].y_pred]])
         
         self._check_input()        
-        self._check_non_policy_p_var_min_samples()
-        self._auto_assign_p_up_groups()
-        self.feature_mask = self._set_feature_mask()
+        if self.model_params[0].p_grp is not None:
+              self._check_non_policy_p_var_min_samples()
+              self._auto_assign_p_up_groups()
+              self.feature_mask = self._set_feature_mask()
+              PerformanceMetrics._check_y_prob_pred(self)
+              FairnessMetrics._check_y_prob_pred(self)
+        else:
+              self.feature_mask = None
         self._tran_check_input()
 
         if self.multiclass_flag:
                 self.mitigate_methods = ['reweigh','correlate']
+                
+        if not self.multiclass_flag and not self.model_params[0]._model_data_processing_flag:
+              self._model_data_processing()
+              self.model_params[0]._model_data_processing_flag = True
 
     def _check_input(self):
         """
@@ -148,9 +152,9 @@ class BaseClassification(Fairness, Transparency):
         #check if input variables will the correct fair_metric_name based on fairness tree
         self._fairness_metric_value_input_check()
 
-        # check if y_pred is not None 
-        if self.model_params[0].y_pred is None:
-            self.err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
+        # # check if y_pred is not None 
+        # if self.model_params[0].y_pred is None:
+        #     self.err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
 
         # check if y_prob is float
         if self.model_params[0].y_prob is not None:
@@ -169,7 +173,6 @@ class BaseClassification(Fairness, Transparency):
         else :
             self.fair_metric_name
 
-    
     def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
                         
         pos_class_count = 0
@@ -181,7 +184,6 @@ class BaseClassification(Fairness, Transparency):
         
         return pd.Series([pos_class_count, neg_class_count, metric_val]) 
 
-
     def tradeoff(self, output=True, n_threads=1, sigma = 0):
                         
         if self.multiclass_flag:
@@ -190,17 +192,6 @@ class BaseClassification(Fairness, Transparency):
                 
                 super(BaseClassification, self).tradeoff( output,n_threads,sigma)
 
-    def feature_importance(self, output=True, n_threads=1, correlation_threshold=0.7, disable=[]):
-                        
-        if self.multiclass_flag:
-                print("Feature importance analysis is not supported for multiclass classification.")
-        else:
-                super(BaseClassification, self).feature_importance(output,n_threads,correlation_threshold,disable)
 
-    def explain(self, disable = None, local_index = None, output = True, model_num = None):
-                        
-        if self.multiclass_flag:
-                print("Transparency analysis is not supported for multiclass classification.")
-        else:
-                super(BaseClassification, self).explain(disable,local_index,output,model_num)
 
+        

@@ -31,8 +31,8 @@ cs["X_test"]['MARRIAGE'] = cs["X_test"]['MARRIAGE'].replace([0, 3],1)
 y_true = np.array(cs["y_test"])
 y_pred = np.array(cs["y_pred"])
 y_train = np.array(cs["y_train"])
-p_grp = {'SEX': [[1]], 'MARRIAGE':[[1]]}
-up_grp = {'SEX': [[2]], 'MARRIAGE':[[2]]}
+p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+up_grp = {'SEX': [2], 'MARRIAGE':[2]}
 x_train = cs["X_train"]
 x_test = cs["X_test"]
 model_name = "credit_scoring"
@@ -52,7 +52,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name,  y_pred, y_pro
 #Create Use Case Object
 cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", fair_metric_name = "auto", \
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
+                           tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
                            fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2}})
 
 cre_sco_obj.compile()
@@ -186,7 +186,7 @@ def test_feature_importance_x_test_exception():
 #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
     
@@ -247,7 +247,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                            fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
-                           tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+                           tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     test = cre_sco_obj.feature_importance()
     assert test == None
         
@@ -402,7 +402,7 @@ def new_cre_sco_setup():
                             x_test=x_test, model_object=model_obj, up_grp=up_grp)
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                             fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", fair_metric_name = "auto", \
-                            tran_index=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
+                            tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10, \
                             fairness_metric_value_input = {'SEX':{'fpr_parity': 0.2}})
     yield cre_sco_obj
 
@@ -436,7 +436,7 @@ def test_feature_imp_corr(capsys, new_cre_sco_setup):
 
     # Check _print_correlation_analysis
     captured = capsys.readouterr()
-    assert "* No surrogate detected based on correlation analysis." in captured.out
+    assert "* No surrogate detected based on correlation analysis" in captured.out
 
     # Check correlation_threshold
     cre_sco_obj.feature_imp_status_corr = False

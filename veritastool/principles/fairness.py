@@ -52,6 +52,9 @@ class Fairness:
         calibration_score : float, default=None
                 The brier score loss computed for calibration. Computable if y_prob is given.
 
+        calibration_curve_bin : dict, default=None
+                Dictionary of calibration score, probabilities of predicted and true values. 
+
         tradeoff_obj : object, default=None
                 Stores the TradeoffRate() object and contains the result of the computations.
 
@@ -126,7 +129,7 @@ class Fairness:
                 Contains the mean SHAP values between the privileged and unprivileged groups of the protected variable. 
 
         rootcause_label_index : int, default = -1
-                The index of the label to be considered for root cause analysis.
+                The index of the target label to be considered for root cause analysis. Default -1 to assume the last index.
 
         rootcause_model_num : int, default = 0
                 Data holder that contains all the attributes of the model to be assessed. It may hold more than one ModelContainer object.
@@ -179,6 +182,29 @@ class Fairness:
         compile_disable_map : dict, default = {}
                 A dictionary that contains the API function names disabled by user and features for each API. The dictionary can be empty if no features are disabled.
 
+        is_pgrp_abv_min_size : dict
+                A dictionary that stores the Boolean values for each p_var and checks whether p_grp is above minimum size.
+
+        is_upgrp_abv_min_size : dict
+                A dictionary that stores the Boolean values for each p_var and checks whether up_grp is above minimum size.
+
+        _input_validation_lookup: dict
+                Contains the attribute and its correct data type and allowed values (if applicable) for every argument passed by user.
+
+        _use_case_metrics: dict of list, default=None
+                Contains all the performance & fairness metrics for each use case. 
+                {"fair ": ["fnr_parity", ...], "perf": ["balanced_accuracy, ..."]}
+                Dynamically assigned during initialisation by using the _metric_group_map in Fairness/Performance Metrics class and the _model_type_to_metric above.
+
+        map_policy_to_method : dict
+                Maps the policies to the corresponding compute functions.
+
+        map_mitigate_to_method : dict
+                Maps the mitigate methods to the corresponding compute functions.
+
+        mitigate_methods : list
+                A list the stores the supported bias mitigation techniques.     
+
         err : object
                 VeritasError object
 
@@ -229,6 +255,7 @@ class Fairness:
         self.evaluate_disable = []
         self.compile_disable = []
         self.compile_disable_map = {}
+        self.multiclass_flag = False
         self.err = VeritasError()
         #For adding user defined new metrics 
         FairnessMetrics.add_user_defined_metrics()
@@ -238,9 +265,11 @@ class Fairness:
         # This captures the fair_metric input by the user
         self.fair_metric_input = fair_metric_name
         self.fair_neutral_tolerance = Constants().fair_neutral_tolerance
-        self.is_pgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
-        self.is_upgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
-        
+
+        if self.model_params[0].p_grp is not None:
+            self.is_pgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
+            self.is_upgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
+            
         self._model_type_input()
         auto_fair_metric_name = True if self.fair_metric_name == 'auto' else False
         self._select_fairness_metric_name()
@@ -286,7 +315,7 @@ class Fairness:
         if auto_fair_metric_name:
             self._input_validation_lookup["fair_metric_type"] = [(str,), ["difference", "ratio"]]
         else:
-            self.fair_metric_type = None
+            self.fair_metric_type = FairnessMetrics.map_fair_metric_to_group.get(self.fair_metric_name)[2]
 
         self.k = Constants().k
         self.array_size = Constants().perf_dynamics_array_size
@@ -308,7 +337,25 @@ class Fairness:
         self.mitigate_methods = ['threshold','reweigh','correlate']
     
     def _majority_vs_minority(self, p_var, mdl):
-        
+        """
+        Computes the majority and minority groups based on the maj_min policy and protected variable.
+
+        Parameters
+        ----------
+        p_var : str
+                Name of the protected variable.
+
+        mdl : object
+                Model container object containing the protected feature columns and true labels.
+            
+        Returns
+        -------
+        maj : list of lists
+                List of lists containing the majority group values.
+
+        min : list of lists
+                List of lists containing the minority group values.
+        """
         if mdl.model_type =='regression':
             maj = [mdl.protected_features_cols[p_var].value_counts().nlargest(1).index.values.tolist()]
             min = [mdl.protected_features_cols[p_var].value_counts().nsmallest(1).index.values.tolist()]
@@ -328,7 +375,25 @@ class Fairness:
         return maj, min
 
     def _majority_vs_rest(self, p_var, mdl):
-        
+        """
+        Computes the majority and all the groups based on the maj_rest policy and protected variable. 
+
+        Parameters
+        ----------
+        p_var : str
+                Name of the protected variable.
+            
+        mdl : object
+                Model container object containing the protected feature columns and true labels. 
+
+        Returns
+        -------
+        maj : list of lists
+                List of lists containing the majority group values.
+            
+        rest : list of lists
+                List of lists containing all the other group values.
+        """
         maj_rest = mdl.protected_features_cols[p_var].value_counts().nlargest(1)
         maj = [maj_rest.index.values.tolist()]
         rest = [[lbl for lbl in self.model_params[0].check_p_grp[p_var] if lbl not in maj[0]]]
@@ -360,11 +425,41 @@ class Fairness:
         return maj, rest
 
     def translate_fair_to_perf_metric(self):
+        """
+        Translates the primary fairness metric to the corresponding performance metric based on the lookup table `FairnessMetrics.map_fair_metric_to_group`.
+
+        Returns
+        -------
+        perf_metric : str
+                The name of the performance metric that corresponds to the primary fairness metric.
+
+        direction : str
+                The direction of the performance metric (either 'higher' or 'lower') indicating whether a higher metric value indicates better model performance.
+        """
         perf_metric = FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][6]
         direction = FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][7]
         return perf_metric, direction
 
-    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):            
+    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
+        """
+        Computes the subgroup data for each policy.
+
+        Parameters
+        ----------
+        grp : pandas.DataFrame
+                A pandas dataframe containing the relevant data for the given subgroup.
+
+        perf_metric : str
+                The performance metric to use in the subgroup calculation, by default 'sample_count'.
+
+        is_max_bias : bool
+                Whether policy is `max_bias`, by default True.
+
+        Returns
+        -------
+        pandas.Series
+                A pandas series containing the count of positive and negative class, as well as the metric value.
+        """         
         pos_class_count = grp['y_true'].values.sum()
         neg_class_count = (1-grp['y_true'].values).sum()
         if is_max_bias:
@@ -375,6 +470,31 @@ class Fairness:
         return pd.Series([pos_class_count,neg_class_count,metric_val]) 
 
     def _get_max_min_group(self, subGrpDf, perf_metric='sample_count'):
+        """
+        Finds the maximum and minimum subgroups based on the performance metric and the minimum sample count thresholds.
+
+        Parameters
+        ----------
+        subGrpDf : pandas.DataFrame
+                DataFrame containing the subgroups to evaluate.
+
+        perf_metric : str
+                Performance metric used to evaluate the subgroups. Default is 'sample_count'.
+            
+        Returns
+        -------
+        best_ix : int
+                Index of the best subgroup found based on the performance metric.
+
+        worst_ix : int
+                Index of the worst subgroup found based on the performance metric.
+
+        max_group_found : bool
+                True if a subgroup satisfying the minimum sample count threshold was found for the maximum group. False otherwise.
+            
+        min_group_found : bool
+                True if a subgroup satisfying the minimum sample count threshold was found for the minimum group. False otherwise.
+        """
         max_group_found = False
         min_group_found = False
 
@@ -396,6 +516,25 @@ class Fairness:
         return best_ix, worst_ix, max_group_found, min_group_found
 
     def _max_bias(self, p_var, mdl):
+        """
+        Computes the best and worst groups based on the max_bias policy and protected variable. 
+
+        Parameters
+        ----------
+        p_var : str
+                Name of the protected variable.
+            
+        mdl : object
+                Model container object containing the protected feature columns and true labels. 
+
+        Returns
+        -------
+        best : list of lists
+                List of lists containing the best group values.
+            
+        worst : list of lists
+                List of lists containing the worst group values.
+        """
         perf_metric, direction = self.translate_fair_to_perf_metric()
         
         max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred),pd.Series(mdl.y_prob)],axis=1)
@@ -416,6 +555,13 @@ class Fairness:
         return best, worst
 
     def _auto_assign_p_up_groups(self):
+        """
+        Automatically assigns privileged and unprivileged groups based on the policy specified by the user for the protected variable.
+
+        It then maps the policy to the corresponding function that will assign the privileged and unprivileged groups.
+        
+        The resulting groups are stored in the respective model container object.
+        """
         self.perf_metric_obj = PerformanceMetrics(self)
         mdl = self.model_params[0]
         for p_var_key in mdl.p_grp.keys():
@@ -425,10 +571,12 @@ class Fairness:
                 mdl.up_grp[p_var_key] = up_grp
 
     def _check_non_policy_p_var_min_samples(self):
-        
+        """
+        Checks if the privileged group and unprivileged group meet the minimum sample size per label for a given protected variable, for p_grp/up_grp not specified using policy.
+        """
         for p_var_key in self.model_params[0].p_grp.keys():
         
-            if not isinstance(self.model_params[0].p_grp[p_var_key], str):
+            if not isinstance(self.model_params[0].p_grp[p_var_key], str) and self.model_params[0].y_true is not None:
                 p_grp_vals = self.model_params[0].p_grp[p_var_key][0]
                 up_grp_vals = self.model_params[0].up_grp[p_var_key][0]
         
@@ -459,6 +607,7 @@ class Fairness:
         """
         Computes the percentage count of subgroups, performance, and fairness metrics together with their confidence intervals, calibration score & fairness metric self.fair_conclusion for all protected variables.
         If visualize = True, output will be overwritten to False (will not be shown) and run fairness_widget() from Fairness.
+        Option to disable perf_dynamic, calibration_curve and individual_fair.
 
         Parameters
         ----------
@@ -474,10 +623,23 @@ class Fairness:
         seed : int, default=None
                 Used to initialize the random number generator.
 
+        disable : list, default=[]
+                Used to specify which sections to skip. Can include "perf_dynamic", "calibration_curve" and "individual_fair".
+
         Returns
         ----------
         _fairness_widget() or _print_evaluate()
         """
+        #if y_true/y_pred/x_test is None, skip evaluate
+        if self.feature_mask is None or self.model_params[0].y_true is None:
+            self.evaluate_status = -1
+            print("Skipped: Evaluate is skipped due to insufficient data input during ModelContainer() initialization.")
+            return
+
+        if self.model_params[0].model_type != 'uplift' and self.model_params[0].y_pred is None:
+            self.evaluate_status = -1
+            print("Skipped: Evaluate is skipped due to insufficient data input during ModelContainer() initialization.")
+            return
         exp_disable = ['perf_dynamic', 'calibration_curve', 'individual_fair']
         self.evaluate_disable = [] if disable is None else disable
 
@@ -719,6 +881,9 @@ class Fairness:
         # Extract the list of API functions to be skipped
         self.compile_disable = list(self.compile_disable_map.keys()) if self.compile_disable_map else (exp_disable if self.compile_disable_map is None else [])
 
+        # Check data dependency for each API method
+        self.compile_disable.extend(self._check_data_dependency())
+
         # Check that `evaluate`,`feature_importance` and `explain` keys are present in `compile_disable_map` dict
         self.compile_disable_map.update([(key, []) for key in ['evaluate', 'feature_importance', 'explain'] if key not in self.compile_disable_map])
 
@@ -741,12 +906,14 @@ class Fairness:
 
         # Validate the data types and values of the input parameters
         input_parameter_validation(_input_parameter_lookup)
-        
+
         #check if evaluate hasn't run, only run if haven't
         if self.evaluate_status == 0 and ('evaluate' not in self.compile_disable or self.compile_disable_map['evaluate']):
             self.evaluate(visualize=False, output=False, n_threads=n_threads, disable=list(self.compile_disable_map['evaluate']))
         #if evaluate is in disable, print skipped
         elif self.evaluate_status == 0 and 'evaluate' in self.compile_disable and not self.compile_disable_map['evaluate']:
+            evaluate_status = 'skipped'
+        if self.evaluate_status == -1:
             evaluate_status = 'skipped'
         #printout
         print('{:40s}{:<10}'.format('Running evaluate', evaluate_status))
@@ -854,10 +1021,10 @@ class Fairness:
                  When sigma <= 0, smoothing is turn off.
                  Suggested to try sigma = 3 or above if noisy contours are observed.                
         """
-        #if y_prob is None, skip tradeoff
-        if self.model_params[0].y_prob is None:
+        #if y_true/y_prob/x_test is None, skip tradeoff
+        if self.model_params[0].y_prob is None or self.model_params[0].y_true is None or self.feature_mask is None:
             self.tradeoff_status = -1
-            print("Skipped: Tradeoff is skipped due to y_prob")
+            print("Skipped: Tradeoff is skipped due to insufficient data input during ModelContainer() initialization.")
         #if user wants to skip tradeoff, return None            
         if self.tradeoff_status == -1:
             return
@@ -975,16 +1142,22 @@ class Fairness:
             fimp_pbar = tqdm(total=100, desc='Feature importance', bar_format='{l_bar}{bar}')
             fimp_pbar.update(1)
             self.feature_imp_values = {}
-                       
-            for h in self.model_params[0].non_intersect_pvars:
-                self.feature_imp_values[h] = {}
-            fimp_pbar.update(1)
 
-          #if evaluate_status = 0, run evaluate() first
+            #if evaluate_status = 0, run evaluate() first
             if self.evaluate_status == 0:
                 self.evaluate(output=False)
-                
-            #if user wants to skip feature_importance, return None
+
+            #if evaluate skipped, return None
+            if self.evaluate_status == -1:
+                self.feature_imp_values = None
+                print("Skipped: Feature importance is skipped due to insufficient data input during ModelContainer() initialization.")
+                return
+
+            for h in self.model_params[0].non_intersect_pvars:
+                self.feature_imp_values[h] = {} 
+                fimp_pbar.update(1)
+
+            #if user wants to skip feature_importance or evaluate skipped, return None
             if self.feature_imp_status == -1:
                 self.feature_imp_values = None
                 return        
@@ -1136,7 +1309,7 @@ class Fairness:
             else:
                 pre_y_pred_new = pre_y_pred_new.astype(np.float64)
 
-            if pre_y_prob_new is not None and model_type == "classification" and len(pre_y_prob_new.shape)>1 and pre_y_prob_new.shape[1]>1:
+            if pre_y_prob_new is not None and model_type == "classification" and len(pre_y_prob_new.shape)>1 and pre_y_prob_new.shape[1]>1 and use_case_object.multiclass_flag is not True:
                 pre_y_prob_new = process_y_prob(model_obj.classes_ , pre_y_prob_new, pos_label, neg_label)
 
             y_pred_new.append(pre_y_pred_new)
@@ -1219,7 +1392,7 @@ class Fairness:
         Computes the top-20 correlation matrix inclusive of the protected variables
         """
         try :
-            if isinstance(self.model_params[0].x_test, str):
+            if isinstance(self.model_params[0].x_test, str) or self.model_params[0].x_test is None:
                 self.feature_imp_status_corr = False
                 return
                 
@@ -1243,10 +1416,10 @@ class Fairness:
                 self.surrogate_features[i] = {}
 
             # Identify any surrogate feature for each p_var if above specified correlation threshold
-            for i in p_var_columns:
+            for i in p_var_columns.columns:
                 self.surrogate_features[i] = {
                     corr_index: (cor_val,)
-                    for corr_index, cor_val in self.corr_df[i].iteritems()
+                    for corr_index, cor_val in self.corr_df[i].items()
                     if corr_index not in p_var_columns and cor_val > self.correlation_threshold
                 }
 
@@ -1326,16 +1499,18 @@ class Fairness:
             if self.model_params[0].model_type != "uplift": 
 
                 if self.perf_metric_obj.result.get("class_distribution").get("pos_label") is not None:
-                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "pos_label",
+                    pos_label_str = "pos_label ({})".format(", ".join(str(lbl) for lbl in self.model_params[-1].pos_label))
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + pos_label_str,
                                                                     self.perf_metric_obj.result.get("class_distribution").get("pos_label") * 100, decimal_pts=self.decimals))
                 else: 
-                    print("{0:<45s}{1:>29}".format("\t" + "pos_label",str(self.perf_metric_obj.result.get("class_distribution").get("pos_label")) ))
+                    print("{0:<45s}{1:>29}".format("\t" + "pos_label", "NA")) # For multi-class classification cases
 
                 if self.perf_metric_obj.result.get("class_distribution").get("neg_label") is not None:
-                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "neg_label",
+                    neg_label_str = "neg_label ({})".format(", ".join(str(lbl) for lbl in self.model_params[-1].neg_label))
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + neg_label_str,
                                                                     self.perf_metric_obj.result.get("class_distribution").get("neg_label") * 100, decimal_pts=self.decimals))
                 else: 
-                    print("{0:<45s}{1:>29}".format("\t" + "neg_label",str(self.perf_metric_obj.result.get("class_distribution").get("neg_label")) ))
+                    print("{0:<45s}{1:>29}".format("\t" + "neg_label", "NA")) # For multi-class classification cases
                 
             else: 
                 print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "CN",
@@ -1430,24 +1605,48 @@ class Fairness:
                     
         for i, i_var in enumerate(self.model_params[0].protected_features_cols.columns):
             p_len = len(str(i + 1) + ": " + i_var)
+
+            if not self.is_pgrp_abv_min_size[i_var]:
+                if isinstance(self.model_params[0].p_grp_input[i_var], str):
+                    p_grp_str = "Privileged Group* ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].p_grp.get(i_var)[0]))
+                else:
+                    p_grp_str = "Privileged Group*"
+            else:
+                if isinstance(self.model_params[0].p_grp_input[i_var], str):
+                    p_grp_str = "Privileged Group ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].p_grp.get(i_var)[0]))
+                else:
+                    p_grp_str = "Privileged Group"
+
+            if not self.is_upgrp_abv_min_size[i_var]:
+                if isinstance(self.model_params[0].p_grp_input[i_var], str):
+                    if len(self.model_params[-1].up_grp[i_var][0]) == 1:
+                        up_grp_str = "Unprivileged Group* ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].up_grp.get(i_var)[0]))
+                    else:
+                        up_grp_str = "Unprivileged Group* (Not {})".format(self.model_params[-1].p_grp[i_var][0][0])
+                else:
+                    up_grp_str = "Unprivileged Group*"
+            else:
+                if isinstance(self.model_params[0].p_grp_input[i_var], str):
+                    if len(self.model_params[-1].up_grp[i_var][0]) == 1:
+                        up_grp_str = "Unprivileged Group ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].up_grp.get(i_var)[0]))
+                    else:
+                        up_grp_str = "Unprivileged Group (Not {})".format(self.model_params[-1].p_grp[i_var][0][0])
+                else:
+                    up_grp_str = "Unprivileged Group"
             print("-" * 35 + str(i + 1) + ": " + i_var.title() + "-" * int((45 - p_len)))
 
             print("Value Distribution")
-            print("{:<45s}{:>29.{decimal_pts}f}%".format('\tPrivileged Group',
+            print("{:<45s}{:>29.{decimal_pts}f}%".format("\t" + p_grp_str,
                                                          self.fair_metric_obj.result.get(i_var).get(
                                                              "feature_distribution").get("privileged_group") * 100,
                                                          decimal_pts=self.decimals))
-            print("{:<45s}{:>29.{decimal_pts}f}%".format('\tUnprivileged Group',
+            print("{:<45s}{:>29.{decimal_pts}f}%".format("\t" + up_grp_str,
                                                          self.fair_metric_obj.result.get(i_var).get(
                                                              "feature_distribution").get("unprivileged_group") * 100,
                                                          decimal_pts=self.decimals))
             
-            if not self.is_pgrp_abv_min_size[i_var] and not self.is_upgrp_abv_min_size[i_var]:                
-                print("\nWarning: Results may not be robust as min samples per label is not satisfied by both privileged and unprivileged groups")
-            elif not self.is_pgrp_abv_min_size[i_var] and self.is_upgrp_abv_min_size[i_var]:
-                print("\nWarning: Results may not be robust as the minimum samples per label requirement is not satisfied by the privileged group")
-            elif  self.is_pgrp_abv_min_size[i_var] and not self.is_upgrp_abv_min_size[i_var]:
-                print("\nWarning: Results may not be robust as the minimum samples per label requirement is not satisfied by the unprivileged group")            
+            if not self.is_pgrp_abv_min_size[i_var] or not self.is_upgrp_abv_min_size[i_var]:                
+                print("*Measurement may not be robust as min_samples_per_label is not satisfied")          
             print("\n")
             if self.model_params[0].sample_weight is not None:
                 print("Fairness Metrics (Sample Weight = True)")
@@ -1569,7 +1768,7 @@ class Fairness:
             if surrogates:
                 surrogate_list.extend(surrogates.keys())
         
-        display_cols = set(list(self.surrogate_features.keys()) + surrogate_list + self.corr_top_3_features)
+        display_cols = list(set([*self.surrogate_features.keys(), *surrogate_list, *self.corr_top_3_features]))
         display_df = self.corr_df.loc[display_cols, display_cols]
         
         print("\nPartial correlation matrix (Most correlated features for {}):".format(", ".join(self.surrogate_features.keys())))
@@ -1577,9 +1776,10 @@ class Fairness:
         if surrogate_list:
             for p_var, surrogates in self.surrogate_features.items():
                 if surrogates:
-                    print("* Surrogate detected for {}: {}".format(p_var, ', '.join(str(x) for x in surrogates.keys())))
+                    print("* Surrogate detected for {} (threshold={:.{decimal_pts}g}): {}".format(p_var, self.correlation_threshold, ', '.join(str(x) for x in surrogates.keys()), decimal_pts=self.decimals))
+
         else:
-            print("* No surrogate detected based on correlation analysis.")
+            print("* No surrogate detected based on correlation analysis (threshold={:.{decimal_pts}g}).".format(self.correlation_threshold, decimal_pts=self.decimals))
             
         sys.stdout.flush()
 
@@ -1620,20 +1820,25 @@ class Fairness:
         p_var = [] if p_var is None else p_var
         method = [] if method is None else method
         NoneType = type(None)
+        exp_transform_x = None
+        exp_cr_beta = None
         _input_parameter_lookup = {
             "p_var": [p_var, (list,), self.model_params[0].non_intersect_pvars], 
             "method": [method, (list,), self.mitigate_methods],                       
         }
 
         # Filter the input parameters to only include valid values
-        filtered_params = input_parameter_filtering(_input_parameter_lookup)
+        filtered_params = input_parameter_filtering(_input_parameter_lookup, obj_in=self.model_params[model_num])
 
         # Expected param_range
-        exp_transform_x = self.model_params[model_num].x_test.columns.tolist() if self.model_params[model_num].x_test is not None else self.model_params[model_num].x_train.columns
-        if p_var == []:
-            exp_cr_beta = (len(self.model_params[model_num].non_intersect_pvars), self.model_params[model_num].x_test.shape[1] - len(self.model_params[model_num].non_intersect_pvars)) if self.model_params[model_num].x_test is not None else (len(self.model_params[model_num].non_intersect_pvars), self.model_params[model_num].x_train.shape[1])
-        else:
-            exp_cr_beta = (len(p_var), self.model_params[model_num].x_test.shape[1] - len(self.model_params[model_num].non_intersect_pvars)) if self.model_params[model_num].x_test is not None else (len(p_var), self.model_params[model_num].x_train.shape[1])
+        if 'reweigh' in filtered_params['method'] or 'correlate' in filtered_params['method']:
+            exp_transform_x = self.model_params[model_num].x_test.columns.tolist() if self.model_params[model_num].x_test is not None else self.model_params[model_num].x_train.columns
+        
+        if 'correlate' in filtered_params['method']:
+            if p_var == []:
+                exp_cr_beta = (len(self.model_params[model_num].non_intersect_pvars), self.model_params[model_num].x_test.shape[1] - len(self.model_params[model_num].non_intersect_pvars)) if self.model_params[model_num].x_test is not None else (len(self.model_params[model_num].non_intersect_pvars), self.model_params[model_num].x_train.shape[1])
+            else:
+                exp_cr_beta = (len(p_var), self.model_params[model_num].x_test.shape[1] - len(self.model_params[model_num].non_intersect_pvars)) if self.model_params[model_num].x_test is not None else (len(p_var), self.model_params[model_num].x_train.shape[1])
 
         _input_parameter_no_filtering = {
             "cr_alpha": [cr_alpha, (int, float), (0,1)],
@@ -1662,9 +1867,7 @@ class Fairness:
             
             # If p_var is not specified, use all protected variables
             self.mitigate_p_var = self.model_params[model_num].non_intersect_pvars if not p_var else p_var
-
-            # If method is not specified, run all bias mitigation techniques
-            self.mitigate_method = self.mitigate_methods if not method else method
+            self.mitigate_method = method
 
             for i in self.mitigate_method:
                 if i=='correlate':
@@ -1793,11 +1996,11 @@ class Fairness:
         y_pred_copy : tuple of numpy arrays
                 A tuple of numpy arrays according to the suggested thresholds from tradeoff analysis.
         """
-        y_pred = self.model_params[0].y_pred
+        # y_pred = self.model_params[0].y_pred
         y_prob = self.model_params[0].y_prob
         model_type = self.model_params[0].model_type
 
-        if model_type == 'uplift' and y_pred is None:
+        if model_type == 'uplift' and y_prob is None:
             return None
         else:
             y_pred_copy = []
@@ -1807,7 +2010,7 @@ class Fairness:
                 th2 = self.tradeoff_obj.result[var]['max_perf_single_th'][1]
 
                 # Make copy of y_pred and change elements based on feature mask
-                y_pred_var = y_pred.copy()
+                y_pred_var = y_prob.copy()
                 mask = self.feature_mask[var]
                 y_pred_var[mask == 1] = np.where(y_prob[mask == 1] >= th1, 1, 0)
                 y_pred_var[mask == 0] = np.where(y_prob[mask == 0] >= th2, 1, 0)
@@ -1989,10 +2192,21 @@ class Fairness:
         ----------
         Creates the bar plot displaying top 10 contributors to bias for each protected variable.
         """
+        #if y_train/x_train/x_test is None, skip evaluate
+        if self.model_params[0].y_train is None or self.model_params[0].x_train is None or self.model_params[0].p_grp is None or self.model_params[0].model_object is None:
+            print("Skipped: Root cause analysis is skipped due to insufficient data input during ModelContainer() initialization.")
+            return
         self.rootcause_values = {}
         self.rootcause_label_index = -1 # default to use the last label in tran_shap_values
         self.rootcause_model_num = model_num
         p_var = [] if p_var is None else p_var
+
+        _input_parameter_lookup = {
+            "model_num": [model_num, (int,), [i for i in range(len(self.model_params))]]
+        }
+
+        # Validate the data types and values of the input parameters
+        input_parameter_validation(_input_parameter_lookup)
 
         # ignore user input for binary classes but print warning
         if len(self.model_params[self.rootcause_model_num].model_object.classes_) == 2 and multi_class_target is not None:
@@ -2185,7 +2399,7 @@ class Fairness:
         print('{:40s}'.format('Generating model artifact'), end='')
         artifact = {}
         
-        if 'evaluate' not in self.compile_disable or self.compile_disable_map['evaluate']:
+        if ('evaluate' not in self.compile_disable or self.compile_disable_map['evaluate']) and self.evaluate_status != -1:
             artifact_fair = {}
             # Section 1 - fairness_init
             #write results to fairness_init
@@ -2232,7 +2446,7 @@ class Fairness:
 
                 def process_pgrp_upgrp_value(val):
                     if isinstance(val[0], list) and isinstance(val[0][0], str):
-                        return [[int(v) if v.isdigit() else v for v in item.split("_")] for item in val[0]]
+                        return [[int(v) if v.isdigit() else v for v in item.split("|")] for item in val[0]]
                     else:
                         return val
                     
@@ -2317,6 +2531,7 @@ class Fairness:
                     model_priority = "N/A"
                     model_impact = "N/A"
                 model_name = self.model_params[0].model_name.title()
+                metric_type = self.fair_metric_type.title()
                 if FairnessMetrics.map_fair_metric_to_group.get(self.fair_metric_name)[2] == 'ratio':
                     neutral_pos = 1
                 else:
@@ -2333,7 +2548,7 @@ class Fairness:
                                             layout=Layout(display="flex", justify_content="flex-end", width='45%'))
                 dropdown_protected_feature = widgets.Dropdown(options=options, description=r'Protected Feature:',
                                                             layout=Layout(display="flex", justify_content="flex-start",
-                                                                            width='62.5%', padding='0px 0px 0px 5px'),
+                                                                            width='50%', padding='0px 0px 0px 5px'),
                                                             style=dict(description_width='initial'))
                 dropdown_protected_feature.add_class("dropdown_clr")
                 html_model_priority = widgets.HTML(value=html_pink.format("Priority: " + model_priority),
@@ -2341,6 +2556,8 @@ class Fairness:
                 html_model_impact = widgets.HTML(value=html_pink.format("Impact: " + model_impact),
                                                 layout=Layout(display="flex", width='12.5%'))
                 html_model_concern = widgets.HTML(value=html_pink.format('Concern: ' + model_concern),
+                                                layout=Layout(display="flex", width='12.5%'))
+                html_metric_type = widgets.HTML(value=html_pink.format('Type: ' + metric_type),
                                                 layout=Layout(display="flex", width='12.5%'))
     
                 if (self.model_params[0].sample_weight is not None):
@@ -2540,10 +2757,9 @@ class Fairness:
 
                     #remove information metric type from plot
                     for metric_name in filtered_data.columns:
-                        if FairnessMetrics.map_fair_metric_to_group.get(metric_name)[2] == 'information':
+                        if FairnessMetrics.map_fair_metric_to_group.get(metric_name)[2] == 'information' or \
+                            (result_fairness[protected_feature]['fair_metric_values'][metric_name][0] == 'NA'):
                             filtered_data.drop([metric_name], axis=1, inplace=True)
-                        if result_fairness[protected_feature]['fair_metric_values'][metric_name][0]=='NA':
-                                filtered_data.drop([metric_name], axis=1, inplace=True)
 
                     if model_type != 'Uplift' and PerformanceMetrics.map_perf_metric_to_group.get(self.perf_metric_name)[1] != "regression":
                         for i in filtered_data.columns:
@@ -2612,7 +2828,7 @@ class Fairness:
                 item_layout = widgets.Layout(margin='0 0 0 0')
                 input_widgets1 = widgets.HBox([html_model_type, html_sample_weight, html_rej_infer, html_model_name],
                                                 layout=item_layout)
-                input_widgets2 = widgets.HBox([dropdown_protected_feature, html_model_priority, html_model_impact, html_model_concern],
+                input_widgets2 = widgets.HBox([dropdown_protected_feature, html_model_priority, html_model_impact, html_model_concern, html_metric_type],
                     layout=item_layout)
                 input_widgets = VBox([input_widgets1, input_widgets2])
 
@@ -2625,7 +2841,7 @@ class Fairness:
             else:
                 print("The widget is only available on Jupyter notebook")
         except:
-            pass
+            print("Skipped: Issue encountered in rendering the widget.")
 
 
     def _set_feature_mask(self):
@@ -2812,16 +3028,12 @@ class Fairness:
         """
         Checks if primary fairness metric is valid
         """
-        try:
-            if FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][4] == False:
-                ratio_parity_metrics = []
-                for i,j in FairnessMetrics.map_fair_metric_to_group.items():
-                    if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0]:
-                        if FairnessMetrics.map_fair_metric_to_group[i][4] == True:
-                            ratio_parity_metrics.append(i)
-                self.err.push('value_error', var_name="fair_metric_name", given=self.fair_metric_name,  expected=ratio_parity_metrics, function_name="check_fair_metric_name")
-        except:
-            pass
+        if self.fair_metric_name not in FairnessMetrics.map_fair_metric_to_group.keys() or FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][4] == False:
+            ratio_parity_metrics = []
+            for i,j in FairnessMetrics.map_fair_metric_to_group.items():
+                if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0] and FairnessMetrics.map_fair_metric_to_group[i][4] == True:
+                    ratio_parity_metrics.append(i)
+            self.err.push('value_error', var_name="fair_metric_name", given=self.fair_metric_name, expected=ratio_parity_metrics, function_name="check_fair_metric_name")
         #print any exceptions occured
         self.err.pop()
 
@@ -2829,16 +3041,12 @@ class Fairness:
         """
         Checks if primary performance metric is valid
         """
-        try:
-            if PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][2] == False:
-                perf_list = []
-                for i,j in PerformanceMetrics.map_perf_metric_to_group.items():
-                    if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0]:
-                        if PerformanceMetrics.map_perf_metric_to_group[i][2] == True:
-                            perf_list.append(i)
-                self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected=perf_list, function_name="check_perf_metric_name")
-        except:
-            pass
+        if self.perf_metric_name not in PerformanceMetrics.map_perf_metric_to_group.keys() or PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][2] == False:
+            perf_list = []
+            for i,j in PerformanceMetrics.map_perf_metric_to_group.items():
+                if j[1] == self._model_type_to_metric_lookup[self.model_params[0].model_type][0] and PerformanceMetrics.map_perf_metric_to_group[i][2] == True:
+                    perf_list.append(i)
+            self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected=perf_list, function_name="check_perf_metric_name")
         #print any exceptions occured
         self.err.pop()
 
@@ -3050,7 +3258,7 @@ class Fairness:
         else:
             return None
 
-    def get_correlation_analysis_results(self):
+    def get_correlation_results(self):
         """
         Gets the correlation analysis results
 
@@ -3176,9 +3384,13 @@ class Fairness:
         for idx, mdl in enumerate(self.model_params):
             model_params_len = self._model_type_to_metric_lookup.get(mdl.model_type)[2]
             label_size = self._model_type_to_metric_lookup.get(mdl.model_type)[1]
+
+            # Check pos_label not None for classification use cases, except for base_classification which supports multi-class
+            if label_size > 0 and mdl.pos_label is None:
+                err_.append(['value_error', "pos_label", mdl.pos_label, set(mdl.y_true)]) 
             
             #If neg_label not specified deduce from pos_label
-            if mdl.pos_label is not None and mdl.neg_label is None:                
+            if mdl.y_true is not None and mdl.pos_label is not None and mdl.neg_label is None:                
                 neg_labels = list(mdl.y_true_labels - set(mdl.pos_label)) 
             else:
                 neg_labels = mdl.neg_label                                                                  
@@ -3188,7 +3400,7 @@ class Fairness:
                                
                 #pos_label and neg_label checks                     
                 # Skip check for base_classification (which supports any number of labels)          
-                if label_size > 0: 
+                if label_size > 0 and mdl.pos_label is not None and mdl.neg_label is not None: 
                     given_label_size = len(mdl.pos_label) + len(neg_labels)
                     if given_label_size != label_size:
                             err_.append(["length_error", "expected labels size", given_label_size, str(label_size)])
@@ -3318,6 +3530,12 @@ class Fairness:
         and removes unassigned labels in y_true, y_pred, y_prob, x_test, protected_features_cols.
         """
         for model in self.model_params:
+            if model._model_data_processing_flag:
+                continue
+
+            if model.neg_label is None and model.pos_label is not None and model.y_true is not None:
+                model.neg_label = list(set(model.y_true) - set(model.pos_label))
+
             if model.y_true is not None and model.model_type == "classification" and model.unassigned_y_label[0]:
                 if len(model.y_true.shape) == 1 and model.y_true.dtype.kind in ['i','O','U']:
                     model.y_true, model.pos_label2 = self._check_label(model.y_true, model.pos_label, model.neg_label, obj_in=model)
@@ -3327,7 +3545,7 @@ class Fairness:
                 model.y_true, model.y_pred, model.y_prob, model.x_test, model.protected_features_cols = check_data_unassigned(model)
 
             else:
-                if len(model.y_true.shape) == 1 and model.y_true.dtype.kind in ['i','O','U']:
+                if model.y_true is not None and len(model.y_true.shape) == 1 and model.y_true.dtype.kind in ['i','O','U']:
                     model.y_true, model.pos_label2 = self._check_label(model.y_true, model.pos_label, model.neg_label, obj_in=model)  
                 if model.y_pred is not None and len(model.y_pred.shape) == 1 and model.y_pred.dtype.kind in ['i','O','U']:
                     model.y_pred, model.pos_label2 = self._check_label(model.y_pred, model.pos_label, model.neg_label, obj_in=model)
@@ -3374,6 +3592,9 @@ class Fairness:
         err = VeritasError()
         err_= []
 
+        if pos_label is None:
+	        return y, pos_label
+        
         y_bin = y
         if y_pred_flag == True and obj_in.unassigned_y_label[0]:
             y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
@@ -3396,6 +3617,27 @@ class Fairness:
         err.pop()
 
         return y_bin, pos_label2
+    
+    def _check_data_dependency(self):
+        """
+        Check data input dependency for each API function during `ModelContainer()` initialization before `compile()` is run
+
+        Returns
+        -------
+        disable_compile : list
+                A list containing the API functions that will be disabled in `compile`
+        """
+        disable_compile = []
+        if self.feature_mask is None or self.model_params[0].y_true is None:
+            self.evaluate_status = -1
+            disable_compile.append('evaluate')
+        if self.model_params[0].model_type != 'uplift' and self.model_params[0].y_pred is None:
+            self.evaluate_status = -1
+            disable_compile.append('evaluate')
+        if self.model_params[0].y_prob is None or self.model_params[0].y_true is None or self.feature_mask is None:
+            self.tradeoff_status = -1
+            disable_compile.append('tradeoff')
+        return disable_compile 
     
     def _input_parameter_compile_processing(self, disable=[]):
         """

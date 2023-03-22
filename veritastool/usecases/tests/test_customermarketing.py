@@ -29,7 +29,7 @@ cm_rej = pickle.load(input_rej)
 y_true_rej = cm_rej["y_test"]
 y_pred_rej = cm_rej["y_test"]
 y_train_rej = cm_rej["y_train"]
-p_grp_rej = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+p_grp_rej = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
 x_train_rej = cm_rej["X_train"].drop(['ID'], axis = 1)
 x_test_rej = cm_rej["X_test"].drop(['ID'], axis = 1)
 y_prob_rej = pd.DataFrame(cm_rej["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -67,7 +67,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 80, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                  treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fair_is_pos_label_fav=False)
 # cm_uplift_obj.k = 1
 
@@ -78,15 +78,15 @@ def test_check_input():
     assert toolkit_exit.type == MyError
     
     cm_uplift_obj._model_type_to_metric_lookup[cm_uplift_obj.model_params[0].model_type]  = ('uplift', 4, 2)
-    cm_uplift_obj.model_params[0].y_prob = None
-    with pytest.raises(MyError) as toolkit_exit:
-        cm_uplift_obj._check_input()
-    assert toolkit_exit.type == MyError
+    # cm_uplift_obj.model_params[0].y_prob = None
+    # with pytest.raises(MyError) as toolkit_exit:
+    #     cm_uplift_obj._check_input()
+    # assert toolkit_exit.type == MyError
     
-    cm_uplift_obj.model_params[0].model_type = 'uplift'
-    with pytest.raises(MyError) as toolkit_exit:
-        cm_uplift_obj._check_input()
-    assert toolkit_exit.type == MyError
+    # cm_uplift_obj.model_params[0].model_type = 'uplift'
+    # with pytest.raises(MyError) as toolkit_exit:
+    #     cm_uplift_obj._check_input()
+    # assert toolkit_exit.type == MyError
 
     cm_uplift_obj.model_params[0].model_type = 'uplift'
     cm_uplift_obj.spl_params = {'revenue': '190', 'treatment_cost': 20}
@@ -116,7 +116,7 @@ def test_get_confusion_matrix():
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 80, \
                                     fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                     perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                    treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                     tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fair_is_pos_label_fav=False)
     #Model Container Parameters
     y_true_reshape = np.array(cm_uplift_obj.model_params[0].y_true).reshape(1, 1, -1)

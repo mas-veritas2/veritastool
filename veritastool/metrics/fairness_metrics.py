@@ -24,45 +24,45 @@ class FairnessMetrics:
         e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds', 'balanced_acc', 'higher')}
     """
     map_fair_metric_to_group = {
-        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate','higher'),
-        'demographic_parity': ('Demographic Parity', 'classification', 'difference', True, True, 'Demo Parity','selection_rate','higher'),
-        'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo','recall','higher'),
-        'fpr_parity': ('False Positive Rate Parity', 'classification', 'difference', True, True, 'FPR Parity','balanced_acc','higher'),
-        'tnr_parity': ('True Negative Rate Parity', 'classification', 'difference', True, True, 'TNR Parity','tnr','higher'),
-        'fnr_parity': ('False Negative Rate Parity', 'classification', 'difference', True, True, 'FNR Parity','fnr','higher'),
-        'ppv_parity': ('Positive Predictive Parity', 'classification', 'difference', True, True, 'PPV Parity','precision','higher'),
-        'npv_parity': ('Negative Predictive Parity', 'classification', 'difference', True, True, 'NPV Parity','npv','higher'),
-        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'difference', True, True, 'FDR Parity','recall','higher'), 
-        'for_parity': ('False Omission Rate Parity', 'classification', 'difference', True, True, 'FOR Parity','balanced_acc','higher'),
-        'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds','balanced_acc','higher'),
-        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'difference', True, True, 'Neg Equal Odds','balanced_acc','higher'),
-        'calibration_by_group': ('Calibration by Group', 'classification', 'difference', True, True, 'Cali By Group','balanced_acc','higher'),
-        'auc_parity': ('AUC Parity', 'classification', 'difference', False, True, 'AUC Parity','roc_auc','higher'),
-        'log_loss_parity': ('Log-loss Parity', 'classification', 'difference', False, True, 'Log-loss Parity','log_loss','lower'),
-        'equal_opportunity_ratio': ('Equal Opportunity Ratio', 'classification', 'ratio', True, True, 'Equal Opp Ratio','recall','higher'),
-        'fpr_ratio': ('False Positive Rate Ratio', 'classification', 'ratio', True, True, 'FPR Ratio','balanced_acc','higher'),
-        'tnr_ratio': ('True Negative Rate Ratio', 'classification', 'ratio', True, True, 'TNR Ratio','tnr','higher'),
-        'fnr_ratio': ('False Negative Rate Ratio', 'classification', 'ratio', True, True, 'FNR Ratio','fnr','higher'),
-        'ppv_ratio': ('Positive Predictive Ratio', 'classification', 'ratio', True, True, 'PPV Ratio','precision','higher'),
-        'npv_ratio': ('Negative Predictive Ratio', 'classification', 'ratio', True, True, 'NPV Ratio','npv','higher'),
-        'fdr_ratio': ('False Discovery Rate Ratio', 'classification', 'ratio', True, True, 'FDR Ratio','recall','higher'),
-        'for_ratio': ('False Omission Rate Ratio', 'classification', 'ratio', True, True, 'FOR Ratio','balanced_acc','higher'),
-        'equal_odds_ratio': ('Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Equalized OR','balanced_acc','higher'),
-        'neg_equal_odds_ratio': ('Negative Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Neg Equalized OR','balanced_acc','higher'),
-        'calibration_by_group_ratio': ('Calibration by Group Ratio', 'classification', 'ratio', True, True, 'Cali By Group Ratio','balanced_acc','higher'),
-        'auc_ratio': ('AUC Ratio', 'classification', 'ratio', False, True, 'AUC Ratio','roc_auc','higher'),
-        'log_loss_ratio': ('Log-loss Ratio', 'classification', 'ratio', False, True, 'Log-loss Ratio','log_loss','lower'),
-        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False, 'MI Independence',None,None),
-        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False, 'MI Separation',None,None),
-        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False, 'MI Sufficiency',None,None),
-        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'difference', False, True, 'RMSE Parity','rmse','lower'),
-        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'MAPE Parity','mape','lower'),
-        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'WAPE Parity','wape','lower'),
-        'rmse_ratio': ('Root Mean Squared Error Ratio', 'regression', 'ratio', False, True, 'RMSE Ratio','rmse','lower'),
-        'mape_ratio': ('Mean Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'MAPE Ratio','mape','lower'),
-        'wape_ratio': ('Weighted Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'WAPE Ratio','wape','lower'),
-        'rejected_harm': ('Harm from Rejection', 'uplift', 'difference', True, True, 'Rejected Harm','emp_lift','higher'),
-        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'difference', False, True, 'Acquire Benefit','emp_lift','higher')
+        'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate','higher','y_pred'),
+        'demographic_parity': ('Demographic Parity', 'classification', 'difference', True, True, 'Demo Parity','selection_rate','higher','y_pred'),
+        'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo','recall','higher','y_pred'),
+        'fpr_parity': ('False Positive Rate Parity', 'classification', 'difference', True, True, 'FPR Parity','balanced_acc','higher','y_pred'),
+        'tnr_parity': ('True Negative Rate Parity', 'classification', 'difference', True, True, 'TNR Parity','tnr','higher','y_pred'),
+        'fnr_parity': ('False Negative Rate Parity', 'classification', 'difference', True, True, 'FNR Parity','fnr','higher','y_pred'),
+        'ppv_parity': ('Positive Predictive Parity', 'classification', 'difference', True, True, 'PPV Parity','precision','higher','y_pred'),
+        'npv_parity': ('Negative Predictive Parity', 'classification', 'difference', True, True, 'NPV Parity','npv','higher','y_pred'),
+        'fdr_parity': ('False Discovery Rate Parity', 'classification', 'difference', True, True, 'FDR Parity','recall','higher','y_pred'), 
+        'for_parity': ('False Omission Rate Parity', 'classification', 'difference', True, True, 'FOR Parity','balanced_acc','higher','y_pred'),
+        'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds','balanced_acc','higher','y_pred'),
+        'neg_equal_odds': ('Negative Equalized Odds', 'classification', 'difference', True, True, 'Neg Equal Odds','balanced_acc','higher','y_pred'),
+        'calibration_by_group': ('Calibration by Group', 'classification', 'difference', True, True, 'Cali By Group','balanced_acc','higher','y_pred'),
+        'auc_parity': ('AUC Parity', 'classification', 'difference', False, True, 'AUC Parity','roc_auc','higher','y_prob'),
+        'log_loss_parity': ('Log-loss Parity', 'classification', 'difference', False, True, 'Log-loss Parity','log_loss','lower','y_prob'),
+        'equal_opportunity_ratio': ('Equal Opportunity Ratio', 'classification', 'ratio', True, True, 'Equal Opp Ratio','recall','higher','y_pred'),
+        'fpr_ratio': ('False Positive Rate Ratio', 'classification', 'ratio', True, True, 'FPR Ratio','balanced_acc','higher','y_pred'),
+        'tnr_ratio': ('True Negative Rate Ratio', 'classification', 'ratio', True, True, 'TNR Ratio','tnr','higher','y_pred'),
+        'fnr_ratio': ('False Negative Rate Ratio', 'classification', 'ratio', True, True, 'FNR Ratio','fnr','higher','y_pred'),
+        'ppv_ratio': ('Positive Predictive Ratio', 'classification', 'ratio', True, True, 'PPV Ratio','precision','higher','y_pred'),
+        'npv_ratio': ('Negative Predictive Ratio', 'classification', 'ratio', True, True, 'NPV Ratio','npv','higher','y_pred'),
+        'fdr_ratio': ('False Discovery Rate Ratio', 'classification', 'ratio', True, True, 'FDR Ratio','recall','higher','y_pred'),
+        'for_ratio': ('False Omission Rate Ratio', 'classification', 'ratio', True, True, 'FOR Ratio','balanced_acc','higher','y_pred'),
+        'equal_odds_ratio': ('Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Equalized OR','balanced_acc','higher','y_pred'),
+        'neg_equal_odds_ratio': ('Negative Equalized Odds Ratio', 'classification', 'ratio', True, True, 'Neg Equalized OR','balanced_acc','higher','y_pred'),
+        'calibration_by_group_ratio': ('Calibration by Group Ratio', 'classification', 'ratio', True, True, 'Cali By Group Ratio','balanced_acc','higher','y_pred'),
+        'auc_ratio': ('AUC Ratio', 'classification', 'ratio', False, True, 'AUC Ratio','roc_auc','higher','y_prob'),
+        'log_loss_ratio': ('Log-loss Ratio', 'classification', 'ratio', False, True, 'Log-loss Ratio','log_loss','lower','y_prob'),
+        'mi_independence': ('Mutual Information Independence', 'classification', 'information', False, False, 'MI Independence',None,None,'y_pred'),
+        'mi_separation': ('Mutual Information Separation', 'classification', 'information', False, False, 'MI Separation',None,None,'y_pred'),
+        'mi_sufficiency': ('Mutual Information Sufficiency', 'classification', 'information', False, False, 'MI Sufficiency',None,None,'y_pred'),
+        'rmse_parity': ('Root Mean Squared Error Parity', 'regression', 'difference', False, True, 'RMSE Parity','rmse','lower','y_pred'),
+        'mape_parity': ('Mean Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'MAPE Parity','mape','lower','y_pred'),
+        'wape_parity': ('Weighted Absolute Percentage Error Parity', 'regression', 'difference', False, True, 'WAPE Parity','wape','lower','y_pred'),
+        'rmse_ratio': ('Root Mean Squared Error Ratio', 'regression', 'ratio', False, True, 'RMSE Ratio','rmse','lower','y_pred'),
+        'mape_ratio': ('Mean Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'MAPE Ratio','mape','lower','y_pred'),
+        'wape_ratio': ('Weighted Absolute Percentage Error Ratio', 'regression', 'ratio', False, True, 'WAPE Ratio','wape','lower','y_pred'),
+        'rejected_harm': ('Harm from Rejection', 'uplift', 'difference', True, True, 'Rejected Harm','emp_lift','higher','y_prob'),
+        'acquire_benefit': ('Benefit from Acquiring', 'uplift', 'difference', False, True, 'Acquire Benefit','emp_lift','higher','y_prob')
     }
 
     map_indiv_fair_metric_to_group = {
@@ -74,7 +74,7 @@ class FairnessMetrics:
         #to get cutomized metrics inherited from NewMetric class 
         for metric in newmetric.NewMetric.__subclasses__() :
             if metric.enable_flag == True and metric.metric_type == "fair":
-                FairnessMetrics.map_fair_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction)    
+                FairnessMetrics.map_fair_metric_to_group[metric.metric_name] = (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction, metric.metric_reqt)    
 
     def __init__(self, use_case_object):
         """
@@ -177,7 +177,7 @@ class FairnessMetrics:
         for metric in NewMetric.__subclasses__() :
             if metric.enable_flag ==True and metric.metric_type == "fair":
                 self.map_fair_metric_to_method[metric.metric_name] =  metric.compute
-                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction)
+                self.map_fair_metric_to_group[metric.metric_name] =  (metric.metric_definition, metric.metric_group, metric.metric_difference_ratio, False, True, metric.metric_short_name, metric.metric_equiv_perf_metric, metric.metric_direction, metric.metric_reqt)
                 if metric.metric_name not in use_case_object._use_case_metrics["fair"]:
                     use_case_object._use_case_metrics["fair"].append(metric.metric_name)
                     
@@ -191,6 +191,14 @@ class FairnessMetrics:
         self.fair_metric_name  = None
         self._use_case_metrics  = None
         self.use_case_object = use_case_object
+
+    def _check_y_prob_pred(self):
+        if(self.fair_metric_name is not None and FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][8]=='y_prob' and self.model_params[0].y_prob is None):
+            self.err.push('value_error', var_name="fair_metric_name", given=self.fair_metric_name,  expected="y_prob", function_name="_check_y_prob_pred")
+            self.err.pop()
+        if(self.fair_metric_name is not None and FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][8]=='y_pred' and self.model_params[0].y_pred is None):
+            self.err.push('value_error', var_name="fair_metric_name", given=self.fair_metric_name,  expected="y_pred", function_name="_check_y_prob_pred")
+            self.err.pop()
 
     def execute_all_fair(self, n_threads, seed, eval_pbar, disable=[]):
         """
@@ -272,14 +280,7 @@ class FairnessMetrics:
                     #submit each thread's work to thread pool
                     if len(indexes[k]) > 0:
                         threads.append(executor.submit(FairnessMetrics._execute_all_fair_map, metric_obj=metric_obj, index =indexes[k], eval_pbar=eval_pbar, worker_progress=worker_progress))
-                        
-                #retrive results from each thread
-                for thread in threads:
-                    mp_result = thread.result()
-                    for i in self.p_var[0]:
-                        for j in self._use_case_metrics['fair']:
-                            if j in map_fair_metric_keys:
-                                self.result[i]["fair_metric_values"][j] += mp_result[i]["fair_metric_values"][j]
+
         else:   
             #if multithreading is not triggered, directly update the progress bar by 36
             eval_pbar.update(36)
@@ -294,7 +295,7 @@ class FairnessMetrics:
                     if self.result[i]["fair_metric_values"][j][-1][0] is None :
                         self.result[i]["fair_metric_values"][j] = (None, None, None)
                     else:
-                        self.result[i]["fair_metric_values"][j] = self.result[i]['fair_metric_values'][j][-1] + (2*np.nanstd([a_tuple[0] for a_tuple in self.result[i]["fair_metric_values"][j]]),)
+                        self.result[i]["fair_metric_values"][j] = self.result[i]['fair_metric_values'][j][-1] + (2*np.nanstd(np.array([a_tuple[0] for a_tuple in self.result[i]["fair_metric_values"][j]], dtype=float)),)
         
         if 'individual_fair' not in disable:
             FairnessMetrics._execute_all_indiv_fair_map(self)
@@ -377,7 +378,7 @@ class FairnessMetrics:
                 metric_obj.feature_masks[i].append((np.array(feature_mask[i])*1).reshape(1,1,-1)) #convert bool to int and reshape
             metric_obj.feature_masks[i] = np.concatenate(metric_obj.feature_masks[i])
             
-            if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+            if  metric_obj.use_case_object.multiclass_flag:
 
                 y_onehot_true = []
                 y_onehot_pred = []
@@ -436,10 +437,10 @@ class FairnessMetrics:
                             metric_obj.feature_masks
                     ) 
 
-            for j in metric_obj._use_case_metrics['fair']:
-                if j in metric_obj.map_fair_metric_to_method_optimized.keys():
-                    metric_obj.result[i]["fair_metric_values"][j] += metric_obj.map_fair_metric_to_method_optimized[j](obj=metric_obj)
-                    
+            with np.errstate(divide="ignore", invalid="ignore"):
+                for j in metric_obj._use_case_metrics['fair']:
+                    if j in metric_obj.map_fair_metric_to_method_optimized.keys():
+                        metric_obj.result[i]["fair_metric_values"][j] += metric_obj.map_fair_metric_to_method_optimized[j](obj=metric_obj)            
         return metric_obj.result
 
     def _execute_all_indiv_fair_map(metric_obj):
@@ -450,7 +451,7 @@ class FairnessMetrics:
         metric_obj : FairnessMetrics object
         """
         
-        if hasattr(metric_obj.use_case_object, 'multiclass_flag') and metric_obj.use_case_object.multiclass_flag:
+        if metric_obj.use_case_object.multiclass_flag:
             metric_obj.result["indiv_fair"]=None
 
         elif len(metric_obj._use_case_metrics["indiv_fair"]) > 0:   
@@ -462,6 +463,67 @@ class FairnessMetrics:
                     
         return metric_obj.result
 
+    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):
+        if metric_obj.use_case_object.multiclass_flag:
+                y_onehot_true = []
+                y_onehot_pred = []
+                for y_true_sample,y_pred_sample in zip(y_true,y_pred):
+
+                        label_binarizer = LabelBinarizer().fit(y_true_sample[0])
+                        y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
+                        y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
+                                                
+                y_onehot_true = np.array(y_onehot_true)
+                y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_true = y_onehot_true
+                y_onehot_pred = np.array(y_onehot_pred)        
+                y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
+                metric_obj.y_onehot_pred = y_onehot_pred
+                
+                tp_p_s_total = 0 
+                fp_p_s_total = 0 
+                tn_p_s_total = 0
+                fn_p_s_total = 0
+                tp_u_s_total = 0 
+                fp_u_s_total = 0 
+                tn_u_s_total = 0
+                fn_u_s_total = 0
+                
+                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_
+                
+                for idx,_ in enumerate(metric_obj.ohe_classes_):
+                    y_trues = y_onehot_true[:,:,:,idx]
+                    y_preds = y_onehot_pred[:,:,:,idx]
+                
+                    tp_p_s, fp_p_s, tn_p_s, fn_p_s, tp_u_s, fp_u_s, tn_u_s, fn_u_s,  =  metric_obj.use_case_object._get_confusion_matrix_optimized(
+                        y_trues,
+                        y_preds, 
+                        sample_weight,
+                        curr_p_var,
+                        feature_mask
+                    ) 
+
+                    tp_p_s_total += tp_p_s
+                    fp_p_s_total += fp_p_s
+                    tn_p_s_total += tn_p_s
+                    fn_p_s_total += fn_p_s
+                    tp_u_s_total += tp_u_s
+                    fp_u_s_total += fp_u_s
+                    tn_u_s_total += tn_u_s
+                    fn_u_s_total += fn_u_s
+        else:
+            
+            tp_p_s_total, fp_p_s_total, tn_p_s_total, fn_p_s_total, tp_u_s_total, fp_u_s_total, tn_u_s_total, fn_u_s_total = \
+                metric_obj.use_case_object._get_confusion_matrix_optimized(
+                        y_true,
+                        y_pred, 
+                        sample_weight,
+                        curr_p_var,
+                        feature_mask
+                    ) 
+        
+        return tp_p_s_total, fp_p_s_total, tn_p_s_total, fn_p_s_total, tp_u_s_total, fp_u_s_total, tn_u_s_total, fn_u_s_total
+    
     def translate_metric(self, metric_name, **kwargs ):
         """
         Computes the primary fairness metric value and its associate value for the privileged group, for the feature importance section.
@@ -499,10 +561,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -526,10 +588,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -552,10 +614,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -578,10 +640,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -604,10 +666,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -630,10 +692,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -656,10 +718,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -682,10 +744,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -708,10 +770,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -734,10 +796,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -760,10 +822,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -786,10 +848,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -812,10 +874,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -838,10 +900,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -864,10 +926,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -890,10 +952,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -916,10 +978,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -946,10 +1008,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -976,10 +1038,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1006,10 +1068,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1225,6 +1287,36 @@ class FairnessMetrics:
             
         return (wape_p/wape_u, wape_p)
 
+    def _compute_log_loss_score(self, y_true, y_prob, mask, multiclass=False ):
+        
+        maskFilterNeg = mask==-1
+
+        if multiclass:
+            
+            maskFilterNeg_rp = np.repeat(maskFilterNeg,y_true.shape[3],axis=2)
+
+            y_trues_ma = np.ma.array(y_true, mask = maskFilterNeg_rp)
+            y_probs_ma = np.ma.array(y_prob, mask = maskFilterNeg_rp)
+            mask = np.ma.array(mask, mask = maskFilterNeg)
+
+            loss_p = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+            log_loss_p = (loss_p*mask).sum(axis=2)/np.sum(mask,2) #, keepdims=True) 
+
+            loss_u = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
+            log_loss_u = (loss_u*(1-mask)).sum(axis=2)/np.sum(1-mask,2) #, keepdims=True) 
+
+        else:
+
+            y_trues_ma = np.ma.array(y_true, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(y_prob, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
+
+            log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
+            log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
+            log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+
+        return log_loss_p, log_loss_u
+    
     def _compute_log_loss_parity(self, **kwargs):
         """
         Computes the difference in logistic loss or cross entropy loss between the privileged and unprivileged groups
@@ -1236,52 +1328,41 @@ class FairnessMetrics:
         """
         if 'y_prob_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
-            maskFilter = mask!=1
-            y_true = self.y_true[0]
+
+            mask = mask.reshape(1,1,-1)        
+            y_true = self.use_case_object.model_params[0].y_true #self.y_true[0]
             y_prob=kwargs['y_prob_new'][0]
-            if self.sample_weight[0] is not None: 
-                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
-                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
-            else:
-                sample_weight_p = None
-                sample_weight_u = None   
-            log_loss_p = log_loss(y_true=np.ma.array(y_true, mask=maskFilter), y_pred=np.ma.array(y_prob, mask=maskFilter), sample_weight = sample_weight_p)
-            log_loss_u = log_loss(y_true=np.ma.array(y_true, mask=~maskFilter), y_pred=np.ma.array(y_prob, mask=~maskFilter), sample_weight = sample_weight_u)
-            return (log_loss_p - log_loss_u, log_loss_p)
+                                   
+            if self.use_case_object.multiclass_flag:
+
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
+                
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,y_prob, mask, True)
+
+            else: 
+                y_prob = y_prob.reshape(1,1,-1)
+                y_true = y_true.reshape(1,1,-1)
+                log_loss_p, log_loss_u = self._compute_log_loss_score(y_true,y_prob, mask, False)
+
+            return ((log_loss_p - log_loss_u)[0][0], log_loss_p[0][0]) 
+        
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()   
             mask = self.feature_masks[self.curr_p_var]
-            maskFilterNeg = mask==-1
-
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+           
+            if self.use_case_object.multiclass_flag:
                 
-                y_trues = self.y_onehot_true                
-                y_probs = self.y_probs
-
-                maskFilterNeg_rp = np.repeat(maskFilterNeg,self.y_onehot_true.shape[3],axis=2)
-
-                y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg_rp)
-                y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg_rp)
-                mask = np.ma.array(mask, mask = maskFilterNeg)
-
-                loss_p = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
-                log_loss_p = (loss_p*mask).sum(axis=2)/np.sum(mask,2, keepdims=True) 
-
-                loss_u = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
-                log_loss_u = (loss_u*(1-mask)).sum(axis=2)/np.sum(1-mask,2, keepdims=True) 
-
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,self.y_probs, mask, True)
+                
             else:
-                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
-                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_trues,self.y_probs, mask, False)
 
             return list(map(tuple, np.stack((log_loss_p - log_loss_u, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
+    
     def _compute_log_loss_ratio(self, **kwargs):
         """
         Computes the ratio of logistic loss or cross entropy loss between the privileged and unprivileged groups
@@ -1293,88 +1374,50 @@ class FairnessMetrics:
         """
         if 'y_prob_new' in kwargs:
             mask = self.feature_mask[self.curr_p_var]
-            maskFilter = mask!=1
-            y_true = self.y_true[0]
+
+            mask = mask.reshape(1,1,-1)        
+            y_true = self.use_case_object.model_params[0].y_true #self.y_true[0]
             y_prob=kwargs['y_prob_new'][0]
-            if self.sample_weight[0] is not None: 
-                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
-                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
-            else:
-                sample_weight_p = None
-                sample_weight_u = None   
-            log_loss_p = log_loss(y_true=np.ma.array(y_true, mask=maskFilter), y_pred=np.ma.array(y_prob, mask=maskFilter), sample_weight = sample_weight_p)
-            log_loss_u = log_loss(y_true=np.ma.array(y_true, mask=~maskFilter), y_pred=np.ma.array(y_prob, mask=~maskFilter), sample_weight = sample_weight_u)
-            return (log_loss_u/log_loss_p, log_loss_p)
+                                   
+            if self.use_case_object.multiclass_flag:
+
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
+                
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,y_prob, mask, True)
+
+            else: 
+                y_prob = y_prob.reshape(1,1,-1)
+                y_true = y_true.reshape(1,1,-1)
+                log_loss_p, log_loss_u = self._compute_log_loss_score(y_true,y_prob, mask, False)
+ 
+            return ((log_loss_u/log_loss_p)[0][0], log_loss_p[0][0]) 
+        
         else:
             if all(v[0] is None for v in self.y_probs):
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
+            
             mask = self.feature_masks[self.curr_p_var]
-            maskFilterNeg = mask==-1
-
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            
+            if self.use_case_object.multiclass_flag:
                 
-                y_trues = self.y_onehot_true                
-                y_probs = self.y_probs
-
-                maskFilterNeg_rp = np.repeat(maskFilterNeg,self.y_onehot_true.shape[3],axis=2)
-
-                y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg_rp)
-                y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg_rp)
-                mask = np.ma.array(mask, mask = maskFilterNeg)
-
-                loss_p = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
-                log_loss_p = (loss_p*mask).sum(axis=2)/np.sum(mask,2, keepdims=True) 
-
-                loss_u = -(y_trues_ma * ma.log(y_probs_ma)).sum(axis=3)
-                log_loss_u = (loss_u*(1-mask)).sum(axis=2)/np.sum(1-mask,2, keepdims=True) 
-
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,self.y_probs, mask, True)
+                
             else:
 
-                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
-
-                log_loss_score = -(y_trues_ma*ma.log(y_probs_ma) + (1-y_trues_ma)*ma.log(1-y_probs_ma))
-                log_loss_p = np.sum(log_loss_score*mask_ma, 2)/np.sum(mask_ma, 2)
-                log_loss_u = np.sum(log_loss_score*(1-mask_ma), 2)/np.sum((1-mask_ma), 2)
-
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_trues,self.y_probs, mask, False)
+                
             return list(map(tuple, np.stack((log_loss_u/log_loss_p, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
-    def _compute_auc_parity(self, **kwargs):
-        """
-        Computes the difference in area under roc curve between the privileged and unprivileged groups
+    def _compute_TPR_FPR(self, y_true, y_prob, mask, multiclass=False):
+                        
+        
+            if multiclass:
 
-        Returns
-        ----------
-        _compute_auc_parity : list of tuple of floats
-                Fairness metric value and privileged group metric value
-        """
-        if 'y_prob_new' in kwargs:
-            mask = self.feature_mask[self.curr_p_var]
-            maskFilter = mask!=1
-            y_true = self.y_true[0]
-            y_prob=kwargs['y_prob_new'][0]
-            if self.sample_weight[0] is not None: 
-                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
-                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
-            else:
-                sample_weight_p = None
-                sample_weight_u = None
-            roc_auc_score_p = roc_auc_score(y_true=np.ma.array(y_true, mask=maskFilter), y_score=np.ma.array(y_prob, mask=maskFilter), sample_weight=sample_weight_p)
-            roc_auc_score_u = roc_auc_score(y_true=np.ma.array(y_true, mask=~maskFilter), y_score=np.ma.array(y_prob, mask=~maskFilter), sample_weight=sample_weight_u)
-            return (roc_auc_score_p - roc_auc_score_u, roc_auc_score_p)
-        else:
-            if all(v[0] is None for v in self.y_probs):
-                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
-            mask = self.feature_masks[self.curr_p_var]
-            maskFilterNeg = mask==-1
+                y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
+                y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
 
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
-
-                y_trues = self.y_onehot_true.reshape(self.y_onehot_true.shape[0],self.y_onehot_true.shape[1],-1)
-                y_probs = self.y_probs.reshape(self.y_probs.shape[0],self.y_probs.shape[1],-1)
-
-                mask = np.repeat(mask,self.y_onehot_true.shape[3],axis=2)
+                mask = np.repeat(mask,y_true.shape[3],axis=2)
 
                 idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
 
@@ -1391,16 +1434,16 @@ class FairnessMetrics:
                 FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
                 TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
                 FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
-
-                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
-                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
-
+                
+            
             else: 
-                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
+
+                maskFilterNeg = mask==-1
+                y_trues_ma = np.ma.array(y_true, mask = maskFilterNeg)
+                y_probs_ma = np.ma.array(y_prob, mask = maskFilterNeg)
                 mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                idx = self.y_probs.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
+                idx = y_prob.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
 
                 y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
                 
@@ -1418,8 +1461,60 @@ class FairnessMetrics:
                 FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
                 TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
                 FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+
+            return TPR_p, FPR_p, TPR_u, FPR_u
+
+    def _compute_auc_parity(self, **kwargs):
+        """
+        Computes the difference in area under roc curve between the privileged and unprivileged groups
+
+        Returns
+        ----------
+        _compute_auc_parity : list of tuple of floats
+                Fairness metric value and privileged group metric value
+        """
+        if 'y_prob_new' in kwargs:
+            mask = self.feature_mask[self.curr_p_var]   
+            mask = mask.reshape(1,1,-1)        
+            y_true = self.use_case_object.model_params[0].y_true #self.y_true[0]
+            y_prob=kwargs['y_prob_new'][0]
+                                   
+            if self.use_case_object.multiclass_flag:
+
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
+                
+                
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,y_prob, mask, True)
+
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
 
+            else: 
+                y_prob = y_prob.reshape(1,1,-1)
+                y_true = y_true.reshape(1,1,-1)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(y_true,y_prob, mask, False)
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+            
+            return (auc_p-auc_u)[0][0] , auc_p[0][0]
+        else:
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
+            mask = self.feature_masks[self.curr_p_var]
+            
+            if self.use_case_object.multiclass_flag:
+
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,self.y_probs, mask, True)
+
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
+            else:                 
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_trues,self.y_probs, mask, False)
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+            
             return list(map(tuple, np.stack((auc_p - auc_u, auc_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_auc_ratio(self, **kwargs):
@@ -1432,90 +1527,48 @@ class FairnessMetrics:
                 Fairness metric value and privileged group metric value
         """
         if 'y_prob_new' in kwargs:
-            mask = self.feature_mask[self.curr_p_var]
-            maskFilter = mask!=1
-            y_true = self.y_true[0]
+            mask = self.feature_mask[self.curr_p_var]     
+            mask = mask.reshape(1,1,-1)        
+            y_true = self.use_case_object.model_params[0].y_true #self.y_true[0]
             y_prob=kwargs['y_prob_new'][0]
-            if self.sample_weight[0] is not None: 
-                sample_weight_p = np.ma.array(self.sample_weight[0], mask=maskFilter)
-                sample_weight_u = np.ma.array(self.sample_weight[0], mask=~maskFilter)
-            else:
-                sample_weight_p = None
-                sample_weight_u = None
-            roc_auc_score_p = roc_auc_score(y_true=np.ma.array(y_true, mask=maskFilter), y_score=np.ma.array(y_prob, mask=maskFilter), sample_weight=sample_weight_p)
-            roc_auc_score_u = roc_auc_score(y_true=np.ma.array(y_true, mask=~maskFilter), y_score=np.ma.array(y_prob, mask=~maskFilter), sample_weight=sample_weight_u)
-            return (roc_auc_score_u/roc_auc_score_p, roc_auc_score_p)
-        else:
-            if all(v[0] is None for v in self.y_probs):
-                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
-            mask = self.feature_masks[self.curr_p_var]
-            maskFilterNeg = mask==-1
+                                   
+            if self.use_case_object.multiclass_flag:
 
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+                ohe_classes_ = self.use_case_object.classes_
+                y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
                 
-                for index,_ in enumerate(self.ohe_classes_):
-                                        
-                    y_probs = self.y_probs[:,:,:,index]                    
-                    y_trues = self.y_onehot_true[:,:,:,index]
-                    
-                    y_trues_ma = np.ma.array(y_trues, mask = maskFilterNeg)
-                    y_probs_ma = np.ma.array(y_probs, mask = maskFilterNeg)
-                    mask_ma = np.ma.array(mask, mask = maskFilterNeg)
-
-                    idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-                    
-                    y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-                    #y_probs = np.take_along_axis(y_probs_ma, idx, axis=2)
-                    mask = np.take_along_axis(mask_ma, idx, axis=2)
-
-                    tpr_class_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
-                    fpr_class_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
-                    
-                    
-                    tpr_class_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                    fpr_class_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-                    
-                    TPR_p = tpr_class_p if index == 0 else np.append(TPR_p,tpr_class_p,axis=2)
-                    FPR_p = fpr_class_p if index == 0 else np.append(FPR_p,fpr_class_p,axis=2)
-                    TPR_u = tpr_class_u if index == 0 else np.append(TPR_u,tpr_class_u,axis=2)
-                    FPR_u = fpr_class_u if index == 0 else np.append(FPR_u,fpr_class_u,axis=2)
-
-                TPR_p = np.sort(TPR_p)
-                FPR_p = np.sort(FPR_p)
-                TPR_u = np.sort(TPR_u)
-                FPR_u = np.sort(FPR_u)
-
-                TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
-                FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
-                TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-                FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+                
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,y_prob, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
 
             else: 
-                y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
-                y_probs_ma = np.ma.array(self.y_probs, mask = maskFilterNeg)
-                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
-
-                idx = self.y_probs.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
-
-                y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-
-                mask = np.take_along_axis(mask_ma, idx, axis=2)
-
-                grp_mask = np.take_along_axis(mask, idx, axis=2)
+                y_prob = y_prob.reshape(1,1,-1)
+                y_true = y_true.reshape(1,1,-1)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(y_true,y_prob, mask, False)
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
             
-                TPR_p = np.cumsum(y_trues*mask, axis=2).data[grp_mask==1]/np.sum(y_trues*mask, axis=2, keepdims=True)
-                FPR_p = np.cumsum((1-y_trues)*mask, axis=2).data[grp_mask==1]/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
-                TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
-                FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
-                auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-                
-                TPR_u = np.cumsum(y_trues*(1-mask), axis=2).data[grp_mask==0]/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-                TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-                FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+            return (auc_u/auc_p)[0][0] , auc_p[0][0]
+        
+        else:
+
+            if all(v[0] is None for v in self.y_probs):
+                return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()     
+            
+            mask = self.feature_masks[self.curr_p_var]
+
+            if self.use_case_object.multiclass_flag:
+
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,self.y_probs, mask, True)
+
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
+                auc_u = np.trapz(TPR_u, FPR_u, axis=2)
+
+            else:                 
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_trues,self.y_probs, mask, False)
+                auc_p = np.trapz(TPR_p, FPR_p, axis=2)
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
 
             return list(map(tuple, np.stack((auc_u/auc_p, auc_p), axis=1).reshape(-1, 2).tolist()))
@@ -1530,11 +1583,11 @@ class FairnessMetrics:
                 Fairness metric value and privileged group metric value
         """
         if 'y_pred_new' in kwargs:
-            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}            
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1557,10 +1610,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1583,10 +1636,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1613,10 +1666,10 @@ class FairnessMetrics:
         """
         if 'y_pred_new' in kwargs:
             feature_mask = {k: np.array(v*1).reshape(1, 1, -1) for k, v in self.feature_mask.items()}
-            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = self.use_case_object._get_confusion_matrix_optimized(
-                y_true=np.array(self.y_true[0]).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1),
-                sample_weight=np.array(self.sample_weight[0]).reshape(1, 1, -1),
+            tp_p, fp_p, tn_p, fn_p, tp_u, fp_u, tn_u, fn_u = FairnessMetrics._translate_confusion_matrix(
+                self.use_case_object.fair_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1),
                 curr_p_var=self.curr_p_var, 
                 feature_mask=feature_mask,
             )
@@ -1652,7 +1705,7 @@ class FairnessMetrics:
             return (mi_independence, None)
     
         else:   
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            if self.use_case_object.multiclass_flag:
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()       
             mask = self.feature_masks[self.curr_p_var]            
             maskFilter = mask!=-1
@@ -1722,7 +1775,7 @@ class FairnessMetrics:
             return (mi_separation, None)   
         
         else:            
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            if self.use_case_object.multiclass_flag:
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()    
             mask = self.feature_masks[self.curr_p_var]
             maskFilter = mask!=-1
@@ -1815,7 +1868,7 @@ class FairnessMetrics:
             return (mi_sufficiency, None)
         
         else:
-            if hasattr(self.use_case_object, 'multiclass_flag') and self.use_case_object.multiclass_flag:
+            if self.use_case_object.multiclass_flag:
                 return np.array([(None,None)]*self.y_trues.shape[0]).reshape(-1, 2).tolist()    
             mask = self.feature_masks[self.curr_p_var]
             maskFilter = mask!=-1

@@ -36,7 +36,7 @@ input_rej.close()
 y_true_rej = cm_rej["y_test"]
 y_pred_rej = cm_rej["y_test"]
 y_train_rej = cm_rej["y_train"]
-p_grp_rej = {'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'maj_rest'}
+p_grp_rej = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
 x_train_rej = cm_rej["X_train"].drop(['ID'], axis = 1)
 x_test_rej = cm_rej["X_test"].drop(['ID'], axis = 1)
 y_prob_rej = pd.DataFrame(cm_rej["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -76,7 +76,7 @@ container_prop = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop,
 cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                  treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 
 #cm_uplift_obj.k = 1
@@ -310,7 +310,7 @@ def new_cm_uplift_setup():
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                     fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                     perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                    treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                     tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6,fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
     yield cm_uplift_obj
 
@@ -344,7 +344,7 @@ def test_feature_imp_corr(capsys, new_cm_uplift_setup):
 
     # Check _print_correlation_analysis
     captured = capsys.readouterr()
-    assert "* No surrogate detected based on correlation analysis." in captured.out
+    assert "* No surrogate detected based on correlation analysis" in captured.out
 
     # Check correlation_threshold
     cm_uplift_obj.feature_imp_status_corr = False
@@ -365,8 +365,8 @@ def test_compute_correlation():
     assert bool(cm_uplift_obj.surrogate_features['isforeign']) == False
 
 @pytest.mark.parametrize("p_grp", [
-    ({'isforeign':[[0]], 'isfemale':[[0]],'isforeign-isfemale':'max_bias'}),
-    ({'isforeign':[[0]], 'isfemale':'max_bias'})
+    ({'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'max_bias'}),
+    ({'isforeign':[0], 'isfemale':'max_bias'})
 ])
 def test_policy_max_bias(p_grp):
     p_grp_policy = p_grp
@@ -381,13 +381,13 @@ def test_policy_max_bias(p_grp):
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 85.4, \
                                     fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                     perf_metric_name = "expected_profit", fair_metric_name="auto", revenue = PROFIT_RESPOND, \
-                                    treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                    treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                     tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6, \
                                     fairness_metric_value_input = {'isforeign':{'rejected_harm': 0.2} })
 
-    if 'isforeign-isfemale' in p_grp:
-        assert cm_uplift_obj.model_params[0].p_grp['isforeign-isfemale'][0] == ['1_0']
-        assert cm_uplift_obj.model_params[0].up_grp['isforeign-isfemale'][0] == ['0_0']
+    if 'isforeign|isfemale' in p_grp:
+        assert cm_uplift_obj.model_params[0].p_grp['isforeign|isfemale'][0] == ['1|0']
+        assert cm_uplift_obj.model_params[0].up_grp['isforeign|isfemale'][0] == ['0|0']
     else:
         assert cm_uplift_obj.model_params[0].p_grp['isfemale'][0] == [1]
         assert cm_uplift_obj.model_params[0].up_grp['isfemale'][0] == [0]

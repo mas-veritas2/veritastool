@@ -65,7 +65,7 @@ def test_ModelRateUplift_init():
     y_true_rej = cm_rej["y_test"]
     y_pred_rej = cm_rej["y_test"]
     y_train_rej = cm_rej["y_train"]
-    p_grp_rej = {'isforeign':[[0]], 'isfemale':[[0]]}
+    p_grp_rej = {'isforeign':[0], 'isfemale':[0]}
     x_train_rej = cm_rej["X_train"].drop(['ID'], axis = 1)
     x_test_rej = cm_rej["X_test"].drop(['ID'], axis = 1)
     y_prob_rej = pd.DataFrame(cm_rej["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
@@ -103,7 +103,7 @@ def test_ModelRateUplift_init():
     cm_uplift_obj = CustomerMarketing(model_params = [container_rej, container_prop], fair_threshold = 0.2, \
                                   fair_concern = "eligible", fair_priority = "benefit", fair_impact = "significant", \
                                   perf_metric_name = "expected_profit", revenue = PROFIT_RESPOND, \
-                                  treatment_cost =COST_TREATMENT, tran_index=[20,40], tran_max_sample=10, \
+                                  treatment_cost =COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=10, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 6)
 
 

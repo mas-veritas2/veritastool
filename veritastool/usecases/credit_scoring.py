@@ -19,9 +19,8 @@ class CreditScoring(Fairness, Transparency):
     """
 
     _model_type_to_metric_lookup = {"classification": ("classification", 2, 1)}
-    _model_data_processing_flag = False
 
-    def __init__(self, model_params, fair_threshold, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', num_applicants = None, base_default_rate = None, fairness_metric_value_input = {}, tran_index = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[]):
+    def __init__(self, model_params, fair_threshold = 80, perf_metric_name = "balanced_acc", fair_metric_name = "auto", fair_concern = "eligible", fair_priority = "benefit", fair_impact = "normal", fair_metric_type = 'difference', num_applicants = None, base_default_rate = None, fairness_metric_value_input = {}, tran_row_num = [1], tran_max_sample = 1, tran_pdp_feature = [], tran_pdp_target=None, tran_max_display = 10,tran_features=[],tran_processed_data = None,tran_processed_label = None):
         """
         Parameters
         ----------
@@ -29,12 +28,12 @@ class CreditScoring(Fairness, Transparency):
                 Data holder that contains all the attributes of the model to be assessed. Compulsory input for initialization. 
                 It holds one ModelContainer object. Single object corresponds to model_type of "credit".
 
-        fair_threshold: int or float
+        Instance Attributes
+        --------------------
+        fair_threshold: int or float, default=80
                 Value between 0 and 100. If a float between 0 and 1 (inclusive) is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.        
                 If an integer between 1 and 100 is provided, it is converted to a percentage and the p % rule is used to calculate the fairness threshold value.
 
-        Instance Attributes
-        --------------------
         perf_metric_name: str, default="balanced_acc"
                 Name of the primary performance metric to be used for computations in the evaluate() and/or compile() functions.
 
@@ -107,35 +106,40 @@ class CreditScoring(Fairness, Transparency):
         pred_outcome: dict, default=None
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
         """
+        self.perf_metric_name = perf_metric_name
         #Positive label is favourable for credit scoring use case
         fair_is_pos_label_fav = True
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)               
-        Transparency.__init__(self, tran_index, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features)
+        Transparency.__init__(self, tran_row_num, tran_max_sample, tran_pdp_feature, tran_pdp_target, tran_max_display,tran_features,tran_processed_data,tran_processed_label)
 
-        self.perf_metric_name = perf_metric_name
-        
         self.spl_params = {'num_applicants':num_applicants, 'base_default_rate': base_default_rate}
                 
         self.e_lift = None
         self.pred_outcome = None
         
-        self._rejection_inference_flag = {}
-        for var in self.model_params[0].p_var:
-           self._rejection_inference_flag[var] = False
-
-        if self.spl_params['base_default_rate'] is not None and self.spl_params['num_applicants'] is not None:
+        if self.model_params[0].p_grp is not None:
+            self._rejection_inference_flag = {}
             for var in self.model_params[0].p_var:
-                self._rejection_inference_flag[var] = True
+                self._rejection_inference_flag[var] = False
 
-        if not CreditScoring._model_data_processing_flag:
-            self._model_data_processing()
-            CreditScoring._model_data_processing_flag = True
-        self._check_input()        
-        self._check_non_policy_p_var_min_samples()
-        self._auto_assign_p_up_groups()
-        self.feature_mask = self._set_feature_mask()
-        self._check_special_params()
+            if self.spl_params['base_default_rate'] is not None and self.spl_params['num_applicants'] is not None:
+                for var in self.model_params[0].p_var:
+                    self._rejection_inference_flag[var] = True
+
+        self._check_input()     
+        if self.model_params[0].p_grp is not None:
+            self._check_non_policy_p_var_min_samples()
+            self._auto_assign_p_up_groups()
+            self.feature_mask = self._set_feature_mask()
+            self._check_special_params()
+            PerformanceMetrics._check_y_prob_pred(self)
+            FairnessMetrics._check_y_prob_pred(self)
+        else:
+            self.feature_mask = None
         self._tran_check_input()
+        if not self.model_params[0]._model_data_processing_flag:
+            self._model_data_processing()
+            self.model_params[0]._model_data_processing_flag = True 
 
     def _check_input(self):
         """
@@ -168,8 +172,8 @@ class CreditScoring(Fairness, Transparency):
         self._fairness_metric_value_input_check()
 
         # check if y_pred is not None 
-        if self.model_params[0].y_pred is None:
-            self.err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
+        # if self.model_params[0].y_pred is None:
+        #     self.err.push('type_error', var_name="y_pred", given= "type None", expected="type [list, np.ndarray, pd.Series]", function_name="_check_input")
 
         # check if y_prob is float
         if self.model_params[0].y_prob is not None:

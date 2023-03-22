@@ -29,8 +29,8 @@ input_file.close()
 y_true = np.array(puw["y_test"])
 y_pred = np.array(puw["y_pred"])
 y_train = np.array(puw["y_train"])
-p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+up_grp = {'gender': [0], 'race': [2, 3]}
 x_train = puw["X_train"]
 x_test = puw["X_test"]
 y_prob = puw["y_prob"]
@@ -46,7 +46,7 @@ container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob
 # Create Use Case Object
 pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                         fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                               tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                               tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                       tran_pdp_feature = ['annual_premium','payout_amount'])
 
 pred_underwriting_obj.compile()
@@ -181,7 +181,7 @@ def test_feature_importance_x_test_exception():
     #Create Use Case Object
     pred_underwriting_obj = PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_name='auto', \
-                                                tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['age','payout_amount'])
     
     test = pred_underwriting_obj.feature_importance()
@@ -247,7 +247,7 @@ def test_feature_importance_x_train_exception():
     #Create Use Case Object
     pred_underwriting_obj = PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_name='auto', \
-                                                tran_index=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['age','payout_amount'])
 
     test = pred_underwriting_obj.feature_importance()
@@ -431,7 +431,7 @@ def new_puw_setup():
 
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['annual_premium','payout_amount'])
     yield pred_underwriting_obj
 
@@ -465,7 +465,7 @@ def test_feature_imp_corr(capsys, new_puw_setup):
 
     # Check _print_correlation_analysis
     captured = capsys.readouterr()
-    assert "* Surrogate detected for gender: num_life_policies" in captured.out
+    assert "* Surrogate detected for gender (threshold=0.7): num_life_policies" in captured.out
 
     # Check correlation_threshold
     pred_underwriting_obj.feature_imp_status_corr = False
@@ -506,7 +506,7 @@ def test_mitigate_correlate(p_var, mitigate_correlate_setup):
         # Check that mitigated fair metric value is closer to neutral coefficient
         fair_metric_mitigated_gender = result_mitigate2.get('gender')['fair_metric_values']['fpr_ratio'][0]
         fair_metric_mitigated_race = result_mitigate2.get('race')['fair_metric_values']['fpr_ratio'][0]
-        fair_metric_mitigated_intersect = result_mitigate2.get('gender-race')['fair_metric_values']['fpr_ratio'][0]
+        fair_metric_mitigated_intersect = result_mitigate2.get('gender|race')['fair_metric_values']['fpr_ratio'][0]
         assert abs(fair_metric_mitigated_gender - 1) != abs(4.677 - 1)
         assert abs(fair_metric_mitigated_race - 1) != abs(0.188 - 1)
         assert abs(fair_metric_mitigated_intersect - 1) != abs(4.299 - 1)
@@ -572,20 +572,20 @@ def mitigate_threshold_setup():
                             x_test=x_test, model_object=model_obj, up_grp=up_grp)
     pred_underwriting_obj_mitg = PredictiveUnderwriting(model_params = [container_mitg], fair_threshold = 80, fair_concern = "inclusive", \
                                                         fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                        tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                        tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                         tran_pdp_feature = ['annual_premium','payout_amount'])    
 
     yield container_mitg, pred_underwriting_obj_mitg
 
 @pytest.fixture
 def mitigate_correlate_setup():
-    p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-    up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+    p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+    up_grp = {'gender': [0], 'race': [2, 3]}
     container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                                x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['annual_premium','payout_amount'])
 
     mitigated_gender = pred_underwriting_obj.mitigate(p_var=['gender'], method=['correlate'])
@@ -595,26 +595,26 @@ def mitigate_correlate_setup():
     y_prob_new = model.predict_proba(x_test_mitigated)[:, 1]
 
     # Update Model Container
-    p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-    up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+    p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+    up_grp = {'gender': [0], 'race': [2, 3]}
     container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                                x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['annual_premium','payout_amount'])
 
     pred_underwriting_obj.evaluate(output=False)
     result_mitigate1 = pred_underwriting_obj.fair_metric_obj.result
 
     # Reinitialise Model Container
-    p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-    up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+    p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+    up_grp = {'gender': [0], 'race': [2, 3]}
     container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                                x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['annual_premium','payout_amount'])
 
     mitigated_all_pvars = pred_underwriting_obj.mitigate(p_var=[], method=['correlate'])
@@ -624,13 +624,13 @@ def mitigate_correlate_setup():
     y_prob_new = model.predict_proba(x_test_mitigated)[:, 1]
 
     # Update Model Container
-    p_grp = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-    up_grp = {'gender': [[0]], 'race': [[2, 3]] }
+    p_grp = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+    up_grp = {'gender': [0], 'race': [2, 3]}
     container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                                x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                 fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                 tran_pdp_feature = ['annual_premium','payout_amount'])
 
     pred_underwriting_obj.evaluate(output=False)
@@ -658,14 +658,14 @@ def test_mitigate_reweigh_categorical(p_var):
     x_train_rwg['race'] = pd.Categorical.from_codes(x_train_rwg['race'], categories=['race_0', 'race_1', 'race_2', 'race_3', 'race_4'])
     x_test_rwg['gender'] = pd.Categorical.from_codes(x_test_rwg['gender'], categories=['male', 'female'])
     x_test_rwg['race'] = pd.Categorical.from_codes(x_test_rwg['race'], categories=['race_0', 'race_1', 'race_2', 'race_3', 'race_4'])
-    p_grp = {'gender': [['male']], 'race': [['race_1']]}
-    up_grp = {'gender': [['female']], 'race': [['race_2', 'race_3']] }
+    p_grp = {'gender': ['male'], 'race': ['race_1']}
+    up_grp = {'gender': ['female'], 'race': ['race_2', 'race_3']}
 
     container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train_rwg, \
                             x_test=x_test_rwg, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                             fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                         tran_pdp_feature = ['annual_premium','payout_amount'])
     
     mitigated = pred_underwriting_obj.mitigate(p_var=p_var, method=['reweigh'], rw_weights=None, transform_x=None, transform_y=None)
@@ -680,8 +680,8 @@ def test_mitigate_reweigh_categorical(p_var):
         assert round(mitigated['reweigh'][1][('male', 1.0)], 3) == 0.9
 
 @pytest.mark.parametrize("p_grp, up_grp", [
-    ({'gender': [[1]], 'race': [[1]], 'gender-race':'maj_min'}, {'gender': [[0]], 'race': [[2, 3]]}),
-    ({'gender': [[1]], 'race': 'maj_min'}, {'gender': [[0]]})
+    ({'gender': [1], 'race': [1], 'gender|race':'maj_min'}, {'gender': [0], 'race': [2, 3]}),
+    ({'gender': [1], 'race': 'maj_min'}, {'gender': [0]})
 ])
 def test_policy_maj_min(p_grp, up_grp):
     p_grp_policy = p_grp
@@ -690,18 +690,18 @@ def test_policy_maj_min(p_grp, up_grp):
                             x_test=x_test, model_object=model, up_grp=up_grp_policy)
     pred_underwriting_obj= PredictiveUnderwriting(model_params=[container], fair_threshold=80, fair_concern="inclusive", \
                                             fair_priority="benefit", fair_impact="normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
                                                         tran_pdp_feature=['annual_premium','payout_amount'])
-    if 'gender-race' in p_grp:
-        assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['0_1']
-        assert pred_underwriting_obj.model_params[0].up_grp['gender-race'][0] == ['1_1']
+    if 'gender|race' in p_grp:
+        assert pred_underwriting_obj.model_params[0].p_grp['gender|race'][0] == ['0|1']
+        assert pred_underwriting_obj.model_params[0].up_grp['gender|race'][0] == ['1|1']
     else:
         assert pred_underwriting_obj.model_params[0].p_grp['race'][0] == [1]
         assert pred_underwriting_obj.model_params[0].up_grp['race'][0] == [2]
 
 @pytest.mark.parametrize("p_grp, up_grp", [
-    ({'gender': [[1]], 'race': [[1]], 'gender-race':'maj_rest'}, {'gender': [[0]], 'race': [[2, 3]]}),
-    ({'gender': [[1]], 'race': 'maj_rest'}, {'gender': [[0]]})
+    ({'gender': [1], 'race': [1], 'gender|race':'maj_rest'}, {'gender': [0], 'race': [2, 3]}),
+    ({'gender': [1], 'race': 'maj_rest'}, {'gender': [0]})
 ])
 def test_policy_maj_rest(p_grp, up_grp):
     p_grp_policy = p_grp
@@ -710,20 +710,20 @@ def test_policy_maj_rest(p_grp, up_grp):
                             x_test=x_test, model_object=model, up_grp=up_grp_policy)
     pred_underwriting_obj= PredictiveUnderwriting(model_params=[container], fair_threshold=80, fair_concern="inclusive", \
                                             fair_priority="benefit", fair_impact="normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
                                                         tran_pdp_feature=['annual_premium','payout_amount'])
-    if 'gender-race' in p_grp:
-        expected_upgrp = ['1_1', '0_3', '1_3', '0_2', '1_2', '1_4', '0_4', '1_0']
-        assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['0_1']
-        assert set(pred_underwriting_obj.model_params[0].up_grp['gender-race'][0]) == set(expected_upgrp)
+    if 'gender|race' in p_grp:
+        expected_upgrp = ['1|1', '0|3', '1|3', '0|2', '1|2', '1|4', '0|4', '1|0']
+        assert pred_underwriting_obj.model_params[0].p_grp['gender|race'][0] == ['0|1']
+        assert set(pred_underwriting_obj.model_params[0].up_grp['gender|race'][0]) == set(expected_upgrp)
     else:
         expected_upgrp = [3, 2, 4, 0]
         assert pred_underwriting_obj.model_params[0].p_grp['race'][0] == [1]
         assert set(pred_underwriting_obj.model_params[0].up_grp['race'][0]) == set(expected_upgrp)
 
 @pytest.mark.parametrize("p_grp, up_grp", [
-    ({'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}, {'gender': [[0]], 'race': [[2, 3]]}),
-    ({'gender': [[1]], 'race': 'max_bias'}, {'gender': [[0]]})
+    ({'gender': [1], 'race': [1], 'gender|race':'max_bias'}, {'gender': [0], 'race': [2, 3]}),
+    ({'gender': [1], 'race': 'max_bias'}, {'gender': [0]})
 ])
 def test_policy_max_bias(p_grp, up_grp):
     p_grp_policy = p_grp
@@ -732,11 +732,11 @@ def test_policy_max_bias(p_grp, up_grp):
                             x_test=x_test, model_object=model, up_grp=up_grp_policy)
     pred_underwriting_obj= PredictiveUnderwriting(model_params=[container], fair_threshold=80, fair_concern="inclusive", \
                                             fair_priority="benefit", fair_impact="normal", fair_metric_type='ratio',\
-                                                tran_index=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
                                                         tran_pdp_feature=['annual_premium','payout_amount'])
-    if 'gender-race' in p_grp:
-        assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['1_1']
-        assert pred_underwriting_obj.model_params[0].up_grp['gender-race'][0] == ['0_1']
+    if 'gender|race' in p_grp:
+        assert pred_underwriting_obj.model_params[0].p_grp['gender|race'][0] == ['1|1']
+        assert pred_underwriting_obj.model_params[0].up_grp['gender|race'][0] == ['0|1']
     else:
         assert pred_underwriting_obj.model_params[0].p_grp['race'][0] == [2]
         assert pred_underwriting_obj.model_params[0].up_grp['race'][0] == [1]
@@ -747,20 +747,20 @@ def test_policy_max_bias(p_grp, up_grp):
 ])
 def test_policy_max_bias_y_prob(fair_metric_name):
     # Check direction indicator anda y_prob-based metrics
-    p_grp_policy = {'gender': [[1]], 'race': [[1]], 'gender-race':'max_bias'}
-    up_grp_policy = {'gender': [[0]], 'race': [[2, 3]]}
+    p_grp_policy = {'gender': [1], 'race': [1], 'gender|race':'max_bias'}
+    up_grp_policy = {'gender': [0], 'race': [2, 3]}
     container = ModelContainer(y_true, p_grp_policy, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
                             x_test=x_test, model_object=model, up_grp=up_grp_policy)
     pred_underwriting_obj= PredictiveUnderwriting(model_params=[container], fair_threshold=80, fair_concern="inclusive", \
                                             fair_priority="benefit", fair_impact="normal", fair_metric_name=fair_metric_name,\
-                                                tran_index=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
+                                                tran_row_num=[1,2,3,20], tran_max_sample=10, tran_max_display=10, \
                                                         tran_pdp_feature=['annual_premium','payout_amount'])
     if fair_metric_name == 'auc_parity':
-        assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['1_1']
-        assert pred_underwriting_obj.model_params[0].up_grp['gender-race'][0] == ['0_1']
+        assert pred_underwriting_obj.model_params[0].p_grp['gender|race'][0] == ['1|1']
+        assert pred_underwriting_obj.model_params[0].up_grp['gender|race'][0] == ['0|1']
     elif fair_metric_name == 'log_loss_parity':
-        assert pred_underwriting_obj.model_params[0].p_grp['gender-race'][0] == ['0_1']
-        assert pred_underwriting_obj.model_params[0].up_grp['gender-race'][0] == ['1_1']
+        assert pred_underwriting_obj.model_params[0].p_grp['gender|race'][0] == ['0|1']
+        assert pred_underwriting_obj.model_params[0].up_grp['gender|race'][0] == ['1|1']
 
 def test_compile_disable():
     pred_underwriting_obj.evaluate_status = 0
@@ -777,7 +777,7 @@ def test_compile_disable_pipe_processing():
                             x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                     fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                    tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                    tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                     tran_pdp_feature = ['annual_premium','payout_amount'])
     pred_underwriting_obj.compile(disable=['evaluate>perf_dynamic|calibration_curve|individual_fair','feature_importance>correlation','explain'])
     assert pred_underwriting_obj.compile_disable_map['evaluate'] == set(['calibration_curve', 'individual_fair', 'perf_dynamic'])
@@ -791,7 +791,7 @@ def test_compile_skip():
                             x_test=x_test, model_object=model, up_grp=up_grp)
     pred_underwriting_obj= PredictiveUnderwriting(model_params = [container], fair_threshold = 80, fair_concern = "inclusive", \
                                                     fair_priority = "benefit", fair_impact = "normal", fair_metric_type='ratio',\
-                                                    tran_index=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
+                                                    tran_row_num=[1,2,3,20], tran_max_sample = 10, tran_max_display = 10, \
                                                     tran_pdp_feature = ['annual_premium','payout_amount'])
     pred_underwriting_obj.feature_imp_status = -1
     pred_underwriting_obj.tradeoff_status = -1
