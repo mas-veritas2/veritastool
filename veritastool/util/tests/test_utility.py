@@ -206,7 +206,7 @@ def new_clf_setup():
                                model_object=clf, pos_label=['CR'], neg_label=['CN'])
     clf_obj= BaseClassification(model_params = [container_clf], fair_threshold = 80, fair_concern = "eligible", \
                             fair_priority = "benefit", fair_impact = "normal",fair_metric_type='difference', \
-                            perf_metric_name = "accuracy", tran_index=[12,42], tran_max_sample=10, \
+                            perf_metric_name = "accuracy", tran_row_num=[12,42], tran_max_sample=10, \
                             tran_pdp_feature = ['income','age'], tran_pdp_target='TR')
 
     yield container_clf, clf_obj

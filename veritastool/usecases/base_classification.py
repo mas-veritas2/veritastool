@@ -102,8 +102,12 @@ class BaseClassification(Fairness, Transparency):
         self.e_lift = None
         self.pred_outcome = None
 
-        if self.model_params[0].model_object is not None and self.model_params[0].model_object.classes_ is not None and len(self.model_params[0].model_object.classes_) > 2 and self.model_params[0].pos_label is None:
-              self.classes_ = self.model_params[0].model_object.classes_
+        if self.model_params[0].model_object is None:
+             self.classes_ = self.model_params[0].classes_
+        else: 
+             self.classes_ = self.model_params[0].model_object.classes_
+
+        if len(self.classes_) > 2 and self.model_params[0].pos_label is None:
               self.multiclass_flag = True
               self.y_onehot_true,self.y_onehot_pred = PerformanceMetrics._one_hot_encode([[self.model_params[0].y_true]], [[self.model_params[0].y_pred]])
         
