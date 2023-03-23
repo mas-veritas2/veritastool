@@ -71,32 +71,7 @@ x_test = cs["X_test"]
 model_name = "credit_scoring"
 model_type = "classification"
 y_prob = cs["y_prob"]
-
-#create model object using model wrapper if required
-from imblearn.over_sampling import SMOTENC
-from sklearn.preprocessing import StandardScaler
-class LRwrapper(ModelWrapper):
-    def __init__(self, model_obj, classes=[0, 1]):
-        self.model_obj = model_obj
-        self.classes_ = classes
-    def fit(self, X, y):    
-        #Upsampling
-        categorical_features = [i for i, col in enumerate(X.columns) if X[col].dtype == 'int8']
-        smote = SMOTENC(random_state=0, categorical_features=categorical_features)
-        X, y = smote.fit_resample(X, y)
-        #Scaling
-        scaling = StandardScaler()
-        X = scaling.fit_transform(X)   
-        self.model_obj.fit(X, y)    
-    def predict(self, x_test, best_th = 0.43):        
-        test_probs = self.model_obj.predict_proba(x_test.values)[:, 1]         
-        #Using finetuned Threshold
-        test_preds = np.where(test_probs > best_th, 1, 0)
-        return test_preds    
-    def predict_proba(self, x_test):        
-        return self.model_obj.predict_proba(x_test.values)
-log_reg = LogisticRegression(C=0.1)
-model_obj = LRwrapper(log_reg)
+model_obj = LogisticRegression(C=0.1)
 model_obj.fit(x_train, y_train) #fit the model as required for transparency analysis
 
 #Create Model Container 
@@ -123,7 +98,7 @@ cre_sco_obj.evaluate()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_2.png" width="760" height="745"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_2.png" width="608" height="596"></p>
 
 You can also toggle the widget to view your results in a interactive visualization format.
 
@@ -132,7 +107,7 @@ cre_sco_obj.evaluate(visualize = True)
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_2_visualize.png" width="1144" height="706"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_2_visualize.png" width="858" height="530"></p>
 
 **Tradeoff**
 
@@ -143,7 +118,7 @@ cre_sco_obj.tradeoff()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/tradeoff_2.png" width="781" height="646"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/tradeoff_2.png" width="625" height="516"></p>
 
 ** Note: Replace {Balanced Accuracy} with the respective given metrics. 
 
@@ -156,7 +131,7 @@ cre_sco_obj.feature_importance()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/faeture_imp_2.png" width="1104" height="871"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/faeture_imp_2.png" width="828" height="653"></p>
 
 **Root Cause**
 
@@ -167,7 +142,7 @@ cre_sco_obj.root_cause()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/rootcause_2.png" width="775" height="706"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/rootcause_2.png" width="581" height="530"></p>
 
 **Mitigate**
 
@@ -178,7 +153,7 @@ mitigated = cre_sco_obj.mitigate(p_var=[], method=['reweigh', 'correlation', 'th
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/mitigate_2.png" width="721" height="828"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/mitigate_2.png" width="576" height="662"></p>
 
 **Explain**
 
@@ -190,7 +165,7 @@ cre_sco_obj.explain()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/explain_2.png" width="520" height="862"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/explain_2.png" width="624" height="1034"></p>
 
 ```python
 #get the local interpretability plot for specific row index and model
@@ -198,7 +173,7 @@ cre_sco_obj.explain(local_row_num = 20)
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/local_2.png" width="535" height="484"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/local_2.png" width="514" height="464"></p>
 
 **Compile**
 
@@ -209,7 +184,7 @@ cre_sco_obj.compile()
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/compile_2.png" width="661" height="261"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/compile_2.png" width="529" height="209"></p>
 
 **Model Artifact**
 
@@ -217,7 +192,7 @@ A JSON file that stores all the results from all the APIs.
 
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/json_2.png" width="760" height="823"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/json_2.png" width="456" height="494"></p>
 
 ## Examples
 
@@ -230,6 +205,7 @@ You may refer to our example notebooks below to see how the toolkit can be appli
 | [`BaseClassification_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/BaseClassification_demo.ipynb)          | Tutorial notebook for a multi-class propensity model           | 
 | [`BaseRegression_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/BaseRegression_demo.ipynb)          | Tutorial notebook for a prediciton of a continuous target variable          | 
 | [`PUW_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/PUW_demo.ipynb)          | Tutorial notebook for a binary classification model to predict whether to award insurance policy by assessing risk          | 
+| [`NewUseCaseCreation_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/NewUseCaseCreation_demo.ipynb)          | Tutorial notebook to create a new use case note-book and add custom metrics         | 
 | [`nonPythonModel_customMetric_demo.ipynb`](https://github.com/mas-veritas2/veritastool/blob/master/veritastool/examples/nonPythonModel_customMetric_demo.ipynb)          | Tutorial notebook to diagnose a credit scoring model by LibSVM (non-Python) with custom metric.            | 
 
 ## License
