@@ -565,8 +565,9 @@ class Fairness:
         self.perf_metric_obj = PerformanceMetrics(self)
         mdl = self.model_params[0]
         for p_var_key in mdl.p_grp.keys():
-            if isinstance(mdl.p_grp[p_var_key],str):                    
-                p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
+            if isinstance(mdl.p_grp[p_var_key],str): 
+                with np.errstate(divide="ignore", invalid="ignore"):                   
+                    p_grp, up_grp = self.map_policy_to_method[mdl.p_grp[p_var_key]](p_var_key, mdl)
                 mdl.p_grp[p_var_key]  = p_grp
                 mdl.up_grp[p_var_key] = up_grp
 
@@ -1256,7 +1257,7 @@ class Fairness:
 
         # loop through model_params
         for k in range(len(use_case_object.model_params)):
-           	## for uplift model type --> two model container --> need to train two models
+            ## for uplift model type --> two model container --> need to train two models
             ## when model param len =2, then it is uplift model
             p_var = use_case_object.model_params[k].p_var
             x_train = use_case_object.model_params[k].x_train
@@ -1499,15 +1500,13 @@ class Fairness:
             if self.model_params[0].model_type != "uplift": 
 
                 if self.perf_metric_obj.result.get("class_distribution").get("pos_label") is not None:
-                    pos_label_str = "pos_label ({})".format(", ".join(str(lbl) for lbl in self.model_params[-1].pos_label))
-                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + pos_label_str,
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "pos_label",
                                                                     self.perf_metric_obj.result.get("class_distribution").get("pos_label") * 100, decimal_pts=self.decimals))
                 else: 
                     print("{0:<45s}{1:>29}".format("\t" + "pos_label", "NA")) # For multi-class classification cases
 
                 if self.perf_metric_obj.result.get("class_distribution").get("neg_label") is not None:
-                    neg_label_str = "neg_label ({})".format(", ".join(str(lbl) for lbl in self.model_params[-1].neg_label))
-                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + neg_label_str,
+                    print("{0:<45s}{1:>29.{decimal_pts}f}%".format("\t" + "neg_label",
                                                                     self.perf_metric_obj.result.get("class_distribution").get("neg_label") * 100, decimal_pts=self.decimals))
                 else: 
                     print("{0:<45s}{1:>29}".format("\t" + "neg_label", "NA")) # For multi-class classification cases
@@ -3213,7 +3212,8 @@ class Fairness:
         if self.evaluate_status == 1:
             result = {}
             for p_var in self.fair_metric_obj.result.keys():
-                result[p_var] = self.fair_metric_obj.result[p_var]['fair_metric_values']
+                if p_var != 'indiv_fair':
+                    result[p_var] = self.fair_metric_obj.result[p_var]['fair_metric_values']
             return result
         else:
             return None
@@ -3552,7 +3552,7 @@ class Fairness:
 
             # Convert y_prob to nx1 array if model_type is classification and y_prob is not nx1
             if model.y_prob is not None and model.model_type == "classification" and len(model.y_prob.shape)>1 and model.y_prob.shape[1]>1:
-                model.y_prob = process_y_prob(model.model_object.classes_ , model.y_prob, model.pos_label, model.neg_label)
+                model.y_prob = process_y_prob(model.classes_, model.y_prob, model.pos_label, model.neg_label)
 
     def _check_label(self, y, pos_label, neg_label=None, obj_in=None, y_pred_flag=False):
         """
@@ -3593,7 +3593,7 @@ class Fairness:
         err_= []
 
         if pos_label is None:
-	        return y, pos_label
+            return y, pos_label
         
         y_bin = y
         if y_pred_flag == True and obj_in.unassigned_y_label[0]:

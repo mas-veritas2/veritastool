@@ -125,7 +125,10 @@ class ModelContainer(object):
         if self.model_name == 'auto':
             self.model_name = model_type
         self.pos_label = pos_label
-        self.neg_label = neg_label
+        if self.pos_label is None:
+            self.neg_label = None
+        else:
+            self.neg_label = neg_label
         self.pos_label2 = None
         self.policies = ['maj_min','maj_rest','max_bias']
         self._model_data_processing_flag = False
@@ -210,9 +213,21 @@ class ModelContainer(object):
         
         if self.model_type != 'regression':
             self.check_y_prob()
-            self.check_classes()
+            self.check_classes() 
 
-        if self.model_type != 'regression' and self.model_object is not None and self.model_object.classes_ is not None and len(self.model_object.classes_) > 2 and self.pos_label is None:
+        # If model object is None then get classes_ from y_prob (if dataframe) or y_train or y_true
+        if self.model_object is None:
+            if isinstance(self.y_prob, pd.DataFrame) and self.y_prob.shape[1] > 2:
+                    self.classes_ = np.array(self.y_prob.columns.tolist())
+            else:
+                if self.y_train is not None:
+                    self.classes_ =  np.unique(self.y_train)
+                else:
+                    self.classes_ =  np.unique(self.y_true)
+        elif self.model_type != 'regression':
+            self.classes_ = self.model_object.classes_
+        
+        if self.model_type != 'regression' and len(self.classes_) > 2 and self.pos_label is None:
             self.multi_class_flag = True
             self.neg_label = None
         
@@ -224,7 +239,7 @@ class ModelContainer(object):
             self.y_true = np.array(self.y_true)
         if self.y_pred is not None :
             self.y_pred = np.array(self.y_pred)
-        if self.y_prob is not None :            
+        if self.y_prob is not None :        
             self.y_prob = np.array(self.y_prob)
         if self.y_train is not None :
             self.y_train = np.array(self.y_train)
