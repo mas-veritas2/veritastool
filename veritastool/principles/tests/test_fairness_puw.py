@@ -372,7 +372,7 @@ def test_fairness_tree():
 
 def test_check_label():
     y = np.array([1,1,1,1,1,1,1])
-    msg = '[value_error]: pos_label: given [1], expected not all y_true labels at _check_label()\n'
+    msg = '[value_error]: pos_label: given [1], expected not all y_true labels as pos_label at _check_label()\n'
     #catch the err poping out
     with pytest.raises(MyError) as toolkit_exit:
         y_new, pos_label2 = pred_underwriting_obj._check_label(y=y, pos_label=[1], neg_label=[0])
