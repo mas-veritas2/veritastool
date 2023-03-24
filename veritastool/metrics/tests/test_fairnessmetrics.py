@@ -259,11 +259,11 @@ def test_execute_all_fair():
     base_reg_obj.evaluate()
     assert base_reg_obj.fair_metric_obj.result != None
 
-# def test_translate_metric():
-#     cre_sco_obj.feature_importance()
-#     assert cre_sco_obj.feature_imp_values != None
-#     cm_uplift_obj.feature_importance()
-#     assert cm_uplift_obj.feature_imp_values != None
+def test_translate_metric():
+    cre_sco_obj.feature_importance()
+    assert cre_sco_obj.feature_imp_values != None
+    cm_uplift_obj.feature_importance()
+    assert cm_uplift_obj.feature_imp_values != None
 
 def test_compute_wape_parity():
     expected_without_mask = -0.009    
@@ -640,3 +640,72 @@ def test_new_metric_ap_parity(delete_new_metric_subclass):
     expected = 0.000
     result = pred_underwriting_obj.fair_metric_obj.result['gender']['fair_metric_values']['ap_parity'][0]
     assert round(result, 3) == round(expected, 3)
+
+def test_compute_auc():
+    y_true = np.array(cs["y_test"])
+    y_pred = np.array(cs["y_pred"])
+    y_train = np.array(cs["y_train"])
+    p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+    up_grp = {'SEX': [2], 'MARRIAGE':[2]}
+    x_train = cs["X_train"]
+    x_test = cs["X_test"]
+    model_name = "credit_scoring"
+    model_type = "classification"
+    y_prob = cs["y_prob"]
+    model_obj = cs["model"]
+    # rounding y_prob to simulate fewer distinct y_prob output
+    y_prob_ =  np.round(y_prob, 4)  # only passes at 6 decimal places
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob_, y_train, x_train=x_train, \
+                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", 
+                            fair_priority = "benefit", fair_impact = "significant", 
+                            num_applicants =num_applicants,  base_default_rate=base_default_rate,
+                            tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+
+    
+    # adding 'y_pred_new' will use sklearn.metrics implementation
+    cre_sco_obj.evaluate(output=False)
+
+    cre_sco_obj.fair_metric_obj.curr_p_var = 'SEX'
+    cre_sco_obj.fair_metric_obj.y_true = [container.y_true]
+    cre_sco_obj.fair_metric_obj.y_prob = [container.y_prob]
+    cre_sco_obj.fair_metric_obj.sample_weight = [None]
+
+    result = FairnessMetrics._compute_auc_parity(cre_sco_obj.fair_metric_obj, y_pred_new=cre_sco_obj.fair_metric_obj.y_prob)[0]
+    result2 = cre_sco_obj.get_fair_metrics_results()["SEX"]["auc_parity"][:2]
+    assert result == pytest.approx(result2)
+
+
+def test_compute_log_loss():
+    y_true = np.array(cs["y_test"])
+    y_pred = np.array(cs["y_pred"])
+    y_train = np.array(cs["y_train"])
+    p_grp = {'SEX': [1], 'MARRIAGE':[1]}
+    up_grp = {'SEX': [2], 'MARRIAGE':[2]}
+    x_train = cs["X_train"]
+    x_test = cs["X_test"]
+    model_name = "credit_scoring"
+    model_type = "classification"
+    y_prob = cs["y_prob"]
+    model_obj = cs["model"]
+    # rounding y_prob to simulate fewer distinct y_prob output
+    y_prob_ =  np.round(y_prob, 4)  # only passes at 6 decimal places
+    container = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, y_prob_, y_train, x_train=x_train, \
+                            x_test=x_test, model_object=model_obj, up_grp=up_grp)
+    cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 0.43, fair_concern = "eligible", 
+                            fair_priority = "benefit", fair_impact = "significant", 
+                            num_applicants =num_applicants,  base_default_rate=base_default_rate,
+                            tran_row_num=[20,40], tran_max_sample = 10, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+    
+    
+    # adding 'y_pred_new' will use sklearn.metrics implementation
+    cre_sco_obj.evaluate(output=False)
+
+    cre_sco_obj.fair_metric_obj.curr_p_var = 'SEX'
+    cre_sco_obj.fair_metric_obj.y_true = [container.y_true]
+    cre_sco_obj.fair_metric_obj.y_prob = [container.y_prob]
+    cre_sco_obj.fair_metric_obj.sample_weight = [None]
+
+    result = FairnessMetrics._compute_log_loss_parity(cre_sco_obj.fair_metric_obj, y_pred_new=cre_sco_obj.fair_metric_obj.y_prob)[0]
+    result2 = cre_sco_obj.get_fair_metrics_results()["SEX"]["log_loss_parity"][:2]
+    assert result == pytest.approx(result2)

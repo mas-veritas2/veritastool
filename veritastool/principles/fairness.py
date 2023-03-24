@@ -3548,7 +3548,7 @@ class Fairness:
                 if model.y_true is not None and len(model.y_true.shape) == 1 and model.y_true.dtype.kind in ['i','O','U']:
                     model.y_true, model.pos_label2 = self._check_label(model.y_true, model.pos_label, model.neg_label, obj_in=model)  
                 if model.y_pred is not None and len(model.y_pred.shape) == 1 and model.y_pred.dtype.kind in ['i','O','U']:
-                    model.y_pred, model.pos_label2 = self._check_label(model.y_pred, model.pos_label, model.neg_label, obj_in=model)
+                    model.y_pred, model.pos_label2 = self._check_label(model.y_pred, model.pos_label, model.neg_label, obj_in=model, y_pred_flag=True)
 
             # Convert y_prob to nx1 array if model_type is classification and y_prob is not nx1
             if model.y_prob is not None and model.model_type == "classification" and len(model.y_prob.shape)>1 and model.y_prob.shape[1]>1:
@@ -3579,7 +3579,7 @@ class Fairness:
                 The object of the model_container class.
 
         y_pred_flag : boolean, default=False
-                Flag to indicate if the function is to process y_pred.
+                Flag to indicate if `y` is y_pred. Also, y_pred will be processed if there are unassigned labels in pos_label and neg_label.
 
         Returns
         -----------------
@@ -3596,18 +3596,19 @@ class Fairness:
             return y, pos_label
         
         y_bin = y
-        if y_pred_flag == True and obj_in.unassigned_y_label[0]:
+        if y_pred_flag and obj_in.unassigned_y_label[0]:
             y_bin = check_data_unassigned(obj_in, y_bin, y_pred_negation_flag=True)
             
         else:
             row = np.isin(y_bin, pos_label)
-            if sum(row) == len(y_bin) :
-                err_.append(['value_error', "pos_label", pos_label, "not all y_true labels"])
-            elif sum(row) == 0 :
-                err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
-            for i in range(len(err_)):
-                err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
-                        function_name="_check_label")
+            if not y_pred_flag:
+                if sum(row) == len(y_bin) :
+                    err_.append(['value_error', "pos_label", pos_label, "not all y_true labels as pos_label"])
+                elif sum(row) == 0 :
+                    err_.append(['value_error', "pos_label", pos_label, set(y_bin)])            
+                for i in range(len(err_)):
+                    err.push(err_[i][0], var_name=err_[i][1], given=err_[i][2], expected=err_[i][3],
+                            function_name="_check_label")
             y_bin[row] = 1 
             y_bin[~row] = 0
         

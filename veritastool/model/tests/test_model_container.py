@@ -12,6 +12,7 @@ from veritastool.model.model_container import ModelContainer
 from veritastool.util.errors import * #MyError
 from veritastool.principles.fairness import Fairness
 from veritastool.usecases.credit_scoring import CreditScoring
+from veritastool.usecases.base_classification import BaseClassification
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
 sys.path.append(module_path)
 import selection, uplift, util
@@ -73,7 +74,7 @@ def test_model_container():
     #y_pred
     pos_label = [1]
     neg_label = None
-    s_y_pred = Fairness._check_label(Fairness, np.array(y_pred, dtype=int), pos_label, neg_label, container)[0]
+    s_y_pred = Fairness._check_label(Fairness, np.array(y_pred, dtype=int), pos_label, neg_label, container, y_pred_flag=True)[0]
     assert np.array_equal(s_y_pred, container.y_pred)
 
     if model_name == 'auto':
@@ -291,3 +292,88 @@ def test_clone():
     clone_obj = m_container.clone(y_true, model_obj, y_pred=y_pred, y_prob=y_prob, y_train=y_train, train_op_name="fit",
                  predict_op_name ="predict", sample_weight=None, pos_label=[1], neg_label=[0])
     assert clone_obj is not None 
+
+def test_check_classes():
+    #Load Base Classification Test Data
+    module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../veritastool/examples/customer_marketing_example'))
+    sys.path.append(module_path)
+    import selection, uplift, util
+    file_prop = os.path.join(project_root, 'veritastool', 'examples', 'data', 'mktg_uplift_acq_dict.pickle')
+    input_prop = open(file_prop, "rb")
+    cm_prop = pickle.load(input_prop)
+    input_prop.close()
+
+    #Model Container Parameters
+    y_true = cm_prop["y_test"]
+    y_train = cm_prop["y_train"]
+    model_name = "base_classification" 
+    model_type = "classification"
+    y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
+    p_grp = {'isforeign':[0], 'isfemale':[0],'isforeign|isfemale':'maj_rest'}
+    x_train = cm_prop["X_train"].drop(['ID'], axis = 1)
+    x_test = cm_prop["X_test"].drop(['ID'], axis = 1)
+    clf = cm_prop['model']
+    clf = clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+
+    clf_container = ModelContainer(y_true,  p_grp, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, x_test=x_test, \
+                            model_object=clf, pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
+
+    #Create Use Case Object
+    clf_obj = BaseClassification(model_params = [clf_container], fair_threshold = 80, fair_concern = "eligible", fair_priority = "benefit", \
+                                fair_impact = "normal", fair_metric_name='auto', perf_metric_name = "accuracy", tran_row_num=[12,42], \
+                                tran_max_sample=10, tran_pdp_feature = ['income','age'], tran_pdp_target='TR') 
+
+    #1st round of test consistency
+    msg =''
+    f_container1 = deepcopy(clf_container)
+    #check when model_object is available, but classes_ attribute not available
+    del f_container1.model_object.classes_
+    f_container1.y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
+    f_container1.y_true = y_true
+    f_container1.y_pred = y_pred
+    msg += 'classes check completed without issue'
+    result = f_container1.check_classes()
+    assert result == msg
+
+    #2nd round of test consistency
+    msg =''
+    f_container2 = deepcopy(clf_container)
+    #check when model_object and classes_ attribute are available, but order of classes_ not consistent with y_prob column names
+    f_container2.y_prob = pd.DataFrame(cm_prop["y_prob"], columns=['CN', 'CR', 'TN', 'TR'])
+    f_container2.y_true = y_true
+    f_container2.y_pred = y_pred
+    f_container2.model_object.classes_ = np.array(['TR', 'CN', 'CR', 'TN'])
+    msg += '[value_error]: classes_: given [\'TR\' \'CN\' \'CR\' \'TN\'], expected labels in classes_ to be consistent with y_prob dataframe column names at check_classes()\n'
+    
+    #catch the err poping out
+    with pytest.raises(Exception) as toolkit_exit:
+        f_container2.check_classes()
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
+
+    #3rd round of test consistency
+    msg =''
+    #check when model_object and classes_ attribute are available and classes > 2 (multi-class), but y_prob passed has 1D shape (10000,)
+    f_container3_y_prob = cm_prop["y_prob"][:, 0].reshape(-1)
+    msg += '[length_error]: y_prob column length: given length 1, expected length 4 at check_data_consistency()\n'
+    
+    #catch the err poping out
+    with pytest.raises(Exception) as toolkit_exit:
+        f_container3 = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, f_container3_y_prob, y_train, x_train=x_train, x_test=x_test, \
+                        model_object=clf, pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
+
+    #4th round of test consistency
+    msg =''
+    #check when model_object and classes_ attribute are available and classes > 2 (multi-class), but y_prob passed as numpy array instead of expected pandas dataframe
+    f_container4_y_prob = cm_prop["y_prob"]
+    msg += '[type_error]: y_prob: given <class \'numpy.ndarray\'>, expected <class \'pandas.core.frame.DataFrame\'> with labels as column names at check_y_prob()\n'
+    
+    #catch the err poping out
+    with pytest.raises(Exception) as toolkit_exit:
+        f_container4 = ModelContainer(y_true, p_grp, model_type, model_name, y_pred, f_container4_y_prob, y_train, x_train=x_train, x_test=x_test, \
+                        model_object=clf, pos_label=['TR','CR'], neg_label=['TN','CN'] ) 
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg

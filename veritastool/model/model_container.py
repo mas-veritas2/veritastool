@@ -5,6 +5,7 @@ from ..principles.fairness import Fairness
 from ..util.errors import *
 from ..model.modelwrapper import ModelWrapper
 from collections.abc import Iterable
+from ..util.utility import _one_hot_encode_y_true_y_pred
 
 class ModelContainer(object):
 
@@ -230,6 +231,7 @@ class ModelContainer(object):
         if self.model_type != 'regression' and len(self.classes_) > 2 and self.pos_label is None:
             self.multi_class_flag = True
             self.neg_label = None
+            self.enc_y_true, self.enc_y_pred = _one_hot_encode_y_true_y_pred(self.y_true, self.y_pred)
         
         #if model name is longer than 20 characters, will keep the first 20 only
         self.model_name = self.model_name[0:20]
