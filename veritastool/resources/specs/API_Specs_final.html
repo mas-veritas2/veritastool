@@ -3128,11 +3128,11 @@ lang=EN-GB>odelContainer()</span></h1>
 <p class=MsoNormal style='margin-right:-71.0pt'><i>&nbsp;</i></p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'><b><i>veritastool.model.model_container.ModelContainer(y_true=None,
-p_grp=None, model_type=“classification”, y_pred=None, y_prob=None,
+p_grp=None, model_type=Â“classificationÂ”, y_pred=None, y_prob=None,
 x_train=None, protected_features_cols=None, y_train=None, x_test=None,
 model_object=None, train_op_name=&quot;fit&quot;,
 predict_op_name=&quot;predict&quot;, sample_weight=None, model_name=&quot;auto&quot;,
-pos_label=[1], neg_label=None, up_grp=None, predict_proba_name=“predict_proba”)</i></b></p>
+pos_label=[1], neg_label=None, up_grp=None, predict_proba_name=Â“predict_probaÂ”)</i></b></p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
@@ -3177,9 +3177,9 @@ model parameters and datasets required for computations in all use cases.</p>
   lang=EN-GB>,</span><span lang=EN-GB> </span><a name="OLE_LINK5">p_grp =
   {'gender': [1,2]}</a></p>
   <p class=MsoNormal>Auto assignment with policy<span lang=EN-GB>: E.g.</span><span
-  lang=EN-GB> </span><span lang=EN-GB>p_grp = {‘gender’: ‘max_bias’ }</span><span
-  lang=EN-GB> . There are three supported polices ‘maj_min’, ‘maj_rest’ and
-  ‘max_bias’. </span></p>
+  lang=EN-GB> </span><span lang=EN-GB>p_grp = {Â‘genderÂ’: Â‘max_biasÂ’ }</span><span
+  lang=EN-GB> . There are three supported polices Â‘maj_minÂ’, Â‘maj_restÂ’ and
+  Â‘max_biasÂ’. </span></p>
   <p class=MsoNormal><span lang=EN-GB>maj_min and maj_rest assigns the majority
   group, while max_bias assigns the best performing group based on primary
   fairness metric as the privileged group.</span></p>
@@ -3195,21 +3195,21 @@ model parameters and datasets required for computations in all use cases.</p>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b>model_type: string,
-  default=“classification”</b></p>
+  default=Â“classificationÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'>The type of model to be
-  evaluated. Supported model types are ‘classification’, ‘regression’ and
-  ‘uplift’. </p>
+  evaluated. Supported model types are Â‘classificationÂ’, Â‘regressionÂ’ and
+  Â‘upliftÂ’. </p>
   </td>
  </tr>
  <tr>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span style='color:black'>model_name:
-  </span></b><b>string, default=“auto”</b></p>
+  </span></b><b>string, default=Â“autoÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3243,7 +3243,7 @@ model parameters and datasets required for computations in all use cases.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'>Predicted probabilities as
-  returned by classifier.  </p>
+  returned by classifier. Â </p>
   <p class=MsoNormal style='margin-right:-71.0pt'>For binary classification
   fairness <a name="OLE_LINK14">diagnosis</a>, L &lt; 2.</p>
   <p class=MsoNormal style='margin-right:-71.0pt'>For uplift model fairness diagnosis,
@@ -3288,7 +3288,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'><b>train_op_name: string,
-  default=“fit”</b></p>
+  default=Â“fitÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3297,7 +3297,7 @@ model parameters and datasets required for computations in all use cases.</p>
   model_object to train the model. <a name="OLE_LINK53">This training function
   should be memoryless which means that when called a second time the model
   parameters are reset first before the run. </a></p>
-  <p class=MsoNormal style='margin-right:-5.4pt'>For e.g., scikit-learn’s fit function.
+  <p class=MsoNormal style='margin-right:-5.4pt'>For e.g., scikit-learnÂ’s fit function.
   </p>
   </td>
  </tr>
@@ -3305,7 +3305,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'><a name="OLE_LINK7"><b>predict_op_name:
-  string, default=”predict</b></a><b>”</b></p>
+  string, default=Â”predict</b></a><b>Â”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3344,7 +3344,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <p class=MsoNormal><a name="OLE_LINK13">For all classification model types
   except uplift, the specified labels in pos_label are converted to 1 and rest
   to 0 if neg_label is not specified.</a></p>
-  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [“a”, “b”]
+  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [Â“aÂ”, Â“bÂ”]
   in fav label. The first will be mapped to treatment responded (TR) &amp;
   second to control responded (CR).</p>
   <p class=MsoNormal><a name="OLE_LINK9">For multi-class</a><span lang=EN-GB>
@@ -3366,12 +3366,12 @@ model parameters and datasets required for computations in all use cases.</p>
   classification models.</p>
   <p class=MsoNormal><span lang=EN-GB>For all classification model types except
   uplift, the specified labels in pos_label are converted to 0.</span></p>
-  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [“c”, “d”]
+  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [Â“cÂ”, Â“dÂ”]
   in unfav label. The first will be mapped to treatment others (TN) &amp;
   second to control others (CN).</p>
   <p class=MsoNormal><a name="OLE_LINK10"><span lang=EN-GB>For multi-class
   classification fairness diagnosis (pos_label = None),</span></a><span
-  lang=EN-GB>  specifying neg_label is not needed. If specified, value is not
+  lang=EN-GB> Â specifying neg_label is not needed. If specified, value is not
   used.</span></p>
   </td>
  </tr>
@@ -3408,7 +3408,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <p class=MsoNormal style='margin-right:-5.2pt'><a name="OLE_LINK18"><span
   lang=EN-GB>String value refers to the dataset path where the dataset resides
   (e.g., HDFS URI). The loading of the dataset using the path string is to be
-  handled using the Model Wrapper.</span></a><span lang=EN-GB> </span> <a
+  handled using the Model Wrapper.</span></a><span lang=EN-GB> </span>Â <a
   name="OLE_LINK90">If string, protected_feature</a> parameter must be set.</p>
   <p class=MsoNormal style='margin-right:-5.2pt'><span lang=EN-GB>It </span>is a
   required parameter if protected_features_cols is not provided.</p>
@@ -3448,7 +3448,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <p class=MsoNormal style='margin-right:-.9pt'><span lang=EN-GB>Assignment of unprivileged
   group for protected variables. There are two ways to perform the assignment. </span></p>
   <p class=MsoNormal style='margin-right:-71.0pt'><span lang=EN-GB>Manual
-  assignment: E.g., up_grp = {‘gender’: [2,3]}</span></p>
+  assignment: E.g., up_grp = {Â‘genderÂ’: [2,3]}</span></p>
   <p class=MsoNormal style='margin-right:-5.2pt'><span lang=EN-GB>Auto
   assignment with policy: If a policy has been specified for p_grp of a
   protected variable<a name="OLE_LINK17">, then specifying up_grp is not needed.
@@ -3459,7 +3459,7 @@ model parameters and datasets required for computations in all use cases.</p>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>Predict_proba_op_name:
-  string, default=”predict_proba”</span></b></p>
+  string, default=Â”predict_probaÂ”</span></b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3529,8 +3529,8 @@ line-height:106%'>Methods in ModelContainer class</span></b></p>
   <td width=300 valign=top style='width:225.35pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal>clone(y_true, model_object, y_pred=None, y_prob=None,
-  y_train=None, train_op_name=”fit”, predict_op_name =”predict”, feature_imp=None,
-  sample_weight=None, pos_label=[[1]], neg_label=None, predict_proba_op_name=“predict_proba”)</p>
+  y_train=None, train_op_name=Â”fitÂ”, predict_op_name =Â”predictÂ”, feature_imp=None,
+  sample_weight=None, pos_label=[[1]], neg_label=None, predict_proba_op_name=Â“predict_probaÂ”)</p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3543,7 +3543,7 @@ line-height:106%'>Methods in ModelContainer class</span></b></p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:107%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:107%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>check_protected_columns()</p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>This function raises an error
@@ -3570,7 +3570,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'>If there are no errors, a
-  success message will be returned   </p>
+  success message will be returnedÂ Â  </p>
   </td>
  </tr>
 </table>
@@ -3578,7 +3578,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:107%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:107%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>check_data_consistency()</p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>This function raises an error
@@ -3605,7 +3605,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'>If there are no errors, a
-  success message will be returned   </p>
+  success message will be returnedÂ Â  </p>
   </td>
  </tr>
 </table>
@@ -3613,7 +3613,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:107%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:107%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>check_label_consistency()</p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>This function raises an error
@@ -3640,7 +3640,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'>If there are no errors, a
-  success message will be returned   </p>
+  success message will be returnedÂ Â  </p>
   </td>
  </tr>
 </table>
@@ -3648,7 +3648,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:107%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:107%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>check_label_length()</p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>This function raises an error
@@ -3675,7 +3675,7 @@ when the checks fail or returns a success message if all checks are passed.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'>If there are no errors, a
-  success message will be returned   </p>
+  success message will be returnedÂ Â  </p>
   </td>
  </tr>
 </table>
@@ -3683,10 +3683,10 @@ when the checks fail or returns a success message if all checks are passed.</p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:107%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:107%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>clone(y_true, model_object, y_pred=None, y_prob=None,
-y_train=None, train_op_name=”fit”, predict_op_name =”predict”,
-feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_proba_op_name=“predict_proba”)</p>
+y_train=None, train_op_name=Â”fitÂ”, predict_op_name =Â”predictÂ”,
+feature_imp=None, sample_weight=None,Â  pos_label=[[1]], neg_label=None, predict_proba_op_name=Â“predict_probaÂ”)</p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
@@ -3750,7 +3750,7 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
   0in;margin-left:0in;line-height:normal'>Predicted probabilities as returned
   by classifier. For uplift models, L = 4. Else, L = 1.</p>
   <p class=MsoNormal style='margin-right:-71.0pt'>Y_prob column orders should
-  be [“TR”, “TN”, “CR”, “CN”] for uplift models.</p>
+  be [Â“TRÂ”, Â“TNÂ”, Â“CRÂ”, Â“CNÂ”] for uplift models.</p>
   </td>
  </tr>
  <tr>
@@ -3768,7 +3768,7 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
  <tr>
   <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal><b>Train_op_name: string, default=”fit”</b></p>
+  <p class=MsoNormal><b>Train_op_name: string, default=Â”fitÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3781,7 +3781,7 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
  <tr>
   <td width=300 valign=top style='width:225.25pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal><b>Predict_op_name: string, default=”predict”</b></p>
+  <p class=MsoNormal><b>Predict_op_name: string, default=Â”predictÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3830,8 +3830,8 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
   <p class=MsoNormal>Label values which are considered favorable.</p>
   <p class=MsoNormal>For all model types except uplift, converts the favourable
   labels to 1 and others to 0.</p>
-  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [[“a”],
-  [“b”]] in fav label. The first will be mapped to treatment responded (TR)
+  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [[Â“aÂ”],
+  [Â“bÂ”]] in fav label. The first will be mapped to treatment responded (TR)
   &amp; second to control responded (CR).</p>
   </td>
  </tr>
@@ -3845,8 +3845,8 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal>Label values which are considered unfavorable.</p>
   <p class=MsoNormal>Neg_label will only be used in uplift models.</p>
-  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [[“c”],
-  [“d”]] in unfav label. The first will be mapped to treatment rejected (TR)
+  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [[Â“cÂ”],
+  [Â“dÂ”]] in unfav label. The first will be mapped to treatment rejected (TR)
   &amp; second to control rejected (CR).</p>
   </td>
  </tr>
@@ -3855,7 +3855,7 @@ feature_imp=None, sample_weight=None,  pos_label=[[1]], neg_label=None, predict_
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-71.0pt'><b>Predict_proba_op_name: string,
   <br>
-  default=”predict_proba”</b></p>
+  default=Â”predict_probaÂ”</b></p>
   </td>
   <td width=756 valign=top style='width:566.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3907,9 +3907,9 @@ lang=EN-GB>CreditScoring()</span></h1>
 
 <p class=MsoNormal style='margin-right:-71.0pt'><a name="_Toc77321328"></a><a
 name="_Toc77321277"></a><b><i>veritastool.usecases.credit_scoring.CreditScoring<a
-name="OLE_LINK32">(model_params, fair_threshold, perf_metric_name=”balanced_acc”,
-fair_metric_name=”auto”,  fair_concern=”eligible”, fair_priority=”benefit”,  fair_impact=”normal”,
-fair_metric_type=‘difference’, num _applicants=None,</a></i></b> <b><i>base_default_rate=None,
+name="OLE_LINK32">(model_params, fair_threshold, perf_metric_name=Â”balanced_accÂ”,
+fair_metric_name=Â”autoÂ”, Â fair_concern=Â”eligibleÂ”, fair_priority=Â”benefitÂ”, Â fair_impact=Â”normalÂ”,
+fair_metric_type=Â‘differenceÂ’, num _applicants=None,</a></i></b> <b><i>base_default_rate=None,
 fairness_metric_value_input={}, tran_row_num=[1], tran_max_sample=1,
 tran_pdp_feature=[], tran_pdp_target=None, tran_max_display=10, tran_features=[],
 tran_processed_data=None, tran_processed_label=None )</i></b></p>
@@ -3963,7 +3963,7 @@ transparency in a credit scoring application.</p>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>Perf_metric_name:
-  string, default = “balanced_acc”</span></b></p>
+  string, default = Â“balanced_accÂ”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3978,7 +3978,7 @@ transparency in a credit scoring application.</p>
   solid windowtext 1.0pt;border-bottom:none;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>Fair_metric_name:
-  string, default&nbsp;= “auto”</span></b></p>
+  string, default&nbsp;= Â“autoÂ”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border:none;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
@@ -4005,57 +4005,57 @@ transparency in a credit scoring application.</p>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>fair_concern:
-  string, default = “eligible”</span></b></p>
+  string, default = Â“eligibleÂ”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Used to
   specify a single fairness concern applied to all protected variables. Could
-  be “eligible” or “inclusive” or “both”.</span></p>
+  be Â“eligibleÂ” or Â“inclusiveÂ” or Â“bothÂ”.</span></p>
   </td>
  </tr>
  <tr>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>Fair_priority:
-  string, default = “benefit”</span></b></p>
+  string, default = Â“benefitÂ”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Used to pick
-  the fairness metric according to the Fairness Tree methodology. Could be “benefit”
-  or “harm”.</span></p>
+  the fairness metric according to the Fairness Tree methodology. Could be Â“benefitÂ”
+  or Â“harmÂ”.</span></p>
   </td>
  </tr>
  <tr>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b><span lang=EN-GB>Fair_impact:
-  string, default = <a name="OLE_LINK22">“normal</a>”</span></b></p>
+  string, default = <a name="OLE_LINK22">Â“normal</a>Â”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt;line-height:107%'><span
   lang=EN-GB>Used to pick the fairness metric according to the Fairness Tree
-  methodology. Could be “normal” or “significant” or “selective”.</span></p>
+  methodology. Could be Â“normalÂ” or Â“significantÂ” or Â“selectiveÂ”.</span></p>
   </td>
  </tr>
  <tr>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><a name="_Hlk129788784"></a><a
-  name="OLE_LINK28"><b><span lang=EN-GB>Fair_metric_type, default = “difference</span></b></a><b><span
-  lang=EN-GB>”</span></b></p>
+  name="OLE_LINK28"><b><span lang=EN-GB>Fair_metric_type, default = Â“difference</span></b></a><b><span
+  lang=EN-GB>Â”</span></b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt;line-height:107%'><a
-  name="OLE_LINK27"><span lang=EN-GB>Used to specify if fairness metrics are “difference”
-  based or “ratio” based. </span></a></p>
+  name="OLE_LINK27"><span lang=EN-GB>Used to specify if fairness metrics are Â“differenceÂ”
+  based or Â“ratioÂ” based. </span></a></p>
   </td>
  </tr>
  <tr>
@@ -4070,8 +4070,8 @@ transparency in a credit scoring application.</p>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Contains the
   number of rejected applicants for the privileged and unprivileged groups for
   each protected feature. E.g.,</span></p>
-  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{“gender”:
-  [10, 20], “race”: [12, 18]}</span></p>
+  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{Â“genderÂ”:
+  [10, 20], Â“raceÂ”: [12, 18]}</span></p>
   </td>
  </tr>
  <tr>
@@ -4086,8 +4086,8 @@ transparency in a credit scoring application.</p>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Contains the
   base default rates for the privileged and unprivileged groups for each
   protected feature. E.g.,</span></p>
-  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{“gender”:
-  [10, 20], “race”: [12, 18]}</span></p>
+  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{Â“genderÂ”:
+  [10, 20], Â“raceÂ”: [12, 18]}</span></p>
   </td>
  </tr>
  <tr>
@@ -4101,7 +4101,7 @@ transparency in a credit scoring application.</p>
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><a name="OLE_LINK29"><span
   lang=EN-GB>Contains the p_var and respective fairness_metric and value e.g.,</span></a></p>
-  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{“gender”: {“fnr_parity”:
+  <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>{Â“genderÂ”: {Â“fnr_parityÂ”:
   0.2}}</span></p>
   </td>
  </tr>
@@ -4197,7 +4197,7 @@ transparency in a credit scoring application.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'>Contains the list of features
-  user wants to see in the output.    </p>
+  user wants to see in the output.Â Â Â  </p>
   </td>
  </tr>
  <tr>
@@ -4250,7 +4250,7 @@ name="_Toc77321363"></a><span lang=EN-GB>CustomerMarketing()</span></h1>
 fair_threshold, <a name="OLE_LINK21">fair_is_pos_label_fav=None, </a>perf_metric_name=<a
 name="_Hlk85639513">&quot;</a>emp_lift&quot;,
 fair_metric_name=&quot;auto&quot;, &nbsp;fair_concern=&quot;eligible&quot;,
-fair_priority=&quot;benefit&quot;, fair_impact=&quot;normal&quot;, fair_metric_type=”difference”,
+fair_priority=&quot;benefit&quot;, fair_impact=&quot;normal&quot;, fair_metric_type=Â”differenceÂ”,
 treatment_cost=None, revenue=None, fairness_metric_value_input={}, <a
 name="OLE_LINK20">proportion_of_interpolation_fitting</a>=1.0, tran_row_num=[1],
 tran_max_sample=1, tran_pdp_feature=[], tran_pdp_target=None,
@@ -4283,7 +4283,7 @@ fairness and transparency </a>in customer marketing applications.</p>
   <p class=MsoNormal><a name="OLE_LINK31">List containing model containers to
   be assessed in fairness and transparency diagnosis. Compulsory input for
   initialization. </a></p>
-  <p class=MsoNormal>If a single container is provided with model_type as “classification”,
+  <p class=MsoNormal>If a single container is provided with model_type as Â“classificationÂ”,
   based on the value of parameter fair_is_pos_label_favourable either &quot;rejection&quot;
   or &quot;propensity&quot; modelling will be selected. </p>
   <p class=MsoNormal>Propensity: pos label is favourable</p>
@@ -4401,7 +4401,7 @@ fairness and transparency </a>in customer marketing applications.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal>Used to specify if fairness metrics are
-  &quot;difference&quot; based or &quot;ratio” based.</p>
+  &quot;difference&quot; based or &quot;ratioÂ” based.</p>
   </td>
  </tr>
  <tr>
@@ -4547,7 +4547,7 @@ fairness and transparency </a>in customer marketing applications.</p>
   <td width="44%" valign=top style='width:44.14%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal>Contains the list of features user wants to see in the output.   
+  <p class=MsoNormal>Contains the list of features user wants to see in the output.Â Â Â 
   </p>
   </td>
  </tr>
@@ -4597,9 +4597,9 @@ name="_Toc130412927"><span lang=EN-GB>PredictiveUnderwriting()</span></a></h1>
 <p class=MsoNormal style='margin-right:-71.0pt'><b><i>veritastool.<a
 name="OLE_LINK36">usecases</a>.predictive_underwriting.PredictiveUnderwriting<a
 name="OLE_LINK35">(model_params, fair_threshold, perf_metric_name =
-&quot;balanced_acc&quot;, fair_metric_name=&quot;auto&quot;, 
-fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefit”, 
-fair_impact=&quot;normal&quot;, fair_metric_type = ‘difference’,
+&quot;balanced_acc&quot;, fair_metric_name=&quot;auto&quot;,Â 
+fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefitÂ”,Â 
+fair_impact=&quot;normal&quot;, fair_metric_type = Â‘differenceÂ’,
 fairness_metric_value_input</a>={}, tran_row_num=[1], tran_max_sample=1,
 tran_pdp_feature=[], tran_pdp_target=None, tran_max_display=10, tran_features=[],
 tran_processed_data=None, tran_processed_label=None)</i></b></p>
@@ -4745,7 +4745,7 @@ transparency in a predictive underwriting application.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Used to
-  specify if fairness metrics are &quot;difference&quot; based or &quot;ratio”
+  specify if fairness metrics are &quot;difference&quot; based or &quot;ratioÂ”
   based. </span></p>
   </td>
  </tr>
@@ -4854,7 +4854,7 @@ transparency in a predictive underwriting application.</p>
   <td width="52%" valign=top style='width:52.26%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal>Contains the list of features user wants to see in the output.   
+  <p class=MsoNormal>Contains the list of features user wants to see in the output.Â Â Â 
   </p>
   </td>
  </tr>
@@ -4907,9 +4907,9 @@ name="_Toc130412928"><span lang=EN-GB>BaseClassification()</span></a></h1>
 
 <p class=MsoNormal style='margin-right:-71.0pt'><b><i>veritastool.usecases.base_classification.BaseClassification(model_params,
 fair_threshold, fair_is_pos_label_fav = True, perf_metric_name =
-&quot;balanced_acc&quot;, fair_metric_name=&quot;auto&quot;, 
-fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefit”, 
-fair_impact=&quot;normal&quot;, fair_metric_type = ‘difference’, fairness_metric_value_input={},
+&quot;balanced_acc&quot;, fair_metric_name=&quot;auto&quot;,Â 
+fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefitÂ”,Â 
+fair_impact=&quot;normal&quot;, fair_metric_type = Â‘differenceÂ’, fairness_metric_value_input={},
 tran_row_num=[1], tran_max_sample=1, tran_pdp_feature=[], tran_pdp_target=None,
 tran_max_display=10, tran_features=[], tran_processed_data=None, tran_processed_label=None
 ) </i></b></p>
@@ -5054,7 +5054,7 @@ both binary fairness assessment and multi-class fairness assessment.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Used to
-  specify if fairness metrics are &quot;difference&quot; based or &quot;ratio”
+  specify if fairness metrics are &quot;difference&quot; based or &quot;ratioÂ”
   based. </span></p>
   </td>
  </tr>
@@ -5163,7 +5163,7 @@ both binary fairness assessment and multi-class fairness assessment.</p>
   <td width="52%" valign=top style='width:52.26%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal>Contains the list of features user wants to see in the output.   
+  <p class=MsoNormal>Contains the list of features user wants to see in the output.Â Â Â 
   </p>
   </td>
  </tr>
@@ -5214,8 +5214,8 @@ name="_Toc130412929"><span lang=EN-GB>BaseRegression()</span></a></h1>
 
 <p class=MsoNormal style='margin-right:-71.0pt'><b><i>veritastool.usecases.credit_scoring.BaseRegression(model_params,
 fair_threshold, perf_metric_name = &quot;balanced_acc&quot;,
-fair_metric_name=&quot;auto&quot;,  fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefit”, 
-fair_impact=&quot;normal&quot;, fair_metric_type = ‘difference’, fairness_metric_value_input={},
+fair_metric_name=&quot;auto&quot;,Â  fair_concern=&quot;eligible&quot;, fair_priority=&quot;benefitÂ”,Â 
+fair_impact=&quot;normal&quot;, fair_metric_type = Â‘differenceÂ’, fairness_metric_value_input={},
 tran_row_num=[1], tran_max_sample=1, tran_pdp_feature=[], tran_pdp_target=None,
 tran_max_display=10, tran_features=[], tran_processed_data=None, tran_processed_label=None
 )</i></b></p>
@@ -5360,7 +5360,7 @@ transparency in a generic regression type application.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:53.4pt'><span lang=EN-GB>Used to
-  specify if fairness metrics are &quot;difference&quot; based or &quot;ratio”
+  specify if fairness metrics are &quot;difference&quot; based or &quot;ratioÂ”
   based. </span></p>
   </td>
  </tr>
@@ -5469,7 +5469,7 @@ transparency in a generic regression type application.</p>
   <td width="52%" valign=top style='width:52.26%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal>Contains the list of features user wants to see in the output.   
+  <p class=MsoNormal>Contains the list of features user wants to see in the output.Â Â Â 
   </p>
   </td>
  </tr>
@@ -5628,15 +5628,15 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   <p class=MsoNormal>This training function should be memoryless which means
   that when called a second time the model parameters are reset first before
   the run. </p>
-  <p class=MsoNormal>For e.g., Scikit-learn’s fit function. </p>
+  <p class=MsoNormal>For e.g., Scikit-learnÂ’s fit function. </p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def fit(x_train, y_train): </p>
-  <p class=MsoNormal>    train_cmd = &quot;train_func --train {x_train}
+  <p class=MsoNormal>Â Â Â  train_cmd = &quot;train_func --train {x_train}
   {y_train} {self.model_file}&quot;</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(train_cmd.split(),
+  <p class=MsoNormal>Â Â Â  import subprocess</p>
+  <p class=MsoNormal>Â Â Â  process = subprocess.Popen(train_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
+  <p class=MsoNormal>Â Â Â  output, error = process.communicate()</p>
   </td>
  </tr>
  <tr>
@@ -5653,13 +5653,13 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   predictions on the test dataset.</p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def predict(x_test): </p>
-  <p class=MsoNormal>    pred_cmd = &quot;pred_func --predict {self.model_file}
+  <p class=MsoNormal>Â Â Â  pred_cmd = &quot;pred_func --predict {self.model_file}
   {x_test} {self.output_file}&quot;</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(pred_cmd.split(),
+  <p class=MsoNormal>Â Â Â  import subprocess</p>
+  <p class=MsoNormal>Â Â Â  process = subprocess.Popen(pred_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
-  <p class=MsoNormal>    return pd.read_csv(output_file) </p>
+  <p class=MsoNormal>Â Â Â  output, error = process.communicate()</p>
+  <p class=MsoNormal>Â Â  Â return pd.read_csv(output_file) </p>
   <p class=MsoNormal>Note: Any preprocessing needed after reading output_file
   required has to be done too</p>
   </td>
@@ -5677,17 +5677,17 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   probability predictions on the test dataset.</p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def predict_proba(x_test): </p>
-  <p class=MsoNormal>    proba_cmd = &quot;pred_func --predict
+  <p class=MsoNormal>Â Â Â  proba_cmd = &quot;pred_func --predict
   {self.model_file} {x_test} {self.output_file}&quot;</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(proba_cmd.split(),
+  <p class=MsoNormal>Â Â Â  import subprocess</p>
+  <p class=MsoNormal>Â Â Â  process = subprocess.Popen(proba_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
-  <p class=MsoNormal>    return pd.read_csv(output_file) </p>
+  <p class=MsoNormal>Â Â Â  output, error = process.communicate()</p>
+  <p class=MsoNormal>Â Â Â  return pd.read_csv(output_file) </p>
   <p class=MsoNormal>Note: <a name="OLE_LINK69">The column order of class
   probabilities from predict_proba output has to be aligned with the order of
   classes in classes_. This processing can be done in the predict_proba
-  function after reading output_file.    </a></p>
+  function after reading output_file.Â  Â Â </a></p>
   </td>
  </tr>
  <tr>
@@ -5700,11 +5700,11 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal>This method performs sampling of the x_train, y_train,
   x_test.</p>
-  <p class=MsoNormal>The sampling mode can be specified by ‘mode’ parameter.</p>
-  <p class=MsoNormal>Mode values supported are ‘first’ and ‘per_label’. </p>
+  <p class=MsoNormal>The sampling mode can be specified by Â‘modeÂ’ parameter.</p>
+  <p class=MsoNormal>Mode values supported are Â‘firstÂ’ and Â‘per_labelÂ’. </p>
   <p class=MsoNormal>First mode selects the first n rows based on the value of
-  parameter ‘size’ (default = 100)</p>
-  <p class=MsoNormal>Per_label model groups by labels and chooses ‘size’ number
+  parameter Â‘sizeÂ’ (default = 100)</p>
+  <p class=MsoNormal>Per_label model groups by labels and chooses Â‘sizeÂ’ number
   of rows from each label. </p>
   </td>
  </tr>
@@ -5727,7 +5727,7 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>fit(x_train, y_train)</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="51%"
@@ -5774,7 +5774,7 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in'><a
-name="OLE_LINK54"><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name="OLE_LINK54"><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>predict(x_test)</a></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="51%"
@@ -5807,7 +5807,7 @@ name="OLE_LINK54"><span style='font-family:Symbol'>·<span style='font:7.0pt "Tim
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:105%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:105%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>predict_proba(x_test)</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="51%"
@@ -5840,7 +5840,7 @@ line-height:105%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Tim
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in;
-line-height:105%'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height:105%'><span style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>check_fit_predict(x_train, y_train, x_test, y_test,
 mode='per_label', size=100)</p>
 
@@ -5914,12 +5914,12 @@ mode='per_label', size=100)</p>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b>mode: str, default =
-  “per_label”</b></p>
+  Â“per_labelÂ”</b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-right:-5.4pt'>“first” or “per_group”</p>
+  <p class=MsoNormal style='margin-right:-5.4pt'>Â“firstÂ” or Â“per_groupÂ”</p>
   </td>
  </tr>
  <tr>
@@ -6049,7 +6049,7 @@ to the library. It allows to create custom fairness and performance metrics.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'>The fairness to performance
-  metric mapping. If metric_type = “perf” this value is <a name="OLE_LINK52">not
+  metric mapping. If metric_type = Â“perfÂ” this value is <a name="OLE_LINK52">not
   used</a></p>
   </td>
  </tr>
@@ -6113,7 +6113,7 @@ line-height:106%'>Methods in NewMetric class</span></b></p>
 <p class=MsoNormal style='margin-right:-71.0pt'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>compute()</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=1056
@@ -6260,7 +6260,7 @@ intersectional fairness protected variables.</p>
 color:#2F5496'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'>CustomerMarketing and BaseRegression
-classes don’t support individual fairness. </p>
+classes donÂ’t support individual fairness. </p>
 
 <p class=MsoNormal style='margin-right:-71.0pt'><span class=normaltextrun><b><span
 style='color:black;background:white'>**Note: The outcome is calculated based on
@@ -6310,9 +6310,9 @@ API function and triggers them if not run yet.</p>
   <p class=MsoNormal style='margin-right:-5.4pt'>E.g., disable=['tradeoff',
   'feature_importance', 'explain']</p>
   <p class=MsoNormal style='margin-right:-5.4pt'>If entire Fairness analysis is
-  to be skipped use: disable= [<a name="OLE_LINK42">'evaluate’</a>]</p>
+  to be skipped use: disable= [<a name="OLE_LINK42">'evaluateÂ’</a>]</p>
   <p class=MsoNormal style='margin-right:-5.4pt'>If entire Transparency
-  analysis is to skipped use: disable = [‘explain’]</p>
+  analysis is to skipped use: disable = [Â‘explainÂ’]</p>
   <p class=MsoNormal style='margin-right:-5.4pt'>If individual sections are to
   be skipped, they can be specified in the following way:</p>
   <p class=MsoNormal style='margin-right:-5.4pt'>disable = ['evaluate&gt;perf_dynamic|calibration_curve|individual_fair',
@@ -6360,11 +6360,11 @@ name="_Toc130412934">Fairness.tradeoff()</a></h1>
 <p class=MsoNormal style='margin-right:-71.0pt'>Computes the trade-off between
 performance and fairness over a range&nbsp;of threshold values.</p>
 
-<p class=MsoNormal style='margin-right:-71.0pt'> This is used to suggest the thresholds
+<p class=MsoNormal style='margin-right:-71.0pt'>Â This is used to suggest the thresholds
 to use for maximum model performance in 3 scenarios. Single threshold for
 privileged and unprivileged groups, Separate thresholds and Separate thresholds
 under neutral fairness constraint (0.001) . Although only the max performance case
-is printed out, all the other cases are computed and saved too.   </p>
+is printed out, all the other cases are computed and saved too. Â Â </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="51%"
  style='width:51.66%;border-collapse:collapse'>
@@ -6483,7 +6483,7 @@ variables.</p>
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'>Used to specify which sections
   to skip. Available option is &quot;correlation&quot;.</p>
-  <p class=MsoNormal style='margin-right:-18.9pt'>E.g., disable=[‘correlation’]</p>
+  <p class=MsoNormal style='margin-right:-18.9pt'>E.g., disable=[Â‘correlationÂ’]</p>
   </td>
  </tr>
 </table>
@@ -6576,7 +6576,7 @@ mitigation applied to the training and testing data.</b></p>
   <td width="28%" valign=top style='width:28.46%;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'><b>method: list of strings, default
-  = [ “reweigh”]</b></p>
+  = [ Â“reweighÂ”]</b></p>
   </td>
   <td width="71%" valign=top style='width:71.54%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -6584,8 +6584,8 @@ mitigation applied to the training and testing data.</b></p>
   <p class=MsoNormal style='margin-right:-5.4pt'>Optional parameter. Mitigation
   methods to be considered </p>
   <p class=MsoNormal style='margin-right:-5.4pt'>for mitigation. Allowed values
-  are “reweigh”, “threshold”, </p>
-  <p class=MsoNormal style='margin-right:-5.4pt'>“correlate” and “all”. </p>
+  are Â“reweighÂ”, Â“thresholdÂ”, </p>
+  <p class=MsoNormal style='margin-right:-5.4pt'>Â“correlateÂ” and Â“allÂ”. </p>
   <p class=MsoNormal style='margin-right:-5.4pt'>If value is [], all methods
   are executed.</p>
   </td>
@@ -6734,7 +6734,7 @@ transform_y=y_true_sample)</span></p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in'><b>1.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b>Mitigate
-is not supported for BaseRegression.  </b></p>
+is not supported for BaseRegression.Â  </b></p>
 
 <p class=MsoListParagraph style='margin-right:-71.0pt;text-indent:-.25in'><b>2.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b>Threshold
@@ -7066,7 +7066,7 @@ results</p>
 = [], local_row_num=None, output=True, model_num=None)</i></b></p>
 
 <p class=MsoListParagraph style='margin-left:0in'>The Transparency explain function
-has four types of analysis – global interpretability, local interpretability,
+has four types of analysis Â– global interpretability, local interpretability,
 partial dependence analysis and permutation importance analysis. </p>
 
 <p class=MsoNormal>If the user provides tran_features, the global and local
@@ -7079,15 +7079,15 @@ sampling will be performed, and the data provided by the user will be used as-is
 <p class=MsoNormal>Transparency analysis will be skipped in the following conditions:</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Model object is not provided</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>X_train/y_train is not provided</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>In case of x_train being a string, processed_data/processed_label
 is not provided</p>
 
@@ -7097,11 +7097,11 @@ is not provided</p>
 skipped in the following conditions:</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Y_true is not provided</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>X_test is not provided</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in'>&nbsp;</p>
@@ -7115,26 +7115,26 @@ use the explain function:</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:105%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>When
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>When
 local_row_num parameter is not passed, all four transparency analysis will be
 executed for the latest model, unless the user has disabled this option.</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:105%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>If
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>If
 there are two or more models, the user can use the model_num parameter to view
 the appropriate plots.</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:105%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>The
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>The
 local interpretability will be performed for all rows from tran_row_num. However,
 the plot will be shown for the latest row number in the tran_row_num list. (tran_row_num
 refers to row number mapping from the x_train data set and the input starts
 from 1.)</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:8.0pt;
-text-indent:-.25in;line-height:105%'><span style='font-family:Wingdings'>Ø<span
+text-indent:-.25in;line-height:105%'><span style='font-family:Wingdings'>Ã˜<span
 style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>If &quot;tran_row_num&quot;
 is not provided, the default value for the local plot will be the first row.</p>
 
@@ -7146,19 +7146,19 @@ line-height:107%'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:107%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>In
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>In
 this case, only the local plot or dataframe for the given row number and model
 number will be shown. (The disable argument is ignored in this case.)</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:105%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>With
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>With
 this option, the user can view multiple local plots as required, by
 appropriately using the local_row_num parameter.</p>
 
 <p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:0in;
 margin-top:0in;text-indent:-.25in;line-height:105%'><span style='font-family:
-Wingdings'>Ø<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>Please
+Wingdings'>Ã˜<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span>Please
 note that since the explain function is optimized to generate the SHAP values
 only once per model, in certain cases, the local row number may not be
 available. In such cases, an appropriate warning message will be displayed.</p>
@@ -7284,7 +7284,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:30.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Minimum
-  allowed value for&nbsp;“fair_threshold”&nbsp;in CreditScoring &amp;
+  allowed value for&nbsp;Â“fair_thresholdÂ”&nbsp;in CreditScoring &amp;
   CustomerMarketing classes</span></p>
   </td>
  </tr>
@@ -7305,7 +7305,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:30.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Minimum
-  allowed value for&nbsp;“fair_threshold”&nbsp;in CreditScoring &amp;
+  allowed value for&nbsp;Â“fair_thresholdÂ”&nbsp;in CreditScoring &amp;
   CustomerMarketing classes</span></p>
   </td>
  </tr>
@@ -7349,7 +7349,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Minimum
-  allowed value for&nbsp;“fair_neutral_tolerance”</span></p>
+  allowed value for&nbsp;Â“fair_neutral_toleranceÂ”</span></p>
   </td>
  </tr>
  <tr style='height:15.0pt'>
@@ -7363,14 +7363,14 @@ have been set up. User can update these parameter values inside this file.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-71.0pt;margin-bottom:
-  0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>0.01         </span></p>
+  0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>0.01Â Â Â Â Â Â Â Â  </span></p>
   </td>
   <td width="52%" valign=top style='width:52.12%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Maximum
-  allowed value for&nbsp;“fair_neutral_tolerance” </span></p>
+  allowed value for&nbsp;Â“fair_neutral_toleranceÂ” </span></p>
   </td>
  </tr>
  <tr style='height:105.0pt'>
@@ -7392,9 +7392,9 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:105.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Minimum
-  allowed value for&nbsp;“proportion_of_interpolation_fitting”&nbsp;of
+  allowed value for&nbsp;Â“proportion_of_interpolation_fittingÂ”&nbsp;of
   CustomerMarketing class<br>
-  “proportion_of_interpolation_fitting”&nbsp;<a name="OLE_LINK71">defines the
+  Â“proportion_of_interpolation_fittingÂ”&nbsp;<a name="OLE_LINK71">defines the
   resolution of interpolating the approximate functions for performance and fairness
   metrics in Trade-off Analysis </a>(Uplift Model only). Resolution is </span>the
   number of threshold bins to be used and is specified as proportion of the
@@ -7419,9 +7419,9 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:90.75pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Maximum
-  allowed value for&nbsp;“proportion_of_interpolation_fitting”&nbsp;of
+  allowed value for&nbsp;Â“proportion_of_interpolation_fittingÂ”&nbsp;of
   CustomerMarketing class<br>
-  “proportion_of_interpolation_fitting”&nbsp;defines the resolution of
+  Â“proportion_of_interpolation_fittingÂ”&nbsp;defines the resolution of
   interpolating the approximate functions for performance and fairness metrics
   in Trade-off Analysis (Uplift Model only). Resolution is </span>the number of
   threshold bins to be used and is specified as proportion of the number of
@@ -7448,7 +7448,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:45.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>threshold
-  value applied to “e-lift” scores for selecting the customers with higher
+  value applied to Â“e-liftÂ” scores for selecting the customers with higher
   scores than the value (Uplift Model only)</span></p>
   </td>
  </tr>
@@ -7493,7 +7493,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:45.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Proportion
-  of Min and max values of “e-lift” scores for computing the range of mesh grid
+  of Min and max values of Â“e-liftÂ” scores for computing the range of mesh grid
   in Trade-off analysis (Uplift Model only)</span></p>
   </td>
  </tr>
@@ -7530,7 +7530,7 @@ have been set up. User can update these parameter values inside this file.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:30.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-71.0pt;margin-bottom:
-  0in;margin-left:0in;line-height:normal'><span style='color:black'>-0.3          </span></p>
+  0in;margin-left:0in;line-height:normal'><span style='color:black'>-0.3Â Â Â Â Â Â Â Â Â  </span></p>
   </td>
   <td width="52%" valign=top style='width:52.12%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -7709,7 +7709,7 @@ Visualization</a></h1>
 <h1 style='margin-right:-71.0pt'>&nbsp;</h1>
 
 <p class=MsoNormal><img border=0 width=1056 height=360 id="Picture 1"
-src="API_Specs_final_v4_filtered_files/image001.jpg"></p>
+src="https://raw.githubusercontent.com/mas-veritas2/veritastool/main/icon/fair_tree.jpg"></p>
 
 <p class=MsoNormal>&nbsp;</p>
 
@@ -7758,7 +7758,7 @@ the decision maker, which can be eligible, inclusive and both. It can be thought
 one more filter for the numerator of the fairness metrics. Until this step, Q2
 already reduces the numerator of the fairness metric based on harm or benefit
 priority. On top of this selection, this step reduced the numerator to one
-based on fairness concern. Let’s assume that favorable class has positive value
+based on fairness concern. LetÂ’s assume that favorable class has positive value
 in Q1, and benefit is selected as priority in Q2. Since the favorable class is
 positive, the positive predictions carry benefits, TP or FP. Please note that
 these benefits carried in TP and FP could be minor and negligible. Decision
@@ -7766,7 +7766,7 @@ maker needs to analyze the harm and benefit of the particular use case carefully
 If the concern is to focus on people who are eligible for the action due to the
 model, the favorable class prediction will be regarded; if the concern is to focus
 on including the people who are intervened for favorable action but not
-eligible, the unfavorable class will be regarded; if the concern is “both”,
+eligible, the unfavorable class will be regarded; if the concern is Â“bothÂ”,
 then the numerator which are suggested for both eligible and inclusive concern
 to be included. For both concern, derived metrics are introduced in the tree,
 which includes the suggested eligible and inclusive fairness metrics under the
@@ -7790,14 +7790,14 @@ all population and does not have any resulting significant impact. Predicted
 values could be either positive predictions (TP + FP) or negative predictions
 (TN + FN). Actual values could be either actual positives (TP + FN) or actual
 negatives (TN + FP). For example, the fraud detection model predicting the
-transaction is fraudulent (as “positive”) has significant impact on the positive
+transaction is fraudulent (as Â“positiveÂ”) has significant impact on the positive
 predictions, therefore, the denominator is suggested to be (TP + FP). For
 example, for marketing propensity model predicting the customers who will buy a
-product (as “positive”), the marketing campaign might not be applied to every
+product (as Â“positiveÂ”), the marketing campaign might not be applied to every
 customer predicted as positive, but instead, it is commonly applied to top tier
 customers ranked by propensity score (e.g., top 10% of customers). As only a
 fraction of positive predictions is relevant, the focus of the model is not to
-recall all “willing-to-buy” customers but to improve the precision of “predicted-to-buy”
+recall all Â“willing-to-buyÂ” customers but to improve the precision of Â“predicted-to-buyÂ”
 customers. Therefore, predicted positives should be picked as the denominator
 of the suggested fairness metric.</span></p>
 
