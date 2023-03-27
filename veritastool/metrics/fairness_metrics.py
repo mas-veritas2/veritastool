@@ -1,9 +1,10 @@
 from sklearn.metrics import confusion_matrix, mean_squared_error, mean_absolute_percentage_error, roc_auc_score, log_loss
+import pandas as pd
 import numpy as np
 from numpy import ma
 import warnings
 from scipy.stats import entropy 
-from ..util.utility import *
+from ..util.utility import check_multiprocessing
 from ..metrics import *
 import concurrent.futures
 from itertools import product
@@ -228,6 +229,8 @@ class FairnessMetrics:
         self.fair_metric_name = self.use_case_object.fair_metric_name
         self._use_case_metrics = self.use_case_object._use_case_metrics
         self.y_train = [model.y_train for model in self.use_case_object.model_params]
+        self.y_true = [model.y_true for model in self.use_case_object.model_params]
+        self.y_pred = [model.y_pred for model in self.use_case_object.model_params]
         self.p_var = [model.p_var for model in self.use_case_object.model_params]
         self.feature_mask = self.use_case_object.feature_mask
         self.curr_p_var = None
@@ -281,6 +284,13 @@ class FairnessMetrics:
                     if len(indexes[k]) > 0:
                         threads.append(executor.submit(FairnessMetrics._execute_all_fair_map, metric_obj=metric_obj, index =indexes[k], eval_pbar=eval_pbar, worker_progress=worker_progress))
 
+                if n_threads != 1:
+                    for thread in threads:
+                        mp_result = thread.result()
+                        for i in self.p_var[0]:
+                            for j in self._use_case_metrics['fair']:
+                                if j in list(self.map_fair_metric_to_method.keys()) + list(self.map_fair_metric_to_method_optimized.keys()):
+                                    self.result[i]["fair_metric_values"][j] += mp_result[i]["fair_metric_values"][j]            
         else:   
             #if multithreading is not triggered, directly update the progress bar by 36
             eval_pbar.update(36)
@@ -303,7 +313,7 @@ class FairnessMetrics:
             self.result["indiv_fair"] = None
         eval_pbar.update(6)
 
-        
+
 
     def _execute_all_fair_map(metric_obj, index, eval_pbar, worker_progress):
         """
@@ -326,7 +336,9 @@ class FairnessMetrics:
         metric_obj.y_preds = []
         metric_obj.sample_weights = []
         metric_obj.feature_masks_list = []
-
+        metric_obj.y_onehot_trues = []
+        metric_obj.y_onehot_preds = []
+        
         for idx in index:
             #prepare data
             metric_obj.y_true = [model.y_true[idx] for model in metric_obj.use_case_object.model_params]
@@ -342,6 +354,11 @@ class FairnessMetrics:
             metric_obj.y_preds.append(metric_obj.y_pred)
             metric_obj.feature_masks_list.append(metric_obj.feature_mask)
             metric_obj.sample_weights.append(metric_obj.sample_weight)
+            if  metric_obj.use_case_object.multiclass_flag:
+                metric_obj.y_onehot_true = [model.enc_y_true[idx] for model in metric_obj.use_case_object.model_params]
+                metric_obj.y_onehot_pred = [model.enc_y_pred[idx] for model in metric_obj.use_case_object.model_params]
+                metric_obj.y_onehot_trues.append(metric_obj.y_onehot_true)
+                metric_obj.y_onehot_preds.append(metric_obj.y_onehot_pred)
 
             for i in metric_obj.p_var[0]:
                 metric_obj.curr_p_var = i     
@@ -352,6 +369,11 @@ class FairnessMetrics:
         metric_obj.y_trues = np.array(metric_obj.y_trues)
         metric_obj.y_probs = np.array(metric_obj.y_probs)
         metric_obj.y_preds = np.array(metric_obj.y_preds)
+        
+        if  metric_obj.use_case_object.multiclass_flag:       
+            metric_obj.y_onehot_trues = np.array(metric_obj.y_onehot_trues)            
+            metric_obj.y_onehot_preds = np.array(metric_obj.y_onehot_preds)
+
         if all(v[0] is None for v in metric_obj.sample_weights):
                 metric_obj.sample_weights = None   
         else:
@@ -377,25 +399,11 @@ class FairnessMetrics:
             for feature_mask in metric_obj.feature_masks_list:
                 metric_obj.feature_masks[i].append((np.array(feature_mask[i])*1).reshape(1,1,-1)) #convert bool to int and reshape
             metric_obj.feature_masks[i] = np.concatenate(metric_obj.feature_masks[i])
-            
+
             if  metric_obj.use_case_object.multiclass_flag:
-
-                y_onehot_true = []
-                y_onehot_pred = []
-                for y_true_sample,y_pred_sample in zip(metric_obj.y_trues,metric_obj.y_preds):
-
-                        label_binarizer = LabelBinarizer().fit(y_true_sample[0])
-                        y_onehot_true.append(label_binarizer.transform(y_true_sample[0]))                        
-                        y_onehot_pred.append(label_binarizer.transform(y_pred_sample[0]))
-                                
-                y_onehot_true = np.array(y_onehot_true)
-                y_onehot_true = y_onehot_true.reshape(len(y_onehot_true),1,-1,len(label_binarizer.classes_))
-                metric_obj.y_onehot_true = y_onehot_true
-                y_onehot_pred = np.array(y_onehot_pred)        
-                y_onehot_pred = y_onehot_pred.reshape(len(y_onehot_pred),1,-1,len(label_binarizer.classes_))
-                metric_obj.y_onehot_pred = y_onehot_pred
                 
-                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_ #label_binarizer.classes_
+                
+                metric_obj.ohe_classes_ = metric_obj.use_case_object.classes_ 
                 metric_obj.tp_ps = 0 
                 metric_obj.fp_ps = 0 
                 metric_obj.tn_ps = 0
@@ -406,8 +414,8 @@ class FairnessMetrics:
                 metric_obj.fn_us = 0
 
                 for idx,_ in enumerate(metric_obj.ohe_classes_):
-                    y_trues = y_onehot_true[:,:,:,idx]
-                    y_preds = y_onehot_pred[:,:,:,idx]
+                    y_trues = metric_obj.y_onehot_trues[:,:,:,idx]
+                    y_preds = metric_obj.y_onehot_preds[:,:,:,idx]
                 
                     tp_ps, fp_ps, tn_ps, fn_ps, tp_us, fp_us, tn_us, fn_us  =  metric_obj.use_case_object._get_confusion_matrix_optimized(
                         y_trues,
@@ -463,7 +471,7 @@ class FairnessMetrics:
                     
         return metric_obj.result
 
-    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):
+    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):        
         if metric_obj.use_case_object.multiclass_flag:
                 y_onehot_true = []
                 y_onehot_pred = []
@@ -1354,7 +1362,7 @@ class FairnessMetrics:
            
             if self.use_case_object.multiclass_flag:
                 
-                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,self.y_probs, mask, True)
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_trues,self.y_probs, mask, True)
                 
             else:
 
@@ -1401,7 +1409,7 @@ class FairnessMetrics:
             
             if self.use_case_object.multiclass_flag:
                 
-                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,self.y_probs, mask, True)
+                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_trues,self.y_probs, mask, True)
                 
             else:
 
@@ -1505,7 +1513,7 @@ class FairnessMetrics:
             
             if self.use_case_object.multiclass_flag:
 
-                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,self.y_probs, mask, True)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_trues,self.y_probs, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
@@ -1561,7 +1569,7 @@ class FairnessMetrics:
 
             if self.use_case_object.multiclass_flag:
 
-                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,self.y_probs, mask, True)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_trues,self.y_probs, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
@@ -1992,7 +2000,7 @@ class FairnessMetrics:
         mask_up = mask_list==0
         e_lift =  self.e_lift
         pred_outcome = self.pred_outcome
-        
+
         if pred_outcome is None or e_lift is None:
             return (None, None)
         

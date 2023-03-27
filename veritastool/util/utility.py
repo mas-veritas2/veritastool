@@ -8,6 +8,7 @@ import math
 from ..config.constants import Constants
 from .errors import *
 from pathlib import Path
+from sklearn.preprocessing import LabelBinarizer
 
 def check_datatype(obj_in):
     """
@@ -505,6 +506,14 @@ def check_multiprocessing(n_threads):
 
     return n_threads
 
+def _one_hot_encode_y_true_y_pred(y_true, y_pred):
+        
+        label_binarizer = LabelBinarizer().fit(y_true)
+        y_onehot_true = label_binarizer.transform(y_true)                    
+        y_onehot_pred = label_binarizer.transform(y_pred)
+
+        return y_onehot_true, y_onehot_pred
+       
 def test_function_cs():
     from ..usecases import CreditScoring
     from ..model import ModelContainer

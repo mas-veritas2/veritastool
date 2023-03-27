@@ -210,6 +210,11 @@ class PerformanceMetrics:
                     if len(indexes[k]) > 0:
                         threads.append(executor.submit(PerformanceMetrics._execute_all_perf_map, metric_obj=metric_obj, index=indexes[k], eval_pbar=eval_pbar, worker_progress=worker_progress))
 
+                if n_threads != 1:
+                    #retrive results from each thread
+                    for thread in threads:
+                        for key, v in thread.result().items():
+                            self.result['perf_metric_values'][key] = self.result['perf_metric_values'][key] + v
         else:
             #if multithreading is not triggered, directly update the progress bar by 24
             eval_pbar.update(24)
@@ -250,6 +255,8 @@ class PerformanceMetrics:
         metric_obj.y_probs = []
         metric_obj.y_preds = []
         metric_obj.sample_weights = []
+        metric_obj.y_onehot_trues = []
+        metric_obj.y_onehot_preds = []
 
         for idx in index:
             metric_obj.y_true = [model.y_true[idx] for model in metric_obj.use_case_object.model_params]
@@ -264,6 +271,12 @@ class PerformanceMetrics:
             metric_obj.y_preds.append(metric_obj.y_pred)
             metric_obj.sample_weights.append(metric_obj.sample_weight)
 
+            if  metric_obj.use_case_object.multiclass_flag:                
+                metric_obj.y_onehot_true = [model.enc_y_true[idx] for model in metric_obj.use_case_object.model_params]
+                metric_obj.y_onehot_pred = [model.enc_y_pred[idx] for model in metric_obj.use_case_object.model_params]
+                metric_obj.y_onehot_trues.append(metric_obj.y_onehot_true)
+                metric_obj.y_onehot_preds.append(metric_obj.y_onehot_pred)
+            
             for j in metric_obj._use_case_metrics['perf']:
                 if j in metric_obj.map_perf_metric_to_method.keys():
                     metric_obj.result['perf_metric_values'][j].append(metric_obj.map_perf_metric_to_method[j](obj=metric_obj))
@@ -271,12 +284,22 @@ class PerformanceMetrics:
         metric_obj.y_trues = np.array(metric_obj.y_trues)
         metric_obj.y_probs = np.array(metric_obj.y_probs)
         metric_obj.y_preds = np.array(metric_obj.y_preds)
+
+        if  metric_obj.use_case_object.multiclass_flag:       
+            metric_obj.y_onehot_trues = np.array(metric_obj.y_onehot_trues)            
+            metric_obj.y_onehot_preds = np.array(metric_obj.y_onehot_preds)
+        
         if all(v[0] is None for v in metric_obj.sample_weights):
                 metric_obj.sample_weights = None   
         else:
             metric_obj.sample_weights = np.array(metric_obj.sample_weights)
         
-        metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = PerformanceMetrics._translate_confusion_matrix(metric_obj, metric_obj.y_trues, metric_obj.y_preds,metric_obj.sample_weights)
+        if not metric_obj.use_case_object.multiclass_flag:
+
+            metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = PerformanceMetrics._translate_confusion_matrix(metric_obj, metric_obj.y_trues, metric_obj.y_preds,metric_obj.sample_weights)
+        
+        else:
+            metric_obj.tp_s, metric_obj.fp_s, metric_obj.tn_s, metric_obj.fn_s = PerformanceMetrics._translate_confusion_matrix(metric_obj, metric_obj.y_onehot_trues, metric_obj.y_onehot_preds,metric_obj.sample_weights)
 
         with np.errstate(divide="ignore", invalid="ignore"):
             for j in metric_obj._use_case_metrics['perf']:
@@ -306,8 +329,12 @@ class PerformanceMetrics:
         
         if metric_obj.use_case_object.multiclass_flag:
                 
-                y_onehot_true,y_onehot_pred = PerformanceMetrics._one_hot_encode(y_true, y_pred)
-                
+                if len(y_true.shape) ==3:
+                    y_onehot_true,y_onehot_pred = PerformanceMetrics._one_hot_encode(y_true, y_pred)
+                else:
+                    y_onehot_true = y_true
+                    y_onehot_pred = y_pred
+                    
                 tp_s_total = 0 
                 fp_s_total = 0 
                 tn_s_total = 0
@@ -859,7 +886,7 @@ class PerformanceMetrics:
             if self.use_case_object.multiclass_flag: 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
-                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.y_onehot_true, y_prob, True)
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.model_params[0].enc_y_true, y_prob, True)
             else:
                 y_prob=y_prob.reshape(1, 1, -1)
                 TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, y_true, y_prob, False)
@@ -881,7 +908,7 @@ class PerformanceMetrics:
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
 
             if self.use_case_object.multiclass_flag:
-                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.y_onehot_true, self.y_probs, True)
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.y_onehot_trues, self.y_probs, True)
             else:
                 TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.y_trues, self.y_probs, False)
             
@@ -937,7 +964,7 @@ class PerformanceMetrics:
             if self.use_case_object.multiclass_flag: 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
-                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.y_onehot_true, y_prob, True)
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.model_params[0].enc_y_true, y_prob, True)
             else:
                 y_prob=y_prob.reshape(1, 1, -1)
                 log_loss_score = PerformanceMetrics._compute_log_loss_score(self, y_true, y_prob, False)
@@ -958,7 +985,7 @@ class PerformanceMetrics:
                 return np.array([None]*self.y_trues.shape[0]).reshape(-1).tolist()   
 
             if self.use_case_object.multiclass_flag:
-                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.y_onehot_true, self.y_probs, True)
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.y_onehot_trues, self.y_probs, True)
             else:
                 log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.y_trues, self.y_probs, False)
  
