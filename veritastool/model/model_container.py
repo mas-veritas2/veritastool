@@ -228,7 +228,7 @@ class ModelContainer(object):
         elif self.model_type != 'regression':
             self.classes_ = self.model_object.classes_
         
-        if self.model_type != 'regression' and len(self.classes_) > 2 and self.pos_label is None:
+        if self.model_type != 'regression' and len(self.classes_) > 2 and self.pos_label is None and self.y_true is not None and self.y_pred is not None:
             self.multi_class_flag = True
             self.neg_label = None
             self.enc_y_true, self.enc_y_pred = _one_hot_encode_y_true_y_pred(self.y_true, self.y_pred)

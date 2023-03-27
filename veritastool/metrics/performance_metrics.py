@@ -886,7 +886,8 @@ class PerformanceMetrics:
             if self.use_case_object.multiclass_flag: 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
-                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, self.use_case_object.model_params[0].enc_y_true, y_prob, True)
+                enc_y_true = self.use_case_object.model_params[0].enc_y_true.reshape(1, 1, -1, len(ohe_classes_))
+                TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, enc_y_true, y_prob, True)
             else:
                 y_prob=y_prob.reshape(1, 1, -1)
                 TPR, FPR = PerformanceMetrics._compute_TPR_FPR(self, y_true, y_prob, False)
@@ -964,7 +965,8 @@ class PerformanceMetrics:
             if self.use_case_object.multiclass_flag: 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob=y_prob.reshape(1, 1, -1, len(ohe_classes_))
-                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, self.use_case_object.model_params[0].enc_y_true, y_prob, True)
+                enc_y_true = self.use_case_object.model_params[0].enc_y_true.reshape(1, 1, -1, len(ohe_classes_))                
+                log_loss_score = PerformanceMetrics._compute_log_loss_score(self, enc_y_true, y_prob, True)
             else:
                 y_prob=y_prob.reshape(1, 1, -1)
                 log_loss_score = PerformanceMetrics._compute_log_loss_score(self, y_true, y_prob, False)

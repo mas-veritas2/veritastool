@@ -346,7 +346,7 @@ class CreditScoring(Fairness, Transparency):
                                             var_name_b="total number of approvals", function_name="_check_special_params")    
 
             #check if spl params provided are realistic, otherwise throw exception
-            if self.model_params[0].y_pred is not None:
+            if self.model_params[0].y_true is not None and self.model_params[0].y_pred is not None:
                 y_true_reshape = np.array(self.model_params[0].y_true).reshape(1, 1, -1)
                 y_pred_reshape = np.array(self.model_params[0].y_pred).reshape(1, 1, -1)
                 tp, fp, tn, fn = self._get_confusion_matrix_optimized(y_true_reshape, y_pred_reshape, self.model_params[0].sample_weight)
