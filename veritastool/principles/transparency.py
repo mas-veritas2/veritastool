@@ -26,7 +26,7 @@ class Transparency:
         ------------------
         tran_row_num : list/np.array/pd.Series
                 It holds the list of indices given by the user for which the user wants to see the local interpretability.
-                (Row_num here refers to row number from the x_train dataset starting from 1.)
+                (tran_row_num refers to row number mapping from the x_train data set and the input starts from 1.)
 
         tran_max_sample : int/float
                 Stores the number of records user wants in the sample. If none is given, the entire dataset will be considered.
@@ -381,8 +381,8 @@ class Transparency:
         Parameters
         -----------
         n : int
-                Index for which the local interpretability is to be calculated.
-                (Row_num here refers to row number from the x_train dataset starting from 1.)
+                Row number for which the local interpretability is to be calculated.
+                (Row numbers refers to row number mapping from the x_train data set and the input starts from 1.)
 
         model_num : int, default = 0
                 It holds the model number for which analysis has to be done.
@@ -786,7 +786,7 @@ class Transparency:
 
         local_row_num : int, default = None
                 It stores the value of the index required to calculate local interpretability. 
-                (Row_num here refers to row number from the x_train dataset starting from 1.)
+                (local_row_num refers to row number mapping from the x_train data set and the input starts from 1.)
 
         output : boolean, default = True
                 If output is true, required transparency plots will be shown to the user on the console.
@@ -809,6 +809,11 @@ class Transparency:
         if(self.model_params[0].y_true is None) or (self.model_params[0].x_test is None):
             print("Skipped: Permutation importance skipped due to insufficient data input during ModelContainer() initialization.")
             disable.append('perm_imp')
+        
+        if(self.model_params[0].model_type!='regression'):
+            if(self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None):
+                print("Skipped: Partial dependence skipped due to insufficient data input during ModelContainer() initialization.")
+                disable.append('partial_dep')
 
         valid_input = ['interpret','partial_dep','perm_imp']
         valid_disable = []
@@ -848,7 +853,7 @@ class Transparency:
             self.err.push('type_error', var_name = "local_row_num", given = type(local_row_num), expected = "An integer value within the index range 1-" + str(self.tran_input_features['shape'][0]), function_name = "explain")
             self.err.pop()
 
-        if(len(valid_disable)>0) and (local_row_num is not None):
+        if(len(disable)>0) and (local_row_num is not None):
             print("Warning: The local interpretability plot is shown basis the given index and input for disable is ignored.")
 
         if local_row_num is None:
@@ -993,12 +998,16 @@ class Transparency:
         for i in range(len(self.model_params)):
             self.explain(disable=disable,model_num=i+1,output= False)
         tran_results = copy.deepcopy(self.tran_results)
+        
         if(self.model_params[0].y_true is None) or (self.model_params[0].x_test is None):
             disable.append('perm_imp')
         if(self.model_params[0].model_object is None):
             disable.extend(['interpret','partial_dep','perm_imp'])
         if(self.tran_input_features['check_input_flag']==2):
             disable.extend(['interpret','partial_dep','perm_imp'])
+        if(self.model_params[0].model_type!='regression') and (self.model_params[0].model_object is not None):
+            if(self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None):
+                disable.append('partial_dep')
 
         if (len(list(set({'interpret','partial_dep','perm_imp'})-set(disable)))==0):
             tran_results = None
