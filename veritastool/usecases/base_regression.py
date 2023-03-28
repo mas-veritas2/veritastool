@@ -101,7 +101,13 @@ class BaseRegression(Fairness, Transparency):
         self.e_lift = None
         self.pred_outcome = None
         
-        self._check_input()        
+        self._check_input()
+        self._tran_check_input()
+
+        if not self.model_params[0]._model_data_processing_flag:
+            self._model_data_processing()
+            self.model_params[0]._model_data_processing_flag = True
+
         if self.model_params[0].p_grp is not None:
             self._auto_assign_p_up_groups()
             self.feature_mask = self._set_feature_mask()
@@ -109,10 +115,6 @@ class BaseRegression(Fairness, Transparency):
             FairnessMetrics._check_y_prob_pred(self)
         else:
             self.feature_mask = None
-        self._tran_check_input()
-        if not self.model_params[0]._model_data_processing_flag:
-            self._model_data_processing()
-            self.model_params[0]._model_data_processing_flag = True
 
     def _check_input(self):
         """

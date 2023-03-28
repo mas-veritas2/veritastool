@@ -125,7 +125,14 @@ class CustomerMarketing(Fairness,Transparency):
         self.spl_params = {'revenue': revenue, 'treatment_cost': treatment_cost}
         self.selection_threshold = Constants().selection_threshold
 
-        self._check_input()        
+        self._check_input()
+        self._tran_check_input()
+
+        for model in self.model_params:
+            if not model._model_data_processing_flag:
+                self._model_data_processing()
+            model._model_data_processing_flag = True
+
         self.e_lift = self._get_e_lift()
         if self.model_params[0].p_grp is not None:
             self._check_non_policy_p_var_min_samples()
@@ -137,11 +144,6 @@ class CustomerMarketing(Fairness,Transparency):
             self.feature_mask = None
 
         self.pred_outcome = self._compute_pred_outcome()
-        self._tran_check_input()
-        for model in self.model_params:
-            if not model._model_data_processing_flag:
-                self._model_data_processing()
-            model._model_data_processing_flag = True
 
     def _check_input(self):
         """
