@@ -1132,5 +1132,8 @@ class PerformanceMetrics:
             return None
         else:
             y_true_counts = pd.Series(y_true).value_counts(normalize = True)
-            y_true_counts = y_true_counts.reset_index().replace({1: 'pos_label', 0:'neg_label'}).set_index('index')
+            if not self.use_case_object.multiclass_flag:
+                y_true_counts = y_true_counts.reset_index().replace({1: 'pos_label', 0:'neg_label'}).set_index('index')
+            else:
+                y_true_counts = y_true_counts.reset_index().set_index('index')
             return y_true_counts[0].to_dict()

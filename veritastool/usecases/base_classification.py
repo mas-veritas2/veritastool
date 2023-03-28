@@ -110,23 +110,25 @@ class BaseClassification(Fairness, Transparency):
         if len(self.classes_) > 2 and self.model_params[0].pos_label is None:
               self.multiclass_flag = True              
         
-        self._check_input()        
+        self._check_input()
+        self._tran_check_input()
+
+        if not self.multiclass_flag and not self.model_params[0]._model_data_processing_flag:
+              self._model_data_processing()
+              self.model_params[0]._model_data_processing_flag = True
+
         if self.model_params[0].p_grp is not None:
-              self._check_non_policy_p_var_min_samples()
+              if not self.multiclass_flag:
+                   self._check_non_policy_p_var_min_samples()
               self._auto_assign_p_up_groups()
               self.feature_mask = self._set_feature_mask()
               PerformanceMetrics._check_y_prob_pred(self)
               FairnessMetrics._check_y_prob_pred(self)
         else:
               self.feature_mask = None
-        self._tran_check_input()
 
         if self.multiclass_flag:
                 self.mitigate_methods = ['reweigh','correlate']
-                
-        if not self.multiclass_flag and not self.model_params[0]._model_data_processing_flag:
-              self._model_data_processing()
-              self.model_params[0]._model_data_processing_flag = True
 
     def _check_input(self):
         """
@@ -176,25 +178,10 @@ class BaseClassification(Fairness, Transparency):
         else :
             self.fair_metric_name
 
-    def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
-                        
-        pos_class_count = 0
-        neg_class_count = 0
-        if is_max_bias:
-                metric_val = self.perf_metric_obj.translate_metric(perf_metric, obj=self.perf_metric_obj, subgrp_y_true=grp['y_true'].values, subgrp_y_pred=grp['y_pred'].values) 
-        else:
-                metric_val = None
-        
-        return pd.Series([pos_class_count, neg_class_count, metric_val]) 
-
     def tradeoff(self, output=True, n_threads=1, sigma = 0):
                         
         if self.multiclass_flag:
-                print("Tradeoff analysis is not supported for multiclass classification.")
+                print("Skipped: Tradeoff analysis is not supported for multiclass classification.")
         else:
                 
                 super(BaseClassification, self).tradeoff( output,n_threads,sigma)
-
-
-
-        

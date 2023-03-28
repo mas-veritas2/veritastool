@@ -126,16 +126,17 @@ class Fairness:
                 flip = "fair to fair", "unfair to fair", "fair to unfair", "unfair to unfair"
 
         rootcause_values: dict of list, default = None
-                Contains the mean SHAP values between the privileged and unprivileged groups of the protected variable. 
+                Contains the mean SHAP values between the privileged and unprivileged groups of the protected variable, used for plots in rootcause() method.
+                The values are normalized between 0 and 1.
 
         rootcause_label_index : int, default = -1
-                The index of the target label to be considered for root cause analysis. Default -1 to assume the last index.
+                The index of the target label to be considered for root cause analysis. Default -1 assumes the last index of classes_ attribute.
 
         rootcause_model_num : int, default = 0
                 Data holder that contains all the attributes of the model to be assessed. It may hold more than one ModelContainer object.
 
         rootcause_sample_size : int, default = None
-                The sample size used to calculate root cause analysis.
+                The sample size used in root cause analysis.
         
         sigma : float or int , default = 0
                  Standard deviation for Gaussian kernel for smoothing the contour lines of primary fairness metric. 
@@ -152,7 +153,7 @@ class Fairness:
                 Contains surrogate features above correlation threshold for each protected variable.
 
         mitigate_result : dict
-                Contains the output for the specified bias mitigate techniques, e.g., threshold tuning, reweighing and correlation removal.
+                Contains the outputs for the specified bias mitigate techniques, e.g., threshold tuning, reweighing and correlation removal.
 
         mitigate_p_var : list of strings, default = []
                 Protected variables to be considered for bias mitigation.
@@ -161,7 +162,7 @@ class Fairness:
                 Methods used for bias mitigation. Valid inputs include "reweigh", "correlate", "threshold".
 
         mitigate_surrogate_flag : int, default = 0
-                Indicates whether `surrogate_features` output dictionary has surrogates for at least one p_var. By default, it assumes that there is no surrogates
+                Indicates whether `surrogate_features` output dictionary has surrogates for at least one p_var. By default, it assumes that there are no surrogates
                 for all protected variables.
 
         rw_is_transform : boolean, default = False
@@ -191,7 +192,7 @@ class Fairness:
         _input_validation_lookup: dict
                 Contains the attribute and its correct data type and allowed values (if applicable) for every argument passed by user.
 
-        _use_case_metrics: dict of list, default=None
+        _use_case_metrics: dict of list, default = None
                 Contains all the performance & fairness metrics for each use case. 
                 {"fair ": ["fnr_parity", ...], "perf": ["balanced_accuracy, ..."]}
                 Dynamically assigned during initialisation by using the _metric_group_map in Fairness/Performance Metrics class and the _model_type_to_metric above.
@@ -203,7 +204,10 @@ class Fairness:
                 Maps the mitigate methods to the corresponding compute functions.
 
         mitigate_methods : list
-                A list the stores the supported bias mitigation techniques.     
+                A list the stores the supported bias mitigation techniques.   
+
+        multiclass_flag : boolean, default = False
+                Indicates whether model parameters provided in ModelContainer is multi-class classification. Used in BaseClassification.
 
         err : object
                 VeritasError object
@@ -1906,7 +1910,7 @@ class Fairness:
     
     def _print_mitigate(self):
         """
-        Prints the results of the bias mitigation techniques to the console.
+        Formats the results of the mitigate() method before printing to console.
 
         Returns
         ----------
@@ -1982,7 +1986,7 @@ class Fairness:
 
     def _threshold(self, p_var=None):
         """
-        Returns a tuple of numpy arrays according to the suggested thresholds from tradeoff analysis.
+        Returns separate thresholds for privileged and unprivileged groups based on tradeoff analysis.
         The order of the arrays in the tuple will be based on the order of p_var input.
 
         Parameters
@@ -2005,8 +2009,8 @@ class Fairness:
             y_pred_copy = []
             for var in p_var:
                 # Get thresholds from tradeoff analysis
-                th1 = self.tradeoff_obj.result[var]['max_perf_single_th'][0]
-                th2 = self.tradeoff_obj.result[var]['max_perf_single_th'][1]
+                th1 = self.tradeoff_obj.result[var]['max_perf_neutral_fair'][0]
+                th2 = self.tradeoff_obj.result[var]['max_perf_neutral_fair'][1]
 
                 # Make copy of y_pred and change elements based on feature mask
                 y_pred_var = y_prob.copy()
@@ -2055,13 +2059,9 @@ class Fairness:
             self.rw_is_transform = True
             return sample_weight_t
             
-        else:
-            if self.model_params[model_num].sample_weight is not None:
-                sample_weight_t = np.empty_like(self.model_params[model_num].sample_weight)
-                sample_weight = self.sample_weight
-            else:            
-                sample_weight= np.ones(self.model_params[model_num].y_train.shape)
-                sample_weight_t = np.empty_like(sample_weight)
+        else:         
+            sample_weight= np.ones(self.model_params[model_num].y_train.shape)
+            sample_weight_t = np.empty_like(sample_weight)
             
             df = self.model_params[model_num].x_train.copy()
             df = df.set_index(p_var)
@@ -3473,6 +3473,9 @@ class Fairness:
             self.fair_metric_name
 
     def _set_up_fairness(self):
+        """
+        Set up fairness diagnosis for new use case creation.               
+        """
         self.e_lift = None
         self.pred_outcome = None        
         self._check_input()        
@@ -3635,9 +3638,12 @@ class Fairness:
         if self.model_params[0].model_type != 'uplift' and self.model_params[0].y_pred is None:
             self.evaluate_status = -1
             disable_compile.append('evaluate')
-        if self.model_params[0].y_prob is None or self.model_params[0].y_true is None or self.feature_mask is None:
+        if self.model_params[0].y_prob is None or self.model_params[0].y_true is None or self.feature_mask is None or self.model_params[0].pos_label is None:
             self.tradeoff_status = -1
             disable_compile.append('tradeoff')
+        if self.model_params[0].model_object is None:
+            self.feature_imp_status = -1
+            disable_compile.append('feature_importance')
         return disable_compile 
     
     def _input_parameter_compile_processing(self, disable=[]):
@@ -3696,7 +3702,7 @@ class Fairness:
     
 class NpEncoder(json.JSONEncoder):
     """
-
+    Saves the errors to a template message depending on their error type to an initialised list
     """
     def default(self, obj):
         """

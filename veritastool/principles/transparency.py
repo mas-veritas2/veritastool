@@ -806,12 +806,11 @@ class Transparency:
             print("Skipped: All transparency analysis skipped due to insufficient data input during ModelContainer() initialization.")
             return
 
-        if(self.model_params[0].y_true is None) or (self.model_params[0].x_test is None):
+        if('perm_imp' not in disable) and ((self.model_params[0].y_true is None) or (self.model_params[0].x_test is None)):
             print("Skipped: Permutation importance skipped due to insufficient data input during ModelContainer() initialization.")
             disable.append('perm_imp')
-        
         if(self.model_params[0].model_type!='regression'):
-            if(self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None):
+            if('partial_dep' not in disable) and ((self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None)):
                 print("Skipped: Partial dependence skipped due to insufficient data input during ModelContainer() initialization.")
                 disable.append('partial_dep')
 
@@ -859,7 +858,7 @@ class Transparency:
         if local_row_num is None:
             #all disable flags are true
             if(len(list(set(valid_input)-set(valid_disable)))==0):
-                print("Skipped: All transparency analysis are disabled for model " + str(model_num+1) + ".")
+                print('{:40s}{:<10}'.format('Transparency analysis for model ' +  str(model_num+1), 'skipped'))
             else:
                 print('{:40s}{:<10}'.format('Running transparency for model ' + str(model_num+1), 'done'))
                 if(self.tran_flag[model_num]['data_prep_flag']==False):
@@ -872,16 +871,22 @@ class Transparency:
                             self._local(n=idx, model_num=model_num)
                             self.tran_flag[model_num]['interpret']=True
                         print('{:5s}{:35s}{:<10}'.format('','Interpretability','done'))
+                else:
+                    print('{:5s}{:35s}{:<10}'.format('','Interpretability','skipped'))
 
                 if(disable_flags['partial_dep']==False):
                     if(self.tran_flag[model_num]['partial_dep']==False):
                         self._compute_partial_dependence(model_num=model_num)
                         self.tran_flag[model_num]['partial_dep']=True
+                else:
+                    print('{:5s}{:35s}{:<10}'.format('','Partial dependence','skipped'))
 
                 if(disable_flags['perm_imp']==False):
                     if(self.tran_flag[model_num]['perm_imp']==False):
                         self._compute_permutation_importance(model_num=model_num)
                         self.tran_flag[model_num]['perm_imp']=True
+                else:
+                    print('{:5s}{:35s}{:<10}'.format('','Permutation importance','skipped'))
 
                 if output == True:
                     self._plot(model_num = model_num,interpretability_plot_flag=not disable_flags['interpret'],pdp_plot_flag=not disable_flags['partial_dep'],perm_imp_plot_flag=not disable_flags['perm_imp'])
@@ -995,19 +1000,21 @@ class Transparency:
         This function returns the transparency results to be included in the json file.
         """
 
-        for i in range(len(self.model_params)):
-            self.explain(disable=disable,model_num=i+1,output= False)
-        tran_results = copy.deepcopy(self.tran_results)
-        
         if(self.model_params[0].y_true is None) or (self.model_params[0].x_test is None):
             disable.append('perm_imp')
         if(self.model_params[0].model_object is None):
-            disable.extend(['interpret','partial_dep','perm_imp'])
+            print('{:40s}{:<10}'.format('Transparency analysis ', 'skipped'))
+            return None
         if(self.tran_input_features['check_input_flag']==2):
-            disable.extend(['interpret','partial_dep','perm_imp'])
+            print('{:40s}{:<10}'.format('Transparency analysis ', 'skipped'))
+            return None
         if(self.model_params[0].model_type!='regression') and (self.model_params[0].model_object is not None):
             if(self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None):
                 disable.append('partial_dep')
+                
+        for i in range(len(self.model_params)):
+            self.explain(disable=disable,model_num=i+1,output= False)
+        tran_results = copy.deepcopy(self.tran_results)
 
         if (len(list(set({'interpret','partial_dep','perm_imp'})-set(disable)))==0):
             tran_results = None

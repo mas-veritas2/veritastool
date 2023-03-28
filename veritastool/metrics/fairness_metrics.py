@@ -1345,8 +1345,8 @@ class FairnessMetrics:
 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
-                
-                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,y_prob, mask, True)
+                enc_y_true = np.array(self.y_onehot_true).reshape(1,1,-1,len(ohe_classes_))
+                log_loss_p, log_loss_u = self._compute_log_loss_score(enc_y_true,y_prob, mask, True)
 
             else: 
                 y_prob = y_prob.reshape(1,1,-1)
@@ -1391,8 +1391,8 @@ class FairnessMetrics:
 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
-                
-                log_loss_p, log_loss_u = self._compute_log_loss_score(self.y_onehot_true,y_prob, mask, True)
+                enc_y_true = np.array(self.y_onehot_true).reshape(1,1,-1,len(ohe_classes_))
+                log_loss_p, log_loss_u = self._compute_log_loss_score(enc_y_true,y_prob, mask, True)
 
             else: 
                 y_prob = y_prob.reshape(1,1,-1)
@@ -1491,9 +1491,9 @@ class FairnessMetrics:
 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
+                enc_y_true = np.array(self.y_onehot_true).reshape(1,1,-1,len(ohe_classes_))
                 
-                
-                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,y_prob, mask, True)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(enc_y_true,y_prob, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)
@@ -1512,7 +1512,6 @@ class FairnessMetrics:
             mask = self.feature_masks[self.curr_p_var]
             
             if self.use_case_object.multiclass_flag:
-
                 TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_trues,self.y_probs, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
@@ -1544,9 +1543,9 @@ class FairnessMetrics:
 
                 ohe_classes_ = self.use_case_object.classes_
                 y_prob = y_prob.reshape(1,1,-1,len(ohe_classes_))
+                enc_y_true = np.array(self.y_onehot_true).reshape(1,1,-1,len(ohe_classes_))
                 
-                
-                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(self.y_onehot_true,y_prob, mask, True)
+                TPR_p, FPR_p, TPR_u, FPR_u = self._compute_TPR_FPR(enc_y_true,y_prob, mask, True)
 
                 auc_p = np.trapz(TPR_p, FPR_p, axis=2)     
                 auc_u = np.trapz(TPR_u, FPR_u, axis=2)

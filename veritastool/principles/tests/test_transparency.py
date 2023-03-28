@@ -461,7 +461,7 @@ def test_local():
                         tran_row_num=[20,40], tran_max_sample = 1000, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
     cre_sco_obj._data_prep()
     cre_sco_obj._local(n=40)
-    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['efx'],2)==0.74 #0.743
+    assert round(cre_sco_obj.tran_results['model_list'][0]['local_interpretability'][0]['efx'],2)==0.74
     assert type(cre_sco_obj.tran_results['model_list'][0]['plot']['local_plot'][40])==np.ndarray
     
     cm_uplift_obj._tran_compile()
