@@ -66,7 +66,7 @@ class Constants:
                 Number of decimal places for values to be rounded off
 
         correlation_bins : int
-                Number of bins for interval variables used for phik correlation
+                Number of bins for interval variables used for Phi_K correlation
 
         permutation_additional : float
                 % of additional features to be included in permutation plot

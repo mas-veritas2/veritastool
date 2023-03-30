@@ -8,6 +8,7 @@ from ..config.constants import Constants
 import concurrent.futures
 from sklearn.preprocessing import LabelBinarizer
 from ..util.errors import *
+from sklearn.metrics import confusion_matrix
 
 class PerformanceMetrics:
     """
@@ -16,7 +17,7 @@ class PerformanceMetrics:
     Class Attributes    
     ------------------------
     map_perf_metric_to_group : dict
-            Maps the performance metric names to their corresponding full names, metric group eg classification or regression metric types, and whether it can be a primary metric
+            Maps the performance metric names to their corresponding full names, metric group eg classification or regression metric types, whether it can be a primary metric, and its dependency on y_pred/y_prob.
     """
     map_perf_metric_to_group = {
         'selection_rate':('Selection Rate', 'classification', True, 'y_pred'),
@@ -137,6 +138,9 @@ class PerformanceMetrics:
         self.use_case_object = use_case_object
 
     def _check_y_prob_pred(self):
+        """
+        Checks performance metric depedency on y_pred or y_prob, and raises error if mismatched.
+        """
         if(self.perf_metric_name is not None and PerformanceMetrics.map_perf_metric_to_group[self.perf_metric_name][3]=='y_prob' and self.model_params[0].y_prob is None):
             self.err.push('value_error', var_name="perf_metric_name", given=self.perf_metric_name,  expected="y_prob", function_name="_check_y_prob_pred")
             self.err.pop()
@@ -309,6 +313,25 @@ class PerformanceMetrics:
         return metric_obj.result['perf_metric_values']
 
     def _one_hot_encode(y_true, y_pred):
+        """
+        Performs one-hot encoding on y_true and y_pred.
+
+        Parameters
+        ----------
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_pred : list, numpy.ndarray, pandas.Series
+                Predicted targets as returned by classifier.
+
+        Returns
+        ----------
+        y_onehot_true : numpy.ndarray
+                One-hot encoded ground truth target values.
+
+        y_onehot_pred : numpy.ndarray
+                One-hot encoded predicted targets as returned by classifier.
+        """
         y_onehot_true = []
         y_onehot_pred = []
         for y_true_sample,y_pred_sample in zip(y_true,y_pred):
@@ -326,7 +349,27 @@ class PerformanceMetrics:
         
     
     def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight):
-        
+        """
+        Translates confusion matrix based on entire dataset
+
+        Parameters
+        ----------
+        metric_obj : object
+                PerformanceMetrics object
+
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_pred : list, numpy.ndarray, pandas.Series
+                Predicted targets as returned by classifier.
+
+        sample_weight : numpy.ndarray, default=None
+                Used to normalize y_true & y_pred.
+
+        Returns
+        ----------
+        Confusion matrix metrics for the entire dataset
+        """
         if metric_obj.use_case_object.multiclass_flag:
                 
                 if len(y_true.shape) ==3:
@@ -429,11 +472,15 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
-                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
-                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
-            accuracy = (tp + tn) / (tp + tn + fp + fn)
+            if self.use_case_object.multiclass_flag:
+                accuracy = PerformanceMetrics.get_multiclass_accuracy(np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), \
+                                                                      np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1))
+            else:
+                tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                    self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                    y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                    sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
+                accuracy = (tp + tn) / (tp + tn + fp + fn)
             return accuracy[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
             y_true = kwargs['subgrp_y_true']
@@ -444,8 +491,39 @@ class PerformanceMetrics:
             accuracy = (tp + tn) / (tp + tn + fp + fn)
             return accuracy[0][0]
         else:
-            accuracy = (self.tp_s + self.tn_s) / (self.tp_s + self.tn_s + self.fp_s + self.fn_s)
+            if self.use_case_object.multiclass_flag:
+                
+                accuracy = PerformanceMetrics.get_multiclass_accuracy(self.y_trues, self.y_preds)
+            else:
+                accuracy = (self.tp_s + self.tn_s) / (self.tp_s + self.tn_s + self.fp_s + self.fn_s)                    
             return accuracy.reshape(-1).tolist()
+
+    def get_multiclass_accuracy(y_true, y_pred):
+        accuracy_mul = y_true==y_pred
+        accuracy_mul = accuracy_mul.sum(axis=2) / accuracy_mul.shape[2]      
+        return accuracy_mul
+        
+
+    def get_confusion_matrix_multiclass(y_true, y_pred):
+        cms = []
+        for idx in range(y_true.shape[0]):
+            C = confusion_matrix(y_true[idx][0],y_pred[idx][0])
+            cms.append(C)
+        cms = np.array(cms)
+        return cms
+
+    
+    def get_multiclass_bal_accuracy(cms):
+        scores = []
+        
+        for cm in cms:            
+            per_class = np.diag(cm) / cm.sum(axis=1)
+            score = np.mean(per_class)
+            scores.append(score)
+
+        scores = np.array(scores).reshape(len(cms),1,-1)
+        
+        return scores
 
     def _compute_balanced_accuracy(self, **kwargs):
         """
@@ -457,11 +535,17 @@ class PerformanceMetrics:
                 The performance metric value
         """
         if 'y_pred_new' in kwargs:
-            tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
-                self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
-                y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
-                sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
-            balanced_accuracy = ((tp/(tp+fn)) + (tn/(tn+fp)))/2 
+
+            if self.use_case_object.multiclass_flag:
+                cm = PerformanceMetrics.get_confusion_matrix_multiclass(np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), \
+                                                                        np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1))
+                balanced_accuracy = PerformanceMetrics.get_multiclass_bal_accuracy(cm)[0]
+            else:
+                tp, fp, tn, fn = PerformanceMetrics._translate_confusion_matrix(
+                    self.use_case_object.perf_metric_obj, y_true=np.array(self.use_case_object.model_params[0].y_true).reshape(1, 1, -1), 
+                    y_pred=np.array(kwargs['y_pred_new'][0]).reshape(1, 1, -1), 
+                    sample_weight=np.array(self.use_case_object.model_params[0].sample_weight).reshape(1, 1, -1))     
+                balanced_accuracy = ((tp/(tp+fn)) + (tn/(tn+fp)))/2 
             return balanced_accuracy[0][0]
         elif ('subgrp_y_true' in kwargs) and ('subgrp_y_pred' in kwargs):
             y_true = kwargs['subgrp_y_true']
@@ -472,7 +556,11 @@ class PerformanceMetrics:
             balanced_accuracy = ((tp/(tp+fn)) + (tn/(tn+fp)))/2 
             return balanced_accuracy[0][0]
         else:
-            balanced_accuracy = ((self.tp_s/(self.tp_s+self.fn_s)) + (self.tn_s/(self.tn_s+self.fp_s)))/2  
+            if self.use_case_object.multiclass_flag:
+                cms = PerformanceMetrics.get_confusion_matrix_multiclass(self.y_trues, self.y_preds)
+                balanced_accuracy = PerformanceMetrics.get_multiclass_bal_accuracy(cms)
+            else:
+                balanced_accuracy = ((self.tp_s/(self.tp_s+self.fn_s)) + (self.tn_s/(self.tn_s+self.fp_s)))/2  
             return balanced_accuracy.reshape(-1).tolist()
 
     def _compute_f1_score(self, **kwargs):
@@ -918,33 +1006,54 @@ class PerformanceMetrics:
             return roc_auc.reshape(-1).tolist()
 
     def _compute_TPR_FPR(self, y_true, y_prob, multiclass=False):
-            
-            if multiclass:
+        """
+        Computes true positive rate and false positive rate based on multiclass flag.
 
-                y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
-                y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
-                
-                idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+        Parameters
+        ----------
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
 
-                y_trues = np.take_along_axis(y_trues, idx, axis=2)
+        y_prob : list, numpy.ndarray, pandas.Series, pandas.DataFrame
+                Predicted probabilities as returned by classifier.
 
-                TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)                    
-                FPR = np.cumsum((1-y_trues),axis=2)/np.sum((1-y_trues), axis=2, keepdims=True)
-              
-                TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
-                FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+        multiclass : boolean
+                Indicates if classification model is multi-class.
+
+        Returns
+        ----------
+        TPR : numpy.ndarray
+                True positive rate.
+
+        FPR : numpy.ndarray
+                False positive rate.
+        """  
+        if multiclass:
+
+            y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
+            y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
             
-            else:
-                idx = y_prob.argsort(axis=2)[:,:,::-1] # sort by descending order
-                y_probs = np.take_along_axis(y_prob, idx, axis=2)
-                
-                y_trues = np.take_along_axis(y_true, idx, axis=2)
-                TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)
-                FPR = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
-                TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
-                FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+            idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+            y_trues = np.take_along_axis(y_trues, idx, axis=2)
+
+            TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)                    
+            FPR = np.cumsum((1-y_trues),axis=2)/np.sum((1-y_trues), axis=2, keepdims=True)
             
-            return TPR, FPR
+            TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
+            FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+        
+        else:
+            idx = y_prob.argsort(axis=2)[:,:,::-1] # sort by descending order
+            y_probs = np.take_along_axis(y_prob, idx, axis=2)
+            
+            y_trues = np.take_along_axis(y_true, idx, axis=2)
+            TPR = np.cumsum(y_trues, axis=2)/np.sum(y_trues, axis=2, keepdims=True)
+            FPR = np.cumsum(1-y_trues, axis=2)/np.sum(1-y_trues, axis=2, keepdims=True)
+            TPR = np.append(np.zeros((TPR.shape[0],TPR.shape[1],1)), TPR, axis=2) # append starting point (0)
+            FPR = np.append(np.zeros((FPR.shape[0],FPR.shape[1],1)), FPR, axis=2)
+        
+        return TPR, FPR
 
     def _compute_log_loss(self, **kwargs):
         """
@@ -994,7 +1103,25 @@ class PerformanceMetrics:
             return log_loss_score.reshape(-1).tolist()
 
     def _compute_log_loss_score(self, y_true, y_prob, multiclass=False):
-        
+        """
+        Computes log loss score based on multiclass flag.
+
+        Parameters
+        ----------
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_prob : list, numpy.ndarray, pandas.Series, pandas.DataFrame
+                Predicted probabilities as returned by classifier. 
+                
+        multiclass : boolean
+                Indicates if classification model is multi-class.
+
+        Returns
+        ----------
+        log_loss_score : numpy.ndarray
+                Log-loss score.
+        """   
         if multiclass:
             
             loss = -(y_true * np.log(y_prob)).sum(axis=3)

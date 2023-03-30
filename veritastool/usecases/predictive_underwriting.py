@@ -10,7 +10,7 @@ from ..util.errors import *
 
 class PredictiveUnderwriting(Fairness, Transparency):
     """
-    Class to evaluate and analyse fairness in predictive underwriting insurance related applications.
+    Class to evaluate and analyse fairness and transparency in predictive underwriting insurance related applications.
 
     Class Attributes
     ------------------

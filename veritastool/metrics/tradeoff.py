@@ -61,7 +61,7 @@ class TradeoffRate(object):
         map_metric_to_method : dict
                 Mapping of metric name to respective compute function
                 
-        sigma : float or integer , default = 0
+        sigma : float or integer, default = 0
                  Standard deviation for Gaussian kernel for smoothing the contour lines of primary fairness metric. 
                  When sigma <= 0, smoothing is turn off.
                  Suggested to try sigma = 3 or above if noisy contours are observed.
@@ -141,6 +141,7 @@ class TradeoffRate(object):
         'emp_lift': self._compute_emp_lift_tr
         }
         self.sigma = usecase_obj.sigma
+
     def compute_tradeoff(self, n_threads, tdff_pbar):
         """
         Computes the tradeoff values.

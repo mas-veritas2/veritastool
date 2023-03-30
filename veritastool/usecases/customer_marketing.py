@@ -10,7 +10,7 @@ from ..util.errors import *
 
 class CustomerMarketing(Fairness,Transparency):
     """
-    A class to evaluate and analyse fairness in customer marketing related applications.
+    A class to evaluate and analyse fairness and transparency in customer marketing related applications.
 
     Class Attributes
     ------------------
@@ -42,7 +42,7 @@ class CustomerMarketing(Fairness,Transparency):
         fair_is_pos_label_fav: boolean, default=None
                 Used to indicate if positive label specified is favourable for the classification use case. If True, 1 is specified to be favourable and 0 as unfavourable.
         
-        perf_metric_name: string, default = "balanced_acc"
+        perf_metric_name: string, default = "emp_lift"
                 Name of the primary performance metric to be used for computations in the evaluate() and/or compile() functions.
 
         fair_metric_name : string, default = "auto"
@@ -225,7 +225,25 @@ class CustomerMarketing(Fairness,Transparency):
         err.pop()
             
     def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
-                            
+        """
+        Computes the subgroup data for each policy.
+
+        Parameters
+        ----------
+        grp : pandas.DataFrame
+                A pandas dataframe containing the relevant data for the given subgroup.
+
+        perf_metric : str, default='sample_count'
+                The performance metric to use in the subgroup calculation, by default 'sample_count'.
+
+        is_max_bias : bool, default=True
+                Whether policy is `max_bias`, by default True.
+
+        Returns
+        -------
+        pandas.Series
+                A pandas series containing the count of positive and negative class, as well as the metric value.
+        """                  
         pos_class_count = np.isin(grp['y_true'],['CR','TR']).sum()
         neg_class_count = np.isin(grp['y_true'],['CN','TN']).sum()          
         if is_max_bias:      
@@ -236,7 +254,13 @@ class CustomerMarketing(Fairness,Transparency):
         return pd.Series([pos_class_count, neg_class_count, metric_val])
 
     def _auto_assign_p_up_groups(self):
+        """
+        Automatically assigns privileged and unprivileged groups based on the policy specified by the user for the protected variable.
 
+        It then maps the policy to the corresponding function that will assign the privileged and unprivileged groups.
+        
+        The resulting groups are stored in the respective model container object.
+        """
         self.perf_metric_obj = PerformanceMetrics(self)
         mdl = self.model_params
         for p_var_key in mdl[1].p_grp.keys():
@@ -251,6 +275,25 @@ class CustomerMarketing(Fairness,Transparency):
                 mdl[1].up_grp[p_var_key] = up_grp
 
     def _max_bias(self, p_var, mdls):
+        """
+        Computes the best and worst groups based on the max_bias policy and protected variable. 
+
+        Parameters
+        ----------
+        p_var : str
+                Name of the protected variable.
+            
+        mdl : object
+                Model container object containing the protected feature columns and true labels. 
+
+        Returns
+        -------
+        best : list of lists
+                List of lists containing the best group values.
+            
+        worst : list of lists
+                List of lists containing the worst group values.
+        """
         perf_metric, direction = self.translate_fair_to_perf_metric()
         
         if self.fair_metric_name == 'rejected_harm':

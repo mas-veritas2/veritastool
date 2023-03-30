@@ -9,7 +9,7 @@ from ..config.constants import Constants
 from ..util.errors import *
 
 class CreditScoring(Fairness, Transparency):
-    """A class to evaluate and analyse fairness in credit scoring related applications.
+    """A class to evaluate and analyse fairness and transparency in credit scoring related applications.
 
     Class Attributes
     ------------------

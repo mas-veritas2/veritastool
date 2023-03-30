@@ -381,7 +381,7 @@ def test_check_tran_processed_data():
                                model_object = model_object_rej,  model_name = model_name_rej, model_type = model_type_rej,\
                                pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
 
-        container_prop1 = container_rej.clone(y_true = y_true_prop, y_pred = y_pred_prop, y_prob = y_prob_prop, y_train= None,\
+        container_prop1 = container_rej1.clone(y_true = y_true_prop, y_pred = y_pred_prop, y_prob = y_prob_prop, y_train= None,\
                                 model_object = model_object_prop,  pos_label=['TR', 'CR'], neg_label=['TN', 'CN'])
 
         cm_uplift_obj1 = CustomerMarketing(model_params = [container_rej1, container_prop1], fair_threshold = 80, \
@@ -390,8 +390,8 @@ def test_check_tran_processed_data():
                                   treatment_cost = COST_TREATMENT, tran_row_num=[20,40], tran_max_sample=1000, \
                                   tran_pdp_feature= ['age','income'], tran_pdp_target='CR', tran_max_display = 4, tran_features=['noproducts'], \
                                   tran_processed_data = x_train_rej[:1000], tran_processed_label = [y_train_rej[:1000]])
-        assert toolkit_exit.type == MyError
-        assert toolkit_exit.value.message == msg
+    assert toolkit_exit.type == MyError
+    assert toolkit_exit.value.message == msg
 
 def test_data_sampling():    
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
@@ -852,6 +852,14 @@ def test_explain():
     cm_uplift_obj.explain()
     cm_uplift_obj.explain(local_row_num=52)
     assert 52 in list(cm_uplift_obj.tran_results['model_list'][1]['plot']['local_plot'].keys())
+
+    container1 = ModelContainer(None, None, model_type, model_name, y_pred, y_prob, y_train, x_train=x_train, \
+                           x_test=x_test, model_object=model_object, up_grp=up_grp)
+    cre_sco_obj1= CreditScoring(model_params = [container1], fair_threshold = 80, fair_concern = "eligible", \
+                           fair_priority = "benefit", fair_impact = "normal", perf_metric_name="accuracy", \
+                           tran_max_sample = 2, tran_pdp_feature = ['LIMIT_BAL'], tran_max_display = 10)
+    cre_sco_obj1.explain()
+    assert cre_sco_obj1.tran_results['permutation']['score'] == ''
 
 def test_tran_compile():
     cre_sco_obj= CreditScoring(model_params = [container], fair_threshold = 80, fair_concern = "eligible", \
