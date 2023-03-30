@@ -98,6 +98,21 @@ class ModelContainer(object):
 
         non_intersect_pvars : list, default=None
                 Contains list of protected variables, excluding intersectional variables
+
+        label_count : int
+                Unique count of y_true target labels.
+
+        _model_data_processing_flag : boolean, default=False
+                Indicates if data in ModelContainer has been processed. Flag used in the respective use case classes.
+
+        policies : list
+                List of supported policies, i.e., 'maj_min', 'maj_rest', 'max_bias'.
+
+        p_grp_input : dict
+                Stores a copy of original p_grp passed by user, used in _print_evaluate.
+
+        classes_ : numpy.ndarray
+                A list of class labels known to the classifier.
         """
         self.x_train = x_train
         self.x_test = x_test
@@ -280,6 +295,9 @@ class ModelContainer(object):
             self._process_up_grp_input() # Deduce up_grp values if up_grp is None and p_grp not a policy
     
     def _intersectional_fairness(self):
+        """
+        Implements intersectional fairness by modifying protected variable values.
+        """
         if len(self.intersect_p_grp.keys())>0:
                         
             for ix, cols in enumerate(self.intersect_p_var_sep):
@@ -288,6 +306,11 @@ class ModelContainer(object):
                 self.protected_features_cols.loc[:,self.intersect_p_var_names[ix]] = intersect_col.apply(lambda row: '|'.join([str(col) for col in row]),axis = 1)        
 
     def _process_intersect_p_vars(self):
+        """
+        Processes intersectional protected variables. Removes intersectional variable groups whose column names are not in either the p_var or the x_test DataFrame columns.
+
+        If any columns are removed, a warning message is printed indicating which columns were omitted.
+        """
         if len(self.intersect_p_grp.keys())>0:
             removed_cols = []
             for ix, cols in enumerate(self.intersect_p_var_sep.copy()):
@@ -301,6 +324,9 @@ class ModelContainer(object):
                 print("Warning: All intersectional columns containing",','.join(removed_cols), 'will be omitted as the column cannot be found.')
 
     def _find_intersect_vars_in_p_grp_input(self):
+        """
+        Identifies intersectional fairness variables based on p_grp input.
+        """
         intersect_p_var_sep = []
         intersect_p_var_names = []        
         intersect_p_grp = {}
@@ -322,12 +348,8 @@ class ModelContainer(object):
     def _process_up_grp_input(self):
         """
         Check if up_grp is not provided and initiaize the up_grp.
-        If corresponding p_grp contain labels then assign the rest of labels using set difference.
-        If corresponding p_grp contains policy assign an empty list
-
-        Returns:
-        ---------------
-        None : None
+        If corresponding p_grp contains labels then assign the rest of labels using set difference.
+        If corresponding p_grp contains policy assign an empty list.
         """
 
         #If None then initialise
@@ -428,9 +450,12 @@ class ModelContainer(object):
                 if x_train_cols != x_test_cols:
                     err_.append(['length_error', "x_train column", str(x_train_cols), str(x_test_cols)])
       
+         # pos_label cannot be None for uplift model type
+        if self.model_type == "uplift" and self.pos_label is None:
+            err_.append(['value_error', "pos_label", "None", "not None for uplift"])     
                 
         # neg_label cannot be None for uplift model type
-        if self.neg_label is None and self.model_type == "uplift":
+        if self.neg_label is None and self.pos_label is not None and self.model_type == "uplift":
             err_.append(['value_error', "neg_label", "None", "not None"])
 
         #check pos_label and neg_label for overlap labels
@@ -528,8 +553,8 @@ class ModelContainer(object):
 
     def check_unassigned_y_label(self):
         """
-        Check for unassigned label when both pos_label and neg_label is provided by user for multi-class classification models.
-        Store all unassigned label and index based on y_true in tuple as unassigned_y_label.
+        Checks for unassigned label when both pos_label and neg_label are provided by user for multi-class classification models with more than 2 target labels.
+        Stores all unassigned label and index based on y_true in tuple as unassigned_y_label.
 
         Returns:
         ---------------
@@ -577,7 +602,7 @@ class ModelContainer(object):
 
     def check_classes(self):
         """
-        Check the classes_ attribute of the model and assign attribute if it does not exist.
+        Checks the classes_ attribute of the model and assign attribute if it does not exist.
         """
         err_ = []
         successMsg = "classes check completed without issue"
@@ -611,7 +636,7 @@ class ModelContainer(object):
 
     def check_multi_class_policy(self):
         """
-        Check the policy specified in privileged and unprivileged groups for all protected and intersectional variables.
+        Checks the policy specified in privileged and unprivileged groups for all protected and intersectional variables.
         Policies are disabled for multi-class use cases.
         """
         err_ = []
@@ -660,7 +685,7 @@ class ModelContainer(object):
         return result
                     
     def clone(self, y_true, model_object, y_pred=None, y_prob=None, y_train=None, train_op_name="fit",
-                 predict_op_name ="predict", sample_weight=None,  pos_label=[[1]], neg_label=None, predict_proba_op_name='predict_proba'):
+                 predict_op_name ="predict", sample_weight=None,  pos_label=[1], neg_label=None, predict_proba_op_name='predict_proba'):
 
         """
         Clone ModelContainer object
@@ -698,15 +723,15 @@ class ModelContainer(object):
         sample_weight : list, numpy.ndarray or None, default=None
                 Used to normalize y_true & y_pred.
 
-        pos_label : list of lists, default = [[1]]
+        pos_label : list of lists, default = [1]
                 Label values which are considered favorable.
                 For all model types except uplift, converts the favourable labels to 1 and others to 0.
-                For uplift, user is to provide 2 label names e.g. [["a"], ["b"]] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
+                For uplift, user is to provide 2 label names e.g. ["a", "b"] in fav label. The first will be mapped to treatment responded (TR) & second to control responded (CR).
 
         neg_label : list of lists or None, default = None
                 Label values which are considered unfavorable.
                 neg_label will only be used in uplift models.
-                For uplift, user is to provide 2 label names e.g. [["c"], ["d"]] in unfav label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
+                For uplift, user is to provide 2 label names e.g. ["c", "d"] in unfavourable label. The first will be mapped to treatment rejected (TR) & second to control rejected (CR).
 
         Returns
         ----------------

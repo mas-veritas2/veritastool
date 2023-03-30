@@ -806,13 +806,14 @@ class Transparency:
             print("Skipped: All transparency analysis skipped due to insufficient data input during ModelContainer() initialization.")
             return
 
-        if('perm_imp' not in disable) and ((self.model_params[0].y_true is None) or (self.model_params[0].x_test is None)):
-            print("Skipped: Permutation importance skipped due to insufficient data input during ModelContainer() initialization.")
-            disable.append('perm_imp')
-        if(self.model_params[0].model_type!='regression'):
-            if('partial_dep' not in disable) and ((self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None)):
-                print("Skipped: Partial dependence skipped due to insufficient data input during ModelContainer() initialization.")
-                disable.append('partial_dep')
+        if disable is not None:
+            if('perm_imp' not in disable) and ((self.model_params[0].y_true is None) or (self.model_params[0].x_test is None)):
+                print("Skipped: Permutation importance skipped due to insufficient data input during ModelContainer() initialization.")
+                disable.append('perm_imp')
+            if(self.model_params[0].model_type!='regression'):
+                if('partial_dep' not in disable) and ((self.tran_pdp_target == None) and len(self.model_params[0].model_object.classes_)>2 and (self.model_params[0].pos_label is None)):
+                    print("Skipped: Partial dependence skipped due to insufficient data input during ModelContainer() initialization.")
+                    disable.append('partial_dep')
 
         valid_input = ['interpret','partial_dep','perm_imp']
         valid_disable = []
@@ -852,7 +853,7 @@ class Transparency:
             self.err.push('type_error', var_name = "local_row_num", given = type(local_row_num), expected = "An integer value within the index range 1-" + str(self.tran_input_features['shape'][0]), function_name = "explain")
             self.err.pop()
 
-        if(len(disable)>0) and (local_row_num is not None):
+        if(disable is not None) and (len(disable)>0) and (local_row_num is not None):
             print("Warning: The local interpretability plot is shown basis the given index and input for disable is ignored.")
 
         if local_row_num is None:

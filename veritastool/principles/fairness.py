@@ -207,7 +207,7 @@ class Fairness:
                 A list the stores the supported bias mitigation techniques.   
 
         multiclass_flag : boolean, default = False
-                Indicates whether model parameters provided in ModelContainer is multi-class classification. Used in BaseClassification.
+                Indicates whether model parameters provided in ModelContainer runs multi-class classification diagnosis. Used in BaseClassification.
 
         err : object
                 VeritasError object
@@ -271,8 +271,8 @@ class Fairness:
         self.fair_neutral_tolerance = Constants().fair_neutral_tolerance
 
         if self.model_params[0].p_grp is not None:
-            self.is_pgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
-            self.is_upgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var)
+            self.is_pgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var, True)
+            self.is_upgrp_abv_min_size = dict.fromkeys(self.model_params[0].p_var, True)
             
         self._model_type_input()
         auto_fair_metric_name = True if self.fair_metric_name == 'auto' else False
@@ -1609,7 +1609,7 @@ class Fairness:
         for i, i_var in enumerate(self.model_params[0].protected_features_cols.columns):
             p_len = len(str(i + 1) + ": " + i_var)
 
-            if not self.is_pgrp_abv_min_size[i_var]:
+            if self.is_pgrp_abv_min_size[i_var] is not None and not self.is_pgrp_abv_min_size[i_var]:
                 if isinstance(self.model_params[0].p_grp_input[i_var], str):
                     p_grp_str = "Privileged Group* ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].p_grp.get(i_var)[0]))
                 else:
@@ -1620,7 +1620,7 @@ class Fairness:
                 else:
                     p_grp_str = "Privileged Group"
 
-            if not self.is_upgrp_abv_min_size[i_var]:
+            if self.is_upgrp_abv_min_size[i_var] is not None and not self.is_upgrp_abv_min_size[i_var]:
                 if isinstance(self.model_params[0].p_grp_input[i_var], str):
                     if len(self.model_params[-1].up_grp[i_var][0]) == 1:
                         up_grp_str = "Unprivileged Group* ({})".format(', '.join(str(lbl) for lbl in self.model_params[-1].up_grp.get(i_var)[0]))
@@ -1648,7 +1648,7 @@ class Fairness:
                                                              "feature_distribution").get("unprivileged_group") * 100,
                                                          decimal_pts=self.decimals))
             
-            if not self.is_pgrp_abv_min_size[i_var] or not self.is_upgrp_abv_min_size[i_var]:                
+            if self.is_pgrp_abv_min_size[i_var] is not None and (not self.is_pgrp_abv_min_size[i_var] or not self.is_upgrp_abv_min_size[i_var]):              
                 print("*Measurement may not be robust as min_samples_per_label is not satisfied")          
             print("\n")
             if self.model_params[0].sample_weight is not None:
@@ -1874,16 +1874,6 @@ class Fairness:
 
             for i in self.mitigate_method:
                 if i=='correlate':
-                    #if data_prep_flag is False, run _data_prep() first
-                    if not self.tran_flag[0]['data_prep_flag']:  
-                        tqdm._instances.clear()
-                        self._data_prep(model_num=0)
-                        mi_pbar.update(10)
-                    #if feature_imp_status_corr hasn't run
-                    if self.feature_imp_status_corr == False:
-                        self._compute_correlation()
-                        mi_pbar.update(10)
-
                     mitigate_result[i] = self.map_mitigate_to_method[i](self.mitigate_p_var, cr_alpha, cr_beta, transform_x)    
                     mi_pbar.update(10)
                 elif i=='reweigh':
@@ -1973,14 +1963,11 @@ class Fairness:
             print("=" * 80)
             print()
 
-            if self.mitigate_surrogate_flag == 0:
-                print("Skipped: Skipping correlation removal as there are no surrogate features identified\nfor p_var {}.".format(self.mitigate_p_var))
+            if self.cr_is_transform:
+                print("Transforming dataset based on provided and corr_alpha and corr_beta.")
             else:
-                if self.cr_is_transform:
-                    print("Transforming dataset based on provided and corr_alpha and corr_beta.")
-                else:
-                    print("Transforming x_train, x_test based on corr_alpha.")
-                    print("(To use a different dataset provide transform_x, corr_alpha and corr_beta)")
+                print("Transforming x_train, x_test based on corr_alpha.")
+                print("(To use a different dataset provide transform_x, corr_alpha and corr_beta)")
 
         print()
 
@@ -2120,23 +2107,13 @@ class Fairness:
                 Returns a tuple containing the transformed test data if `beta` and `transform_df` not None.
                 Otherwise, returns a tuple containing the transformed train and test data and the beta coefficients.
         """
-        # check if there are surrogates for at least one p_var
-        for var in p_var:
-            if self.surrogate_features.get(var):
-                self.mitigate_surrogate_flag = 1
-                break
-        if self.mitigate_surrogate_flag == 0:
-            return
-
         #If one is None and other isn't then ignore
         if beta is not None and transform_df is not None:
-            
             x_use = transform_df.drop(columns=self.model_params[0].non_intersect_pvars) 
             x_sensitive = transform_df[p_var]
             beta_ = beta
             self.cr_is_transform = True
         else:
-
             x_use = self.model_params[0].x_train.drop(columns=self.model_params[0].non_intersect_pvars) 
             x_sensitive = self.model_params[0].x_train[p_var] #[p_var]
             sensitive_mean_ = x_sensitive.mean()
@@ -2166,7 +2143,6 @@ class Fairness:
         x_test_decorr[self.model_params[0].non_intersect_pvars] = self.model_params[0].x_test[self.model_params[0].non_intersect_pvars]        
         x_test_decorr = x_test_decorr[self.model_params[0].x_test.columns]
 
-        
         if beta is not None and transform_df is not None:
             return (x_test_decorr,)
         else:		
@@ -2192,7 +2168,7 @@ class Fairness:
         Creates the bar plot displaying top 10 contributors to bias for each protected variable.
         """
         #if y_train/x_train/x_test is None, skip evaluate
-        if self.model_params[0].y_train is None or self.model_params[0].x_train is None or self.model_params[0].p_grp is None or self.model_params[0].model_object is None:
+        if self.model_params[0].y_train is None or self.model_params[0].x_train is None or self.model_params[0].p_grp is None or self.model_params[0].model_object is None or isinstance(self.model_params[0].x_train, str):
             print("Skipped: Root cause analysis is skipped due to insufficient data input during ModelContainer() initialization.")
             return
         self.rootcause_values = {}
@@ -3641,7 +3617,7 @@ class Fairness:
         if self.model_params[0].y_prob is None or self.model_params[0].y_true is None or self.feature_mask is None or self.model_params[0].pos_label is None:
             self.tradeoff_status = -1
             disable_compile.append('tradeoff')
-        if self.model_params[0].model_object is None:
+        if self.model_params[0].model_object is None or self.model_params[0].x_train is None or self.model_params[0].y_train is None:
             self.feature_imp_status = -1
             disable_compile.append('feature_importance')
         return disable_compile 

@@ -11,7 +11,7 @@ from ..util.errors import *
 
 class BaseRegression(Fairness, Transparency):
     """
-    Class to evaluate and analyse fairness in predictive underwriting insurance related applications.
+    Class to evaluate and analyse fairness and transparency in predictive underwriting insurance related applications.
 
     Class Attributes
     ------------------
@@ -168,7 +168,25 @@ class BaseRegression(Fairness, Transparency):
             return self.fair_metric_name
             
     def _get_sub_group_data(self, grp, perf_metric='sample_count', is_max_bias=True):
+        """
+        Computes the subgroup data for each policy.
 
+        Parameters
+        ----------
+        grp : pandas.DataFrame
+                A pandas dataframe containing the relevant data for the given subgroup.
+
+        perf_metric : str, default='sample_count'
+                The performance metric to use in the subgroup calculation, by default 'sample_count'.
+
+        is_max_bias : bool, default=True
+                Whether policy is `max_bias`, by default True.
+
+        Returns
+        -------
+        pandas.Series
+                A pandas series containing the count of positive and negative class, as well as the metric value.
+        """ 
         pos_class_count = None
         neg_class_count = None
         if is_max_bias:
@@ -179,6 +197,13 @@ class BaseRegression(Fairness, Transparency):
         return pd.Series([pos_class_count, neg_class_count, metric_val])
     
     def _auto_assign_p_up_groups(self):
+        """
+        Automatically assigns privileged and unprivileged groups based on the policy specified by the user for the protected variable.
+
+        It then maps the policy to the corresponding function that will assign the privileged and unprivileged groups.
+        
+        The resulting groups are stored in the respective model container object.
+        """
         self.perf_metric_obj = PerformanceMetrics(self)
         mdl = self.model_params[0]
         for p_var_key in mdl.p_grp.keys():
@@ -188,6 +213,25 @@ class BaseRegression(Fairness, Transparency):
                 mdl.up_grp[p_var_key] = up_grp
 
     def _max_bias(self, p_var, mdl):
+        """
+        Computes the best and worst groups based on the max_bias policy and protected variable. 
+
+        Parameters
+        ----------
+        p_var : str
+                Name of the protected variable.
+            
+        mdl : object
+                Model container object containing the protected feature columns and true labels. 
+
+        Returns
+        -------
+        best : list of lists
+                List of lists containing the best group values.
+            
+        worst : list of lists
+                List of lists containing the worst group values.
+        """
         perf_metric, direction = self.translate_fair_to_perf_metric()
 
         max_bias_df = pd.concat([mdl.protected_features_cols[p_var],pd.Series(mdl.y_true),pd.Series(mdl.y_pred)],axis=1)
@@ -212,7 +256,7 @@ class BaseRegression(Fairness, Transparency):
 
     def rootcause(self, p_var=None, label=None):
         """
-        Print a message indicating that root cause analysis is not supported for regression use cases.
+        Prints a message indicating that root cause analysis is not supported for regression use cases.
 
         Parameters
         ----------
@@ -235,7 +279,7 @@ class BaseRegression(Fairness, Transparency):
 
     def mitigate(self, p_var=[], method=['reweigh'], cr_alpha=1, cr_beta=None, rw_weights=None, transform_x=None, transform_y=None, model_num=0):
         """
-        Print a message indicating that bias mitigation is not supported for regression use cases.
+        Prints a message indicating that bias mitigation is not supported for regression use cases.
 
         Parameters
         ----------

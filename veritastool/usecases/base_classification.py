@@ -11,14 +11,14 @@ from ..util.errors import *
 
 class BaseClassification(Fairness, Transparency):
     """
-    Class to evaluate and analyse fairness in general classification applications.
+    Class to evaluate and analyse fairness and transparency in general classification applications.
 
     Class Attributes
     ------------------
     _model_type_to_metric_lookup: dictionary
                 Used to associate the model type (key) with the metric type, expected size of positive and negative labels (value) & length of model_params respectively.
                 
-                e.g. {"base_classification": ("classification", 2, 1), “rejection”: (“classification”, 2, 1), “uplift”: (“uplift”, 4, 2), “a_new_type”: (“regression”, -1, 1)}
+                e.g. {"classification": ("classification", 2, 1), “rejection”: (“classification”, 2, 1), “uplift”: (“uplift”, 4, 2), “a_new_type”: (“regression”, -1, 1)}
     """
 
     _model_type_to_metric_lookup = {"classification": ("classification", 0, 1)}
@@ -94,6 +94,12 @@ class BaseClassification(Fairness, Transparency):
 
         pred_outcome: dictionary, default=None
                 Contains the probabilities of the treatment and control groups for both rejection and acquiring
+
+        multiclass_flag : boolean
+                Indicates whether model parameters provided in ModelContainer runs multi-class classification diagnosis. Used in BaseClassification.
+
+        mitigate_methods : list
+                A list the stores the supported bias mitigation techniques. Supported methods for multi-class classification diagnosis are "reweigh" and "correlate".
         """
         self.perf_metric_name = perf_metric_name
         Fairness.__init__(self,model_params, fair_threshold, fair_metric_name, fair_is_pos_label_fav, fair_concern, fair_priority, fair_impact, fair_metric_type, fairness_metric_value_input)

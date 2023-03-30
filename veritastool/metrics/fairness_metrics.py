@@ -21,8 +21,12 @@ class FairnessMetrics:
     ----------
     map_fair_metric_to_group : dict
         Maps the fairness metrics to its name, metric_group (classification, uplift, or regression), type (difference or ratio), whether the metric is related to tradeoff, whether the metric can be a primary metric, 
-        short-form name, equivalent performance metric, and direction of the perf metric i.e., whether a `higher` metric value indicates better model performance (higher, lower)
-        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds', 'balanced_acc', 'higher')}
+        short-form name, equivalent performance metric, direction of the perf metric i.e., whether a `higher` metric value indicates better model performance (higher, lower), and its dependency on y_pred/y_prob.
+        e.g. {'equal_opportunity': ('Equal Opportunity', 'classification', 'difference', True, True, 'Equal Oppo', 'y_pred'), 'equal_odds': ('Equalized Odds', 'classification', 'difference', True, True, 'Equal Odds', 'balanced_acc', 'higher', 'y_pred')}
+
+    map_indiv_fair_metric_to_group : dict
+        Maps the individual fairness metrics to its name and metric_group.
+        e.g., {'consistency_score': ('Consistency Score', 'classification')}
     """
     map_fair_metric_to_group = {
         'disparate_impact': ('Disparate Impact', 'classification', 'ratio', True, True, 'Disp Impact','selection_rate','higher','y_pred'),
@@ -90,6 +94,12 @@ class FairnessMetrics:
                 Maps the fairness metrics to the corresponding compute functions.
                 e.g. {'equal_opportunity': _compute_equal_opportunity, 'equal_odds': _compute_equal_odds}
 
+        map_fair_metric_to_method_optimized : dict
+                Maps the fairness metrics to the corresponding optimized compute functions.
+
+        map_indiv_fair_metric_to_method : dict
+                Maps the individual fairness metrics to the corresponding optimized compute functions.
+
         result : dict of tuple, default=None
                 Data holder that stores the following for every protected variable:
                 - fairness metric value, corresponding confidence interval & neutral position for all fairness metrics.
@@ -103,7 +113,7 @@ class FairnessMetrics:
 
         y_train :numpy.ndarray, default=None
                 Ground truth for training data.
-
+                
         y_prob : numpy.ndarray, default=None
                 Predicted probabilities as returned by classifier. 
                 For uplift models, L = 4. Else, L = 1 where shape is (n_samples, L)
@@ -194,6 +204,9 @@ class FairnessMetrics:
         self.use_case_object = use_case_object
 
     def _check_y_prob_pred(self):
+        """
+        Checks fairness metric depedency on y_pred or y_prob, and raises error if mismatched.
+        """
         if(self.fair_metric_name is not None and FairnessMetrics.map_fair_metric_to_group[self.fair_metric_name][8]=='y_prob' and self.model_params[0].y_prob is None):
             self.err.push('value_error', var_name="fair_metric_name", given=self.fair_metric_name,  expected="y_prob", function_name="_check_y_prob_pred")
             self.err.pop()
@@ -218,6 +231,9 @@ class FairnessMetrics:
 
         eval_pbar : tqdm object
                 Progress bar
+
+        disable : list
+                Option to disable individual fairness used in evaluate() method, i.e., disable=[‘individual_fair’]
 
         Returns
         ----------
@@ -454,6 +470,7 @@ class FairnessMetrics:
     def _execute_all_indiv_fair_map(metric_obj):
         """
         Maps each thread's work for execute_all_indiv_fair()
+
         Parameters
         ----------
         metric_obj : FairnessMetrics object
@@ -471,7 +488,31 @@ class FairnessMetrics:
                     
         return metric_obj.result
 
-    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):        
+    def _translate_confusion_matrix(metric_obj, y_true, y_pred, sample_weight, curr_p_var = None, feature_mask = None):  
+        """
+        Translates confusion matrix based on privileged and unprivileged groups
+
+        Parameters
+        ----------
+        metric_obj : object
+                FairnessMetrics object
+
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_pred : list, numpy.ndarray, pandas.Series
+                Predicted targets as returned by classifier.
+
+        sample_weight : numpy.ndarray, default=None
+                Used to normalize y_true & y_pred.
+
+        curr_p_var : str, default=None
+                Current protected variable.
+
+        Returns
+        ----------
+        Confusion matrix metrics based on privileged and unprivileged groups
+        """      
         if metric_obj.use_case_object.multiclass_flag:
                 y_onehot_true = []
                 y_onehot_pred = []
@@ -1295,8 +1336,29 @@ class FairnessMetrics:
             
         return (wape_p/wape_u, wape_p)
 
-    def _compute_log_loss_score(self, y_true, y_prob, mask, multiclass=False ):
-        
+    def _compute_log_loss_score(self, y_true, y_prob, mask, multiclass=False):
+        """
+        Computes log loss score for privileged and unprivileged groups based on multiclass flag.
+
+        Parameters
+        ----------
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_prob : list, numpy.ndarray, pandas.Series, pandas.DataFrame
+                Predicted probabilities as returned by classifier. 
+                
+        multiclass : boolean
+                Indicates if classification model is multi-class.
+
+        Returns
+        ----------
+        log_loss_p : numpy.ndarray
+                Log-loss score for privileged group.
+
+        log_loss_u : numpy.ndarray
+                Log-loss score for unprivileged group.
+        """  
         maskFilterNeg = mask==-1
 
         if multiclass:
@@ -1418,59 +1480,82 @@ class FairnessMetrics:
             return list(map(tuple, np.stack((log_loss_u/log_loss_p, log_loss_p), axis=1).reshape(-1, 2).tolist()))
 
     def _compute_TPR_FPR(self, y_true, y_prob, mask, multiclass=False):
-                        
+        """
+        Computes true positive rate and false positive rate for privileged and unprivileged groups based on multiclass flag.
+
+        Parameters
+        ----------
+        y_true : list, numpy.ndarray or pandas.Series
+                Ground truth target values.
+
+        y_prob : list, numpy.ndarray, pandas.Series, pandas.DataFrame
+                Predicted probabilities as returned by classifier. 
+                
+        multiclass : boolean
+                Indicates if classification model is multi-class.
+
+        Returns
+        ----------
+        TPR_p : numpy.ndarray
+                True positive rate for privileged group.
+
+        FPR_p : numpy.ndarray
+                False positive rate for privileged group.
+
+        TPR_u : numpy.ndarray
+                True positive rate for unprivileged group.
+
+        FPR_u : numpy.ndarray
+                False positive rate for unprivileged group.
+        """  
+        if multiclass:
+            y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
+            y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
+
+            mask = np.repeat(mask,y_true.shape[3],axis=2)
+
+            idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
+
+            y_trues = np.take_along_axis(y_trues, idx, axis=2)
+            mask = np.take_along_axis(mask, idx, axis=2)
+
+            TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
+            FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
+                
+            TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+            FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+
+            TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
+            FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
+            TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+            FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
         
-            if multiclass:
+        else: 
+            maskFilterNeg = mask==-1
+            y_trues_ma = np.ma.array(y_true, mask = maskFilterNeg)
+            y_probs_ma = np.ma.array(y_prob, mask = maskFilterNeg)
+            mask_ma = np.ma.array(mask, mask = maskFilterNeg)
 
-                y_trues = y_true.reshape(y_true.shape[0],y_true.shape[1],-1)
-                y_probs = y_prob.reshape(y_prob.shape[0],y_prob.shape[1],-1)
+            idx = y_prob.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
 
-                mask = np.repeat(mask,y_true.shape[3],axis=2)
-
-                idx = y_probs.argsort(axis=2)[:,:,::-1] # sort by descending order
-
-                y_trues = np.take_along_axis(y_trues, idx, axis=2)
-                mask = np.take_along_axis(mask, idx, axis=2)
-
-                TPR_p = np.cumsum(y_trues*mask, axis=2)/np.sum(y_trues*mask, axis=2, keepdims=True)                    
-                FPR_p = np.cumsum((1-y_trues)*mask, axis=2)/np.sum((1-y_trues)*mask, axis=2, keepdims=True)
-                    
-                TPR_u = np.cumsum(y_trues*(1-mask), axis=2)/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2)/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-
-                TPR_p = np.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)
-                FPR_p = np.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)
-                TPR_u = np.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-                FPR_u = np.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
-                
+            y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
             
-            else: 
+            mask = np.take_along_axis(mask_ma, idx, axis=2)
 
-                maskFilterNeg = mask==-1
-                y_trues_ma = np.ma.array(y_true, mask = maskFilterNeg)
-                y_probs_ma = np.ma.array(y_prob, mask = maskFilterNeg)
-                mask_ma = np.ma.array(mask, mask = maskFilterNeg)
-
-                idx = y_prob.argsort(kind="mergesort",axis=2)[:,:,::-1] # sort by descending order
-
-                y_trues = np.take_along_axis(y_trues_ma, idx, axis=2)
-                
-                mask = np.take_along_axis(mask_ma, idx, axis=2)
-
-                grp_mask = np.take_along_axis(mask, idx, axis=2)
+            grp_mask = np.take_along_axis(mask, idx, axis=2)
+        
+            TPR_p = np.cumsum(y_trues*mask, axis=2).data[grp_mask==1]/np.sum(y_trues*mask, axis=2, keepdims=True)
+            FPR_p = np.cumsum((1-y_trues)*mask, axis=2).data[grp_mask==1]/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
+            TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
+            FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
+            auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
             
-                TPR_p = np.cumsum(y_trues*mask, axis=2).data[grp_mask==1]/np.sum(y_trues*mask, axis=2, keepdims=True)
-                FPR_p = np.cumsum((1-y_trues)*mask, axis=2).data[grp_mask==1]/np.sum((1-y_trues)*mask, axis=2, keepdims=True)            
-                TPR_p = ma.append(np.zeros((TPR_p.shape[0],TPR_p.shape[1],1)), TPR_p, axis=2) # append starting point (0)            
-                FPR_p = ma.append(np.zeros((FPR_p.shape[0],FPR_p.shape[1],1)), FPR_p, axis=2)            
-                auc_p = np.trapz(TPR_p, FPR_p, axis=2)            
-                
-                TPR_u = np.cumsum(y_trues*(1-mask), axis=2).data[grp_mask==0]/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
-                FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
-                TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
-                FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
+            TPR_u = np.cumsum(y_trues*(1-mask), axis=2).data[grp_mask==0]/np.sum(y_trues*(1-mask), axis=2, keepdims=True)
+            FPR_u = np.cumsum((1-y_trues)*(1-mask), axis=2).data[grp_mask==0]/np.sum((1-y_trues)*(1-mask), axis=2, keepdims=True)
+            TPR_u = ma.append(np.zeros((TPR_u.shape[0],TPR_u.shape[1],1)), TPR_u, axis=2) # append starting point (0)
+            FPR_u = ma.append(np.zeros((FPR_u.shape[0],FPR_u.shape[1],1)), FPR_u, axis=2)
 
-            return TPR_p, FPR_p, TPR_u, FPR_u
+        return TPR_p, FPR_p, TPR_u, FPR_u
 
     def _compute_auc_parity(self, **kwargs):
         """
@@ -1774,11 +1859,11 @@ class FairnessMetrics:
             y_pred=kwargs['y_pred_new'][0]
             df = pd.DataFrame({'y_true': self.y_true, 'y_pred': y_pred, 'curr_p_var': mask})
             e_y_true_curr_p_var = self._get_entropy(df,['y_true', 'curr_p_var'])
-            e_y_pred_curr_p_var = self._get_entropy(df,['y_pred', 'curr_p_var'])
+            e_y_true_y_pred = self._get_entropy(df,['y_true', 'y_pred'])
             e_y_true_y_pred_curr_p_var = self._get_entropy(df,['y_true', 'y_pred', 'curr_p_var'])
             e_y_true = self._get_entropy(df,['y_true'])
             e_curr_p_var_y_true_conditional = e_y_true_curr_p_var - e_y_true
-            mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
+            mi_separation = (e_y_true_curr_p_var + e_y_true_y_pred - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
             return (mi_separation, None)   
         
         else:            
@@ -1819,8 +1904,8 @@ class FairnessMetrics:
             proportion_join = []
 
             y_preds_ma = np.ma.array(self.y_preds, mask = maskFilterNeg)
-            mask_ma = np.ma.array(mask, mask = maskFilterNeg) 
-            cart_product = product([y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
+            y_trues_ma = np.ma.array(self.y_trues, mask = maskFilterNeg)
+            cart_product = product([y_preds_ma, 1-y_preds_ma], [y_trues_ma, 1-y_trues_ma])
 
             proportion_join_denom = maskFilter.sum(axis=2)
             for i in cart_product:
@@ -1829,9 +1914,8 @@ class FairnessMetrics:
                     np.sum(p, 2)/proportion_join_denom
                 )
             proportion_join = np.stack(proportion_join, axis=2)
-            e_y_pred_curr_p_var = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
-            self.e_y_pred_curr_p_var = e_y_pred_curr_p_var
-            
+            e_y_true_y_pred = -np.sum(proportion_join*ma.log(proportion_join), axis=2) 
+            self.e_y_true_y_pred = e_y_true_y_pred
             proportion_join = []
 
             cart_product = product([y_trues_ma, 1-y_trues_ma], [y_preds_ma, 1-y_preds_ma], [mask_ma, 1-mask_ma])
@@ -1848,7 +1932,7 @@ class FairnessMetrics:
             
 
             e_curr_p_var_y_true_conditional = e_y_true_curr_p_var - e_y_true            
-            mi_separation = (e_y_true_curr_p_var + e_y_pred_curr_p_var - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
+            mi_separation = (e_y_true_curr_p_var + e_y_true_y_pred - e_y_true_y_pred_curr_p_var - e_y_true)/e_curr_p_var_y_true_conditional
             mi_separation = mi_separation.reshape(-1).tolist()
 
             return [(v, None) for v in mi_separation]

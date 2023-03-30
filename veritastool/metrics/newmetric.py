@@ -1,4 +1,4 @@
-class NewMetric: # discuss the case when more than 1 new metric is defined, new class to be created or design to be in dict form
+class NewMetric:
     """
     Base class to add new metrics to the Veritas library.
 
@@ -28,6 +28,9 @@ class NewMetric: # discuss the case when more than 1 new metric is defined, new 
     metric_direction: str
         Direction of performance metric, i.e., whether a `higher` metric value indicates better model performance. For fairness metric_type only.
         "higher" or "lower"
+
+    metric_reqt: str
+        Metric requirement/dependency, i.e., "y_pred" or "y_prob"
 
     enable_flag: boolean
         Whether the new metric can be a primary metric

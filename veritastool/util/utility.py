@@ -215,7 +215,7 @@ def check_value(obj_in):
 
 def convert_to_set(var):
     """
-    Converts certain types of variable into set
+    Converts certain types of variables into set
 
     Parameters
     ----------
@@ -252,7 +252,7 @@ def check_data_unassigned(obj_in, y=None, y_pred_negation_flag=False):
             Predicted targets as returned by classifier.
 
     y_pred_negation_flag : boolean, default=False
-            Whether predicted targets in y_pred to be checked for unassigned labels, and perform negation of labels based on y_true.
+            Whether predicted targets in y_pred to be checked for unassigned labels and perform negation of labels based on y_true.
 
     Returns
     -----------------
@@ -428,9 +428,9 @@ def input_parameter_filtering(_input_parameter_lookup, obj_in=None):
         for mtd in filtered_params['method']:
             if mtd == 'threshold' and (obj_in.y_true is None or obj_in.y_prob is None or obj_in.protected_features_cols is None or obj_in.p_grp is None):
                 print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
-            elif mtd == 'reweigh' and (obj_in.y_train is None or obj_in.x_train is None or obj_in.protected_features_cols is None or obj_in.p_grp is None):
+            elif mtd == 'reweigh' and (obj_in.y_train is None or obj_in.x_train is None or obj_in.protected_features_cols is None or obj_in.p_grp is None or isinstance(obj_in.x_train, str)):
                 print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
-            elif mtd == 'correlate' and (obj_in.x_train is None or obj_in.x_test is None or obj_in.protected_features_cols is None or obj_in.p_grp is None or obj_in.model_object is None):
+            elif mtd == 'correlate' and (obj_in.x_train is None or obj_in.x_test is None or obj_in.protected_features_cols is None or obj_in.p_grp is None or obj_in.model_object is None or isinstance(obj_in.x_train, str) or not obj_in.x_train.select_dtypes(include=[np.number]).equals(obj_in.x_train)):
                 print("Skipped: Mitigate {} is skipped due to insufficient data input during ModelContainer() initialization.".format(mtd))
             else:
                 new_methods.append(mtd)
@@ -463,8 +463,6 @@ def process_y_prob(classes, y_prob, pos_label, y_label):
     """
     pos_idxs = np.argwhere(np.isin(classes, pos_label)).ravel()    
     return y_prob[:,pos_idxs].sum(axis=1)
-
-
 
 def get_cpu_count():
     """
@@ -507,12 +505,29 @@ def check_multiprocessing(n_threads):
     return n_threads
 
 def _one_hot_encode_y_true_y_pred(y_true, y_pred):
-        
-        label_binarizer = LabelBinarizer().fit(y_true)
-        y_onehot_true = label_binarizer.transform(y_true)                    
-        y_onehot_pred = label_binarizer.transform(y_pred)
+    """
+    Converts the ground truth and predicted labels to one-hot encoded format using LabelBinarizer.
 
-        return y_onehot_true, y_onehot_pred
+    Parameters:
+    -----------
+    y_true : array-like of shape (n_samples,)
+            Ground truth labels.
+
+    y_pred : array-like of shape (n_samples,)
+            The predicted labels.
+
+    Returns:
+    --------
+    y_onehot_true : array-like of shape (n_samples, n_classes)
+            The one-hot encoded true labels.
+
+    y_onehot_pred : array-like of shape (n_samples, n_classes)
+            The one-hot encoded predicted labels.
+    """
+    label_binarizer = LabelBinarizer().fit(y_true)
+    y_onehot_true = label_binarizer.transform(y_true)                    
+    y_onehot_pred = label_binarizer.transform(y_pred)
+    return y_onehot_true, y_onehot_pred
        
 def test_function_cs():
     from ..usecases import CreditScoring
