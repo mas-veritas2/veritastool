@@ -624,7 +624,7 @@ model parameters and datasets required for computations in all use cases.</p>
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-right:-5.4pt'>The type of model to be
-  evaluated. Supported model types are 'classification', 'regression’<span
+  evaluated. Supported model types are 'classification', 'regression'<span
   lang=EN-GB>,</span> and 'uplift'. </p>
   </td>
  </tr>
@@ -1101,8 +1101,8 @@ neg_label=None, predict_proba_op_name='predict_proba')</b></p>
   <p class=MsoNormal>Label values which are considered favorable.</p>
   <p class=MsoNormal>For all model types except uplift, converts the favourable
   labels to 1 and others to 0.</p>
-  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. [['a'],
-  ['b']] in fav label. The first will be mapped to treatment responded (TR)
+  <p class=MsoNormal>For uplift, user is to provide 2 label names e.g. ['a',
+  'b'] in fav label. The first will be mapped to treatment responded (TR)
   &amp; second to control responded (CR).</p>
   </td>
  </tr>
@@ -2945,12 +2945,12 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   <p class=MsoNormal>For e.g., Scikit-learn's fit function. </p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def fit(x_train, y_train): </p>
-  <p class=MsoNormal>    train_cmd = 'train_func --train {x_train} {y_train}
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;train_cmd = 'train_func --train {x_train} {y_train}
   {self.model_file}'</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(train_cmd.split(),
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;import subprocess</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;process = subprocess.Popen(train_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;output, error = process.communicate()</p>
   </td>
  </tr>
  <tr>
@@ -2967,13 +2967,13 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   predictions on the test dataset.</p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def predict(x_test): </p>
-  <p class=MsoNormal>    pred_cmd = 'pred_func --predict {self.model_file}
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;pred_cmd = 'pred_func --predict {self.model_file}
   {x_test} {self.output_file}'</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(pred_cmd.split(),
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;import subprocess</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;process = subprocess.Popen(pred_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
-  <p class=MsoNormal>    return pd.read_csv(output_file) </p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;output, error = process.communicate()</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;return pd.read_csv(output_file) </p>
   <p class=MsoNormal>Note: Any preprocessing needed after reading output_file
   required has to be done too</p>
   </td>
@@ -2991,13 +2991,13 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   probability predictions on the test dataset.</p>
   <p class=MsoNormal>An example is as follows:</p>
   <p class=MsoNormal>def predict_proba(x_test): </p>
-  <p class=MsoNormal>    proba_cmd = 'pred_func --predict {self.model_file}
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;proba_cmd = 'pred_func --predict {self.model_file}
   {x_test} {self.output_file}'</p>
-  <p class=MsoNormal>    import subprocess</p>
-  <p class=MsoNormal>    process = subprocess.Popen(proba_cmd.split(),
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;import subprocess</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;process = subprocess.Popen(proba_cmd.split(),
   stdout=subprocess.PIPE)</p>
-  <p class=MsoNormal>    output, error = process.communicate()</p>
-  <p class=MsoNormal>    return pd.read_csv(output_file) </p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;output, error = process.communicate()</p>
+  <p class=MsoNormal>&nbsp;&nbsp;&nbsp;&nbsp;return pd.read_csv(output_file) </p>
   <p class=MsoNormal>Note: <a name="OLE_LINK69">The column order of class
   probabilities from predict_proba output has to be aligned with the order of
   classes in classes_. This processing can be done in the predict_proba
@@ -3018,7 +3018,7 @@ line-height:106%'>Methods in ModelWrapper class</span></b></p>
   <p class=MsoNormal>Mode values supported are 'first' and 'per_label'. </p>
   <p class=MsoNormal>First mode selects the first n rows based on the value of
   parameter 'size' (default = 100)</p>
-  <p class=MsoNormal>‘per_label’ model groups by labels and chooses 'size' number
+  <p class=MsoNormal>'per_label' model groups by labels and chooses 'size' number
   of rows from each label. </p>
   </td>
  </tr>
@@ -3738,7 +3738,7 @@ is printed out, all the other cases are computed and saved too. </p>
   <p class=MsoNormal style='margin-right:-71.0pt'>When sigma &lt;= 0, smoothing
   is turn off.</p>
   <p class=MsoNormal style='margin-right:-71.0pt'>Suggested to try sigma = 3 or
-  above if noisy contours are observed.  </p>
+  above if noisy contours are observed.</p>
   </td>
  </tr>
 </table>
@@ -4746,7 +4746,7 @@ have been set up. User can update these parameter values inside this file.</p>
   padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-.9pt;margin-bottom:
   0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>Maximum
-  allowed value for ‘fair_neutral_tolerance’</span></p>
+  allowed value for 'fair_neutral_tolerance'</span></p>
   </td>
  </tr>
  <tr style='height:105.0pt'>
@@ -4818,7 +4818,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>0</span></p>
-  <p class=MsoNormal><span lang=EN-SG style='color:black'>0</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG style='color:black'>0</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -4864,7 +4864,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>0.7</span></p>
-  <p class=MsoNormal><span lang=EN-SG style='color:black'>0.7</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG style='color:black'>0.7</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -4908,7 +4908,7 @@ have been set up. User can update these parameter values inside this file.</p>
   border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:15.0pt'>
   <p class=MsoNormal style='margin-top:0in;margin-right:-71.0pt;margin-bottom:
-  0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>-0.3                                -</span></p>
+  0in;margin-left:0in;line-height:normal'><span lang=EN-SG style='color:black'>-0.3</span></p>
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -4952,7 +4952,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>0.3</span></p>
-  <p class=MsoNormal><span lang=EN-SG style='color:black'>0.3</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG style='color:black'>0.3</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -4976,7 +4976,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>0.7</span></p>
-  <p class=MsoNormal><span lang=EN-SG style='color:black'>0.7</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG style='color:black'>0.7</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -5063,7 +5063,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>3</span></p>
-  <p class=MsoNormal><span lang=EN-SG style='color:black'>3</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG style='color:black'>3</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -5087,7 +5087,7 @@ have been set up. User can update these parameter values inside this file.</p>
   <p class=MsoNormal align=right style='margin-top:0in;margin-right:-71.0pt;
   margin-bottom:0in;margin-left:0in;text-align:right;line-height:normal'><span
   lang=EN-SG style='color:black'>0.2</span></p>
-  <p class=MsoNormal><span lang=EN-SG>0.2</span></p>
+  <!--><p class=MsoNormal><span lang=EN-SG>0.2</span></p><-->
   </td>
   <td width="47%" valign=top style='width:47.5%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
