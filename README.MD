@@ -106,7 +106,7 @@ cre_sco_obj.evaluate(visualize = True)
 ```
 Output:
 
-<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_2_visualize.png" width="858" height="530"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mas-veritas2/veritastool/master/icon/evaluate_3.png" width="858" height="530"></p>
 
 **Tradeoff**
 
